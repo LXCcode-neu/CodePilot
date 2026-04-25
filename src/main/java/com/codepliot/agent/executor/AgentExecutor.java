@@ -1,6 +1,8 @@
 package com.codepliot.agent.executor;
 
 import com.codepliot.agent.context.AgentContext;
+import com.codepliot.agent.tool.AgentTool;
+import com.codepliot.agent.tool.ToolResult;
 import com.codepliot.common.exception.BusinessException;
 import com.codepliot.common.result.ErrorCode;
 import com.codepliot.project.entity.ProjectRepo;
@@ -12,11 +14,12 @@ import com.codepliot.trace.service.AgentStepService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
- * Agent 执行器，目前只跑固定顺序的 Mock 流程。
+ * Agent 执行器，负责编排工具、更新任务状态并记录执行轨迹。
  */
 @Component
 public class AgentExecutor {
@@ -24,13 +27,16 @@ public class AgentExecutor {
     private final AgentTaskService agentTaskService;
     private final AgentStepService agentStepService;
     private final ObjectMapper objectMapper;
+    private final List<AgentTool> agentTools;
 
     public AgentExecutor(AgentTaskService agentTaskService,
                          AgentStepService agentStepService,
-                         ObjectMapper objectMapper) {
+                         ObjectMapper objectMapper,
+                         List<AgentTool> agentTools) {
         this.agentTaskService = agentTaskService;
         this.agentStepService = agentStepService;
         this.objectMapper = objectMapper;
+        this.agentTools = agentTools;
     }
 
     /**
@@ -39,16 +45,9 @@ public class AgentExecutor {
     public void execute(AgentTask task, ProjectRepo projectRepo) {
         AgentContext context = buildContext(task, projectRepo);
         try {
-            runStep(context, AgentTaskStatus.CLONING, AgentStepType.CLONE_REPOSITORY,
-                    "拉取仓库", "mock clone repository completed");
-            runStep(context, AgentTaskStatus.INDEXING, AgentStepType.BUILD_CODE_INDEX,
-                    "构建代码索引", "mock code index completed");
-            runStep(context, AgentTaskStatus.RETRIEVING, AgentStepType.SEARCH_RELEVANT_CODE,
-                    "检索相关代码", "mock relevant code search completed");
-            runStep(context, AgentTaskStatus.ANALYZING, AgentStepType.ANALYZE_ISSUE,
-                    "分析 Issue", "mock issue analysis completed");
-            runStep(context, AgentTaskStatus.GENERATING_PATCH, AgentStepType.GENERATE_PATCH,
-                    "生成 Patch", "mock patch generation completed");
+            for (AgentTool agentTool : agentTools) {
+                runTool(context, agentTool);
+            }
             agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.COMPLETED,
                     "Mock agent run completed", null);
             runCompletionStep(context);
@@ -71,15 +70,20 @@ public class AgentExecutor {
         );
     }
 
-    private void runStep(AgentContext context,
-                         AgentTaskStatus taskStatus,
-                         AgentStepType stepType,
-                         String stepName,
-                         String mockOutput) {
-        agentTaskService.updateStatus(context.taskId(), taskStatus);
-        Long stepId = agentStepService.startStep(context.taskId(), stepType, stepName, toJson(stepInput(context, stepType)));
+    private void runTool(AgentContext context, AgentTool agentTool) {
+        agentTaskService.updateStatus(context.taskId(), agentTool.taskStatus());
+        Long stepId = agentStepService.startStep(
+                context.taskId(),
+                agentTool.stepType(),
+                agentTool.stepName(),
+                toJson(stepInput(context, agentTool.stepType()))
+        );
         try {
-            agentStepService.successStep(stepId, toJson(stepOutput(context, stepType, mockOutput)));
+            ToolResult result = agentTool.execute(context);
+            if (!result.success()) {
+                throw new BusinessException(ErrorCode.INTERNAL_ERROR, result.message());
+            }
+            agentStepService.successStep(stepId, toJson(stepOutput(context, agentTool.stepType(), result)));
         } catch (RuntimeException ex) {
             agentStepService.failStep(stepId, errorMessage(ex));
             throw ex;
@@ -96,7 +100,7 @@ public class AgentExecutor {
         agentStepService.successStep(stepId, toJson(stepOutput(
                 context,
                 AgentStepType.COMPLETE_RUN,
-                "mock agent run completed"
+                ToolResult.success("mock agent run completed", Map.of("taskId", context.taskId()))
         )));
     }
 
@@ -114,11 +118,13 @@ public class AgentExecutor {
         return input;
     }
 
-    private Map<String, Object> stepOutput(AgentContext context, AgentStepType stepType, String mockOutput) {
+    private Map<String, Object> stepOutput(AgentContext context, AgentStepType stepType, ToolResult result) {
         Map<String, Object> output = new LinkedHashMap<>();
         output.put("taskId", context.taskId());
         output.put("stepType", stepType.name());
-        output.put("message", mockOutput);
+        output.put("success", result.success());
+        output.put("message", result.message());
+        output.put("data", result.data());
         return output;
     }
 
