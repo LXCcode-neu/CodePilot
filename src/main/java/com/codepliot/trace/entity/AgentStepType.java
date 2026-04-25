@@ -13,5 +13,7 @@ public enum AgentStepType {
     /** 分析 Issue。 */
     ANALYZE_ISSUE,
     /** 生成 Patch。 */
-    GENERATE_PATCH
+    GENERATE_PATCH,
+    /** Mock 流程完成。 */
+    COMPLETE_RUN
 }

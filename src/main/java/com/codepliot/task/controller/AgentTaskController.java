@@ -1,5 +1,6 @@
 package com.codepliot.task.controller;
 
+import com.codepliot.agent.service.AgentRunService;
 import com.codepliot.common.result.Result;
 import com.codepliot.task.dto.AgentTaskCreateRequest;
 import com.codepliot.task.service.AgentTaskService;
@@ -21,9 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AgentTaskController {
 
     private final AgentTaskService agentTaskService;
+    private final AgentRunService agentRunService;
 
-    public AgentTaskController(AgentTaskService agentTaskService) {
+    public AgentTaskController(AgentTaskService agentTaskService, AgentRunService agentRunService) {
         this.agentTaskService = agentTaskService;
+        this.agentRunService = agentRunService;
     }
 
     /**
@@ -48,5 +51,13 @@ public class AgentTaskController {
     @GetMapping("/{id}")
     public Result<AgentTaskVO> detail(@PathVariable Long id) {
         return Result.success(agentTaskService.getDetail(id));
+    }
+
+    /**
+     * 同步运行当前用户自己的 Agent 任务。
+     */
+    @PostMapping("/{taskId}/run")
+    public Result<AgentTaskVO> run(@PathVariable Long taskId) {
+        return Result.success("Agent task run completed", agentRunService.run(taskId));
     }
 }
