@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: codepilot
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/codepilot?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 2
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      validation-timeout: 5000
+      initialization-fail-timeout: 60000
+      connection-test-query: SELECT 1
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: assign_id
+
+security:
+  jwt:
+    secret: please-change-this-secret-in-production
+    expire-seconds: 86400
+
+codepilot:
+  workspace:
+    local-repo-root: ./data/repos
+  github:
+    base-url: https://github.com
+  llm:
+    provider: mock
+    api-key: your-llm-api-key
