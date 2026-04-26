@@ -4,6 +4,12 @@ server:
 spring:
   application:
     name: codepilot
+  sql:
+    init:
+      mode: always
+      schema-locations:
+        - classpath:db/schema/code_file.sql
+        - classpath:db/schema/code_symbol.sql
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/codepilot?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root

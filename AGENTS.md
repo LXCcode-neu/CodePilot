@@ -150,6 +150,7 @@ Those rules should live in a separate document, for example:
    - `frontend`: React + Vite web console
 9. Unless explicitly requested, do not implement concrete business logic such as login flow, repository management, task execution, Git clone, or LLM calls.
 10. If project structure, tech choices, development boundaries, or startup instructions change, update both `README.md` and this file.
+11. Database tables introduced by new backend modules should preferably provide a repeatable startup initialization path, for example Spring Boot SQL init scripts, instead of relying only on manual execution.
 
 ### Default Interpretation
 

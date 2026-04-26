@@ -243,6 +243,7 @@ Before starting the project, prepare:
 - Redis instance
 - a valid JWT secret
 - a writable workspace root via `codepilot.workspace.root`
+- `code_file` and `code_symbol` will now be auto-created on Spring Boot startup if they do not exist
 
 ### Tree-sitter Native Note
 

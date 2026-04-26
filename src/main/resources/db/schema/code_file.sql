@@ -1,5 +1,3 @@
-USE codepilot;
-
 CREATE TABLE IF NOT EXISTS code_file (
   id BIGINT NOT NULL COMMENT 'MyBatis-Plus ASSIGN_ID',
   project_id BIGINT NOT NULL,
