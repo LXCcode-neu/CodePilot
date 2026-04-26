@@ -44,6 +44,13 @@ public class GitWorkspaceService {
     }
 
     /**
+     * 获取某个项目的 Lucene 索引目录，固定为 workspace/{projectId}/lucene-index。
+     */
+    public Path getLuceneIndexPath(Long projectId) {
+        return getProjectWorkspace(projectId).resolve("lucene-index").normalize();
+    }
+
+    /**
      * 判断目标目录是否已经是一个 Git 仓库。
      */
     public boolean hasGitDirectory(Long projectId) {

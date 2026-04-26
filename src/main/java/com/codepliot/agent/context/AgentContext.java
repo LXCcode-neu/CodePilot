@@ -1,5 +1,8 @@
 package com.codepliot.agent.context;
 
+import com.codepliot.index.dto.RetrievedCodeChunk;
+import java.util.List;
+
 /**
  * Agent 运行上下文。
  * 保存一次任务执行过程中需要被多个 Tool 共享的核心信息。
@@ -14,6 +17,7 @@ public final class AgentContext {
     private String localPath;
     private final String issueTitle;
     private final String issueDescription;
+    private List<RetrievedCodeChunk> retrievedChunks;
 
     public AgentContext(Long taskId,
                         Long userId,
@@ -31,6 +35,7 @@ public final class AgentContext {
         this.localPath = localPath;
         this.issueTitle = issueTitle;
         this.issueDescription = issueDescription;
+        this.retrievedChunks = List.of();
     }
 
     public Long taskId() {
@@ -65,10 +70,21 @@ public final class AgentContext {
         return issueDescription;
     }
 
+    public List<RetrievedCodeChunk> retrievedChunks() {
+        return retrievedChunks;
+    }
+
     /**
      * 在运行过程中更新本地仓库路径，供后续 Tool 复用。
      */
     public void updateLocalPath(String localPath) {
         this.localPath = localPath;
+    }
+
+    /**
+     * 保存检索到的相关代码片段，供后续 Tool 复用。
+     */
+    public void updateRetrievedChunks(List<RetrievedCodeChunk> retrievedChunks) {
+        this.retrievedChunks = retrievedChunks == null ? List.of() : List.copyOf(retrievedChunks);
     }
 }

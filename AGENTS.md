@@ -123,6 +123,7 @@ Those rules should live in a separate document, for example:
    - Lombok
    - JGit
    - Tree-sitter
+   - Apache Lucene
    - React
    - Vite
    - TypeScript

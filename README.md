@@ -33,6 +33,7 @@ CodePilot 是一个基于 Spring Boot 3 的 Issue-to-PR Agent 平台，面向 Gi
 - 基于 JGit 的公开 GitHub 仓库 clone
 - Tree-sitter 多语言索引基础模型骨架（Java / Python / JavaScript / TypeScript / Go）
 - Tree-sitter 统一 AST 解析层与语言注册表
+- 基于 Lucene 的多语言代码检索与重排能力
 - PlainTextFallbackExtractor 文本级兜底索引抽象
 - `frontend/` 前端项目：React + Vite + TypeScript + TailwindCSS + shadcn/ui
 - 统一返回 `Result<T>`
@@ -49,7 +50,6 @@ CodePilot 是一个基于 Spring Boot 3 的 Issue-to-PR Agent 平台，面向 Gi
 - Agent 任务创建
 - 复杂符号提取规则
 - Java 文件扫描执行流程
-- 相关代码检索
 - 修复建议和 patch 生成
 - 执行轨迹展示
 - LLM 调用逻辑
@@ -210,6 +210,8 @@ The project now includes the initial backend scaffold and the first usable authe
 - Tree-sitter parser registry and unified AST parsing layer
 - Tree-sitter multi-language symbol extractors for Java, Python, JavaScript, TypeScript, and Go
 - code index build service that scans repositories and persists `code_file` / `code_symbol`
+- Apache Lucene local index build for `code_symbol` under `workspace/{projectId}/lucene-index`
+- multi-language Lucene code search with reranking for `SearchRelevantCodeTool`
 - plain-text fallback extractor abstraction
 - `frontend/` web console with React, Vite, TypeScript, TailwindCSS, and shadcn-style UI components
 - unified `Result<T>`
@@ -226,7 +228,6 @@ The following modules are still placeholders only:
 - agent task creation
 - complex symbol extraction rules
 - executable file scanning flow
-- related code retrieval
 - repair suggestion and patch generation
 - execution trace display
 - LLM integration logic
@@ -244,6 +245,7 @@ Before starting the project, prepare:
 - a valid JWT secret
 - a writable workspace root via `codepilot.workspace.root`
 - `code_file` and `code_symbol` will now be auto-created on Spring Boot startup if they do not exist
+- Lucene index files are rebuilt under `workspace/{projectId}/lucene-index` during the code-index build step
 
 ### Tree-sitter Native Note
 
