@@ -16,17 +16,18 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
- * OpenAI Chat Completions API 客户端。
+ * DeepSeek Chat Completions API 客户端。
+ * 按 DeepSeek 官方兼容格式请求 /chat/completions 接口。
  */
 @Component
-@ConditionalOnProperty(prefix = "codepilot.llm", name = "provider", havingValue = "openai")
-public class OpenAiLlmClient implements LlmClient {
+@ConditionalOnProperty(prefix = "codepilot.llm", name = "provider", havingValue = "deepseek")
+public class DeepSeekLlmClient implements LlmClient {
 
     private final LlmProperties llmProperties;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
 
-    public OpenAiLlmClient(LlmProperties llmProperties, ObjectMapper objectMapper) {
+    public DeepSeekLlmClient(LlmProperties llmProperties, ObjectMapper objectMapper) {
         this.llmProperties = llmProperties;
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newHttpClient();
@@ -47,7 +48,7 @@ public class OpenAiLlmClient implements LlmClient {
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
                 throw new BusinessException(
                         ErrorCode.INTERNAL_ERROR,
-                        "OpenAI request failed with status " + response.statusCode() + ": " + truncate(response.body())
+                        "DeepSeek request failed with status " + response.statusCode() + ": " + truncate(response.body())
                 );
             }
             return extractContent(response.body());
@@ -55,8 +56,10 @@ public class OpenAiLlmClient implements LlmClient {
             if (exception instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
-            throw new BusinessException(ErrorCode.INTERNAL_ERROR,
-                    "Failed to call OpenAI API: " + buildErrorMessage(exception));
+            throw new BusinessException(
+                    ErrorCode.INTERNAL_ERROR,
+                    "Failed to call DeepSeek API: " + buildErrorMessage(exception)
+            );
         }
     }
 
@@ -64,6 +67,7 @@ public class OpenAiLlmClient implements LlmClient {
         ObjectNode body = objectMapper.createObjectNode();
         body.put("model", llmProperties.getModel().trim());
         body.put("temperature", 0.2d);
+        body.put("stream", false);
 
         ArrayNode messages = body.putArray("messages");
         messages.addObject()
@@ -80,20 +84,20 @@ public class OpenAiLlmClient implements LlmClient {
         JsonNode contentNode = root.path("choices").path(0).path("message").path("content");
         String content = contentNode.isMissingNode() || contentNode.isNull() ? null : contentNode.asText();
         if (content == null || content.isBlank()) {
-            throw new BusinessException(ErrorCode.INTERNAL_ERROR, "OpenAI response did not contain message content");
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR, "DeepSeek response did not contain message content");
         }
         return content.trim();
     }
 
     private void validateConfiguration() {
         if (llmProperties.getApiKey() == null || llmProperties.getApiKey().isBlank()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "codepilot.llm.api-key must be configured for OpenAI provider");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "使用 deepseek provider 时必须配置 codepilot.llm.api-key");
         }
         if (llmProperties.getModel() == null || llmProperties.getModel().isBlank()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "codepilot.llm.model must be configured for OpenAI provider");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "使用 deepseek provider 时必须配置 codepilot.llm.model");
         }
         if (llmProperties.getBaseUrl() == null || llmProperties.getBaseUrl().isBlank()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "codepilot.llm.base-url must be configured for OpenAI provider");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "使用 deepseek provider 时必须配置 codepilot.llm.base-url");
         }
     }
 

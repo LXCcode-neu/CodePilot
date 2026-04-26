@@ -212,7 +212,7 @@ The project now includes the initial backend scaffold and the first usable authe
 - code index build service that scans repositories and persists `code_file` / `code_symbol`
 - Apache Lucene local index build for `code_symbol` under `workspace/{projectId}/lucene-index`
 - multi-language Lucene code search with reranking for `SearchRelevantCodeTool`
-- configurable LLM abstraction with mock and OpenAI-backed clients
+- configurable LLM abstraction with mock and DeepSeek-backed clients
 - issue analysis and patch generation prompt builders
 - `GET /api/tasks/{taskId}/patch` for generated patch record retrieval
 - plain-text fallback extractor abstraction

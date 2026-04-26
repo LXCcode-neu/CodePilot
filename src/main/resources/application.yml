@@ -48,7 +48,7 @@ codepilot:
   github:
     base-url: https://github.com
   llm:
-    provider: mock
-    api-key: your-llm-api-key
-    base-url: https://api.openai.com/v1
-    model: your-openai-model
+    provider: deepseek
+    api-key: sk-c0e745f3ec65481786dbf13c4f17ad01
+    base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+    model: ${DEEPSEEK_MODEL:deepseek-chat}

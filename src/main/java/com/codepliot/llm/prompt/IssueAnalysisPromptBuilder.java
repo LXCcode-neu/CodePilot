@@ -12,31 +12,31 @@ public class IssueAnalysisPromptBuilder {
 
     public String buildSystemPrompt() {
         return """
-                You are a careful senior software engineer analyzing a multi-language repository issue.
-                Only use the code snippets provided by the caller.
-                Do not invent missing files, functions, routes, or dependencies.
-                If the provided snippets are insufficient, explicitly say what is missing.
-                Explain cross-language relationships when they are visible in the snippets.
+                你是一名谨慎的软件工程师，负责分析一个多语言仓库中的 Issue。
+                你只能基于调用方提供的代码片段进行分析。
+                不要编造不存在的文件、函数、路由、依赖或调用关系。
+                如果现有信息不足，请明确指出缺少什么信息。
+                如果代码片段中能看出不同语言文件之间的关联，请明确说明。
                 """;
     }
 
     public String buildUserPrompt(String issueTitle, String issueDescription, List<RetrievedCodeChunk> retrievedChunks) {
         StringBuilder builder = new StringBuilder();
         builder.append("""
-                Analyze the following issue using only the provided retrieved code chunks.
+                请仅基于下面提供的代码检索结果分析这个 Issue。
 
-                Requirements:
-                1. Do not fabricate files or code outside the provided snippets.
-                2. Only reason from the retrieved snippets below.
-                3. Explain any visible relationships across different language files.
-                4. If the evidence is insufficient, say so clearly.
-                5. Provide a concise but actionable analysis for a follow-up patch step.
+                要求：
+                1. 不要编造提供片段之外的文件或代码。
+                2. 只能根据下方检索到的代码片段进行推断。
+                3. 说明不同语言文件之间可见的关联关系。
+                4. 如果证据不足，请明确说明不足之处。
+                5. 给出简洁但可执行的分析结论，供后续 patch 生成使用。
 
-                Issue Title:
+                Issue 标题：
                 """).append(nullToEmpty(issueTitle)).append('\n').append('\n')
-                .append("Issue Description:\n")
+                .append("Issue 描述：\n")
                 .append(nullToEmpty(issueDescription)).append('\n').append('\n')
-                .append("Retrieved Code Chunks:\n");
+                .append("检索到的代码片段：\n");
 
         appendChunks(builder, retrievedChunks);
         return builder.toString();
@@ -44,14 +44,14 @@ public class IssueAnalysisPromptBuilder {
 
     private void appendChunks(StringBuilder builder, List<RetrievedCodeChunk> retrievedChunks) {
         if (retrievedChunks == null || retrievedChunks.isEmpty()) {
-            builder.append("- No retrieved code chunks were provided.\n");
+            builder.append("- 当前没有可用于分析的代码片段。\n");
             return;
         }
 
         int index = 1;
         for (RetrievedCodeChunk chunk : retrievedChunks) {
             builder.append('\n')
-                    .append("[Chunk ").append(index++).append("]\n")
+                    .append("[代码片段 ").append(index++).append("]\n")
                     .append("language: ").append(nullToEmpty(chunk.language())).append('\n')
                     .append("filePath: ").append(nullToEmpty(chunk.filePath())).append('\n')
                     .append("symbolType: ").append(nullToEmpty(chunk.symbolType())).append('\n')

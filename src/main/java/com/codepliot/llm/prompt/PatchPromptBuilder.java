@@ -12,12 +12,12 @@ public class PatchPromptBuilder {
 
     public String buildSystemPrompt() {
         return """
-                You are a careful senior software engineer preparing a patch suggestion for a multi-language repository.
-                You must only use the provided issue, retrieved code chunks, and prior analysis.
-                Do not fabricate files, code locations, or repository structure outside the provided snippets.
-                Return only valid JSON with the exact required keys.
-                Prefer unified diff format in the patch field when you can do so reliably.
-                If a reliable patch cannot be produced, set patch to an empty string and explain why in risk.
+                你是一名谨慎的软件工程师，负责为一个多语言仓库生成 patch 建议。
+                你只能使用给定的 Issue、检索代码片段和已有分析结果。
+                不要编造提供片段之外的文件、代码位置或仓库结构。
+                返回结果必须是合法 JSON，且字段必须完全符合要求。
+                如果可以可靠生成 patch，优先使用 unified diff 格式。
+                如果无法可靠生成 patch，请将 patch 置为空字符串，并在 risk 中说明原因。
                 """;
     }
 
@@ -27,28 +27,28 @@ public class PatchPromptBuilder {
                                   List<RetrievedCodeChunk> retrievedChunks) {
         StringBuilder builder = new StringBuilder();
         builder.append("""
-                Generate a patch suggestion for the following issue.
+                请为下面的 Issue 生成 patch 建议。
 
-                Output requirements:
-                1. Return ONLY valid JSON.
-                2. The JSON must have exactly these keys:
+                输出要求：
+                1. 只能返回合法 JSON。
+                2. JSON 必须且只能包含以下字段：
                    {
                      "analysis": "...",
                      "solution": "...",
                      "patch": "...",
                      "risk": "..."
                    }
-                3. The patch field should use unified diff when possible.
-                4. If you cannot reliably generate a patch from the provided snippets, return an empty string for patch and explain the reason in risk.
-                5. Do not mention files or code that are not present in the provided snippets.
+                3. patch 字段尽量使用 unified diff。
+                4. 如果无法仅基于提供片段可靠生成 patch，请返回空字符串，并在 risk 中说明原因。
+                5. 不要提及提供片段中不存在的文件或代码。
 
-                Issue Title:
+                Issue 标题：
                 """).append(nullToEmpty(issueTitle)).append('\n').append('\n')
-                .append("Issue Description:\n")
+                .append("Issue 描述：\n")
                 .append(nullToEmpty(issueDescription)).append('\n').append('\n')
-                .append("Prior Analysis:\n")
+                .append("已有分析：\n")
                 .append(nullToEmpty(analysis)).append('\n').append('\n')
-                .append("Retrieved Code Chunks:\n");
+                .append("检索到的代码片段：\n");
 
         appendChunks(builder, retrievedChunks);
         return builder.toString();
@@ -56,14 +56,14 @@ public class PatchPromptBuilder {
 
     private void appendChunks(StringBuilder builder, List<RetrievedCodeChunk> retrievedChunks) {
         if (retrievedChunks == null || retrievedChunks.isEmpty()) {
-            builder.append("- No retrieved code chunks were provided.\n");
+            builder.append("- 当前没有可用于生成 patch 的代码片段。\n");
             return;
         }
 
         int index = 1;
         for (RetrievedCodeChunk chunk : retrievedChunks) {
             builder.append('\n')
-                    .append("[Chunk ").append(index++).append("]\n")
+                    .append("[代码片段 ").append(index++).append("]\n")
                     .append("language: ").append(nullToEmpty(chunk.language())).append('\n')
                     .append("filePath: ").append(nullToEmpty(chunk.filePath())).append('\n')
                     .append("symbolType: ").append(nullToEmpty(chunk.symbolType())).append('\n')

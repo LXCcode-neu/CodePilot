@@ -5,15 +5,16 @@ import org.springframework.stereotype.Component;
 
 /**
  * LLM 配置。
+ * provider 决定启用 mock 还是真实模型客户端，baseUrl/model/apiKey 由配置文件注入。
  */
 @Component
 @ConfigurationProperties(prefix = "codepilot.llm")
 public class LlmProperties {
 
-    private String provider = "mock";
+    private String provider = "deepseek";
     private String apiKey;
-    private String baseUrl = "https://api.openai.com/v1";
-    private String model = "your-openai-model";
+    private String baseUrl = "https://api.deepseek.com";
+    private String model = "deepseek-chat";
 
     public String getProvider() {
         return provider;
