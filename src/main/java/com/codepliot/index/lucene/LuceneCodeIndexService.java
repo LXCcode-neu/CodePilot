@@ -129,7 +129,7 @@ public class LuceneCodeIndexService {
         Document document = new Document();
         addKeywordField(document, "projectId", asString(symbol.getProjectId()));
         addKeywordField(document, "filePath", symbol.getFilePath());
-        addSearchOnlyTextField(document, "filePath", symbol.getFilePath());
+        addSearchOnlyTextField(document, "filePathText", symbol.getFilePath());
         addKeywordField(document, "language", symbol.getLanguage());
         addKeywordField(document, "symbolType", symbol.getSymbolType());
         addTextField(document, "symbolName", symbol.getSymbolName());

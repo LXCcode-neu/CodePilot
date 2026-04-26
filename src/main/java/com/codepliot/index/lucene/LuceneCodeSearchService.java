@@ -35,12 +35,12 @@ public class LuceneCodeSearchService {
 
     private static final String[] SEARCH_FIELDS = {
             "symbolName", "parentSymbol", "signature", "annotations",
-            "routePath", "importText", "content", "filePath"
+            "routePath", "importText", "content", "filePathText"
     };
 
     private static final Map<String, Float> FIELD_BOOSTS = Map.of(
             "symbolName", 3.0f,
-            "filePath", 2.2f,
+            "filePathText", 2.2f,
             "routePath", 2.0f,
             "parentSymbol", 1.7f,
             "signature", 1.4f,
