@@ -208,6 +208,7 @@ The project now includes the initial backend scaffold and the first usable authe
 - public GitHub repository clone with JGit
 - Tree-sitter based multi-language index scaffolding for Java, Python, JavaScript, TypeScript, and Go
 - Tree-sitter parser registry and unified AST parsing layer
+- Tree-sitter multi-language symbol extractors for Java, Python, JavaScript, TypeScript, and Go
 - plain-text fallback extractor abstraction
 - `frontend/` web console with React, Vite, TypeScript, TailwindCSS, and shadcn-style UI components
 - unified `Result<T>`

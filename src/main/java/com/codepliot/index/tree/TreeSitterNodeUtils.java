@@ -70,6 +70,36 @@ public class TreeSitterNodeUtils {
     }
 
     /**
+     * 按字段名获取子节点。
+     */
+    public Node getChildByFieldName(Node node, String fieldName) {
+        if (node == null || fieldName == null || fieldName.isBlank()) {
+            return null;
+        }
+        return node.getChildByFieldName(fieldName);
+    }
+
+    /**
+     * 获取父节点。
+     */
+    public Node getParent(Node node) {
+        if (node == null) {
+            return null;
+        }
+        return node.getParent();
+    }
+
+    /**
+     * 获取命名子节点列表。
+     */
+    public List<Node> getNamedChildren(Node node) {
+        if (node == null) {
+            return Collections.emptyList();
+        }
+        return node.getNamedChildren();
+    }
+
+    /**
      * 判断节点类型是否匹配。
      */
     public boolean isType(Node node, String expectedType) {
