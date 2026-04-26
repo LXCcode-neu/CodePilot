@@ -69,9 +69,10 @@ public class TreeSitterParserService {
         }
 
         try {
-            Parser parser = handle.createParser();
-            Tree tree = parser.parse(sourceCode);
-            parser.close();
+            Tree tree;
+            try (Parser parser = handle.createParser()) {
+                tree = parser.parse(sourceCode);
+            }
             if (tree == null) {
                 return new TreeSitterParseResult(
                         languageType,

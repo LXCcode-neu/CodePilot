@@ -58,6 +58,17 @@ public class TreeSitterLanguageRegistry {
 
     private Map<LanguageType, TreeSitterLanguageHandle> buildRegistry() {
         Map<LanguageType, TreeSitterLanguageHandle> handles = new EnumMap<>(LanguageType.class);
+        if (!nativeLibraryLoaded) {
+            String reason = "Tree-sitter native library is unavailable: " + nativeLibraryErrorMessage;
+            handles.put(LanguageType.JAVA, unavailable(LanguageType.JAVA, reason));
+            handles.put(LanguageType.PYTHON, unavailable(LanguageType.PYTHON, reason));
+            handles.put(LanguageType.JAVASCRIPT, unavailable(LanguageType.JAVASCRIPT, reason));
+            handles.put(LanguageType.TYPESCRIPT, unavailable(LanguageType.TYPESCRIPT, reason));
+            handles.put(LanguageType.GO, unavailable(LanguageType.GO, reason));
+            handles.put(LanguageType.UNKNOWN, unavailable(LanguageType.UNKNOWN, "Tree-sitter parser is not defined for UNKNOWN"));
+            return handles;
+        }
+
         handles.put(LanguageType.JAVA, create(LanguageType.JAVA, Language.JAVA));
         handles.put(LanguageType.PYTHON, create(LanguageType.PYTHON, Language.PYTHON));
         handles.put(LanguageType.JAVASCRIPT, create(LanguageType.JAVASCRIPT, Language.JAVASCRIPT));

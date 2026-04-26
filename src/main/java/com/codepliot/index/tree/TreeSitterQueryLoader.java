@@ -4,6 +4,7 @@ import com.codepliot.index.detect.LanguageType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Optional;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class TreeSitterQueryLoader {
             return Optional.empty();
         }
 
-        String resourcePath = "tree-sitter/queries/" + languageType.name().toLowerCase() + "/" + queryName + ".scm";
+        String resourcePath = "tree-sitter/queries/" + languageType.name().toLowerCase(Locale.ROOT) + "/" + queryName + ".scm";
         ClassPathResource resource = new ClassPathResource(resourcePath);
         if (!resource.exists()) {
             return Optional.empty();
