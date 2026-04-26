@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+.m2repo/
+data/
+frontend/node_modules/
+frontend/dist/

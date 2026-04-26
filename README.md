@@ -10,6 +10,11 @@
 
 CodePilot 是一个基于 Spring Boot 3 的 Issue-to-PR Agent 平台，面向 GitHub Issue 驱动的代码修复场景。
 
+当前仓库同时包含：
+
+- Spring Boot 3 后端服务
+- 位于 `frontend/` 的 React + Vite 前端控制台
+
 当前项目已经完成基础工程初始化，并实现了第一阶段的认证能力：
 
 - 用户注册
@@ -25,6 +30,10 @@ CodePilot 是一个基于 Spring Boot 3 的 Issue-to-PR Agent 平台，面向 Gi
 - 用户注册接口 `POST /api/auth/register`
 - 用户登录接口 `POST /api/auth/login`
 - 当前用户接口 `GET /api/user/me`
+- 基于 JGit 的公开 GitHub 仓库 clone
+- Tree-sitter 多语言索引基础模型骨架（Java / Python / JavaScript / TypeScript / Go）
+- PlainTextFallbackExtractor 文本级兜底索引抽象
+- `frontend/` 前端项目：React + Vite + TypeScript + TailwindCSS + shadcn/ui
 - 统一返回 `Result<T>`
 - 错误码枚举 `ErrorCode`
 - 业务异常 `BusinessException`
@@ -37,8 +46,8 @@ CodePilot 是一个基于 Spring Boot 3 的 Issue-to-PR Agent 平台，面向 Gi
 
 - 仓库管理
 - Agent 任务创建
-- GitHub 公开仓库拉取
-- Java 文件扫描
+- Tree-sitter native 解析调用
+- Java 文件扫描执行流程
 - 相关代码检索
 - 修复建议和 patch 生成
 - 执行轨迹展示
@@ -59,19 +68,25 @@ src/main/java/com/codepliot
 ├─ trace
 ├─ sse
 └─ common
+
+frontend
+├─ src
+├─ package.json
+└─ vite.config.ts
 ```
 
 ### 配置文件
 
 核心配置文件：
 
-- [application.yml](/C:/CodePilot/demo/src/main/resources/application.yml)
+- [application.yml](/C:/CodePilot/src/main/resources/application.yml)
 
 启动前请准备：
 
 - MySQL 数据库 `codepilot`
 - Redis 服务
 - 合法的 JWT 密钥
+- 可写的工作目录根路径 `codepilot.workspace.root`
 
 ### 启动方式
 
@@ -86,6 +101,36 @@ src/main/java/com/codepliot
 ```powershell
 mvn spring-boot:run
 ```
+
+### 前端开发
+
+前端项目位于 `frontend/`：
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+- Vite 开发端口：`5173`
+- `/api` 会通过 Vite proxy 转发到 `http://localhost:8080`
+
+### 前端构建并接入 Spring Boot
+
+在 `frontend/` 目录执行：
+
+```powershell
+npm run build:static
+```
+
+执行后会：
+
+- 先构建前端到 `frontend/dist`
+- 再复制到 `src/main/resources/static`
+
+随后启动 Spring Boot，即可通过 `http://localhost:8080` 访问前端首页。
+
+此外，`/login`、`/register`、`/projects`、`/tasks`、`/tasks/new`、`/tasks/{id}` 这些前端路由也会由 Spring Boot 转发到 `index.html`。
 
 ### 认证接口
 
@@ -129,7 +174,7 @@ Authorization: Bearer <token>
 - 公开仓库基础信息管理
 - 后续 Git 拉取入口
 
-因为认证能力已经具备，接下来最自然的就是把“用户 -> 仓库 -> Agent 任务”这条主链路往前推进。
+当前更自然的下一步是继续完成 `index` 模块，把文件遍历、Tree-sitter 解析结果适配、语言提取器落库流程真正串起来。
 
 ---
 
@@ -138,6 +183,11 @@ Authorization: Bearer <token>
 ### Overview
 
 CodePilot is an Issue-to-PR Agent platform built with Spring Boot 3 for GitHub Issue driven code-repair workflows.
+
+This repository now includes:
+
+- the Spring Boot backend
+- a React + Vite frontend console under `frontend/`
 
 The project now includes the initial backend scaffold and the first usable authentication layer:
 
@@ -154,6 +204,10 @@ The project now includes the initial backend scaffold and the first usable authe
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `GET /api/user/me`
+- public GitHub repository clone with JGit
+- Tree-sitter based multi-language index scaffolding for Java, Python, JavaScript, TypeScript, and Go
+- plain-text fallback extractor abstraction
+- `frontend/` web console with React, Vite, TypeScript, TailwindCSS, and shadcn-style UI components
 - unified `Result<T>`
 - `ErrorCode`
 - `BusinessException`
@@ -166,8 +220,8 @@ The following modules are still placeholders only:
 
 - repository management
 - agent task creation
-- public GitHub repository pulling
-- Java file scanning
+- Tree-sitter native parsing integration
+- executable file scanning flow
 - related code retrieval
 - repair suggestion and patch generation
 - execution trace display
@@ -177,13 +231,14 @@ The following modules are still placeholders only:
 
 Main configuration file:
 
-- [application.yml](/C:/CodePilot/demo/src/main/resources/application.yml)
+- [application.yml](/C:/CodePilot/src/main/resources/application.yml)
 
 Before starting the project, prepare:
 
 - MySQL database `codepilot`
 - Redis instance
 - a valid JWT secret
+- a writable workspace root via `codepilot.workspace.root`
 
 ### Run
 
@@ -199,6 +254,33 @@ Or with local Maven:
 mvn spring-boot:run
 ```
 
+### Frontend Development
+
+The frontend lives in `frontend/`:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+- Vite dev server runs on `5173`
+- `/api` is proxied to `http://localhost:8080`
+
+### Build Frontend for Spring Boot
+
+Inside `frontend/` run:
+
+```powershell
+npm run build:static
+```
+
+This builds the frontend and copies the generated files into `src/main/resources/static`.
+
+After that, starting Spring Boot lets you access the frontend at `http://localhost:8080`.
+
+The Spring Boot app also forwards `/login`, `/register`, `/projects`, `/tasks`, `/tasks/new`, and `/tasks/{id}` to `index.html` so direct page visits work.
+
 ### Recommended Next Step
 
-Implement the `project` module next so the system can move from authenticated users to repository onboarding, which is the natural next step in the Issue-to-PR workflow.
+The natural next step is to continue the `index` module by wiring file traversal, parser adaptation, and persistence for multi-language code indexing.

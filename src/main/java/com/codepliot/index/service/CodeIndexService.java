@@ -1,7 +1,7 @@
 package com.codepliot.index.service;
 
 /**
- * Code index service placeholder.
+ * Placeholder for future Tree-sitter based multi-language index orchestration.
  */
 public class CodeIndexService {
 }

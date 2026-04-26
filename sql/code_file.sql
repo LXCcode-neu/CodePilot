@@ -1,0 +1,22 @@
+USE codepilot;
+
+CREATE TABLE code_file (
+  id BIGINT NOT NULL COMMENT 'MyBatis-Plus ASSIGN_ID',
+  project_id BIGINT NOT NULL,
+  file_path VARCHAR(1024) NOT NULL,
+  language VARCHAR(32) NOT NULL,
+  package_name VARCHAR(255) DEFAULT NULL,
+  module_name VARCHAR(255) DEFAULT NULL,
+  class_name VARCHAR(255) DEFAULT NULL,
+  content_hash VARCHAR(64) NOT NULL,
+  size BIGINT NOT NULL,
+  parse_status VARCHAR(32) NOT NULL,
+  parse_error TEXT DEFAULT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_code_file_project_path (project_id, file_path),
+  KEY idx_code_file_project_id (project_id),
+  KEY idx_code_file_language (language),
+  KEY idx_code_file_content_hash (content_hash)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

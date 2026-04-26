@@ -45,8 +45,16 @@
    - JWT
    - Lombok
    - JGit
+   - React
+   - Vite
+   - TypeScript
+   - TailwindCSS
+   - shadcn/ui 风格组件
+   - Axios
+   - React Router
+   - lucide-react
 4. 未经用户明确要求，不要引入新的框架、中间件或前端技术栈。
-5. 不要生成前端代码。
+5. 除非用户明确要求或任务明确针对 `frontend/` 模块，否则不要生成前端代码。
 6. 不要伪造已完成的业务逻辑。
 7. 所有 Java 包必须保持在 `com.codepliot` 命名空间下。
 8. 模块边界应尽量清晰：
@@ -55,12 +63,13 @@
    - `project`：仓库/项目管理
    - `task`：Agent 任务管理
    - `git`：Git 仓库同步能力
-   - `index`：代码扫描与检索基础设施
+   - `index`：基于 Tree-sitter 多语言解析架构的代码扫描与检索基础设施，未支持语言使用文本兜底索引
    - `agent`：任务编排与 Agent 协调
    - `llm`：模型调用抽象
    - `trace`：执行轨迹记录
    - `sse`：实时推送能力
    - `common`：共享基础类
+   - `frontend`：基于 React + Vite 的 Web 控制台
 9. 在用户没有明确要求前，不要实现登录、仓库管理、任务执行、Git clone、LLM 调用等具体业务逻辑。
 10. 如果项目结构、技术选型、开发边界或启动方式发生变化，要同步更新 `README.md` 与本文件。
 11. 数据库操作放 Repository 层，业务逻辑放 Service 层。
@@ -112,8 +121,16 @@ Those rules should live in a separate document, for example:
    - JWT
    - Lombok
    - JGit
+   - React
+   - Vite
+   - TypeScript
+   - TailwindCSS
+   - shadcn/ui style components
+   - Axios
+   - React Router
+   - lucide-react
 4. Do not introduce new frameworks, middleware, or frontend stacks unless explicitly requested.
-5. Do not generate frontend code.
+5. Do not generate frontend code unless the user explicitly asks for it or the task clearly targets the `frontend/` module.
 6. Do not fake completed business logic.
 7. Keep all Java packages under the `com.codepliot` namespace.
 8. Keep module boundaries clear:
@@ -122,12 +139,13 @@ Those rules should live in a separate document, for example:
    - `project`: repository/project management
    - `task`: agent task management
    - `git`: Git synchronization
-   - `index`: code scan and retrieval infrastructure
+   - `index`: Tree-sitter based multi-language code scan and retrieval infrastructure, with plain-text fallback for unsupported languages
    - `agent`: orchestration and agent coordination
    - `llm`: model integration abstractions
    - `trace`: execution trace recording
    - `sse`: real-time push
    - `common`: shared foundational classes
+   - `frontend`: React + Vite web console
 9. Unless explicitly requested, do not implement concrete business logic such as login flow, repository management, task execution, Git clone, or LLM calls.
 10. If project structure, tech choices, development boundaries, or startup instructions change, update both `README.md` and this file.
 
