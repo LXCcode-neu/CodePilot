@@ -1,5 +1,9 @@
 package com.codepliot.agent.context;
 
+/**
+ * Agent 运行上下文。
+ * 保存一次任务执行过程中需要被多个 Tool 共享的核心信息。
+ */
 public final class AgentContext {
 
     private final Long taskId;
@@ -61,6 +65,9 @@ public final class AgentContext {
         return issueDescription;
     }
 
+    /**
+     * 在运行过程中更新本地仓库路径，供后续 Tool 复用。
+     */
     public void updateLocalPath(String localPath) {
         this.localPath = localPath;
     }

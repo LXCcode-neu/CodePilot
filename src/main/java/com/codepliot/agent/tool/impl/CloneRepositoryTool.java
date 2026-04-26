@@ -11,7 +11,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * Public GitHub repository clone tool.
+ * 仓库拉取工具。
+ * 在 Agent 流程中负责调用 GitService 执行真实仓库 clone。
  */
 @Component
 @Order(10)

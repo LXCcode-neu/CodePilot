@@ -6,6 +6,10 @@ import com.codepliot.common.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * 符号级索引实体。
+ * 对应 code_symbol 表，保存类、方法、函数等抽取后的结构化信息。
+ */
 @Data
 @TableName("code_symbol")
 @EqualsAndHashCode(callSuper = true)

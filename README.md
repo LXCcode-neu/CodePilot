@@ -32,6 +32,7 @@ CodePilot 是一个基于 Spring Boot 3 的 Issue-to-PR Agent 平台，面向 Gi
 - 当前用户接口 `GET /api/user/me`
 - 基于 JGit 的公开 GitHub 仓库 clone
 - Tree-sitter 多语言索引基础模型骨架（Java / Python / JavaScript / TypeScript / Go）
+- Tree-sitter 统一 AST 解析层与语言注册表
 - PlainTextFallbackExtractor 文本级兜底索引抽象
 - `frontend/` 前端项目：React + Vite + TypeScript + TailwindCSS + shadcn/ui
 - 统一返回 `Result<T>`
@@ -46,7 +47,7 @@ CodePilot 是一个基于 Spring Boot 3 的 Issue-to-PR Agent 平台，面向 Gi
 
 - 仓库管理
 - Agent 任务创建
-- Tree-sitter native 解析调用
+- 复杂符号提取规则
 - Java 文件扫描执行流程
 - 相关代码检索
 - 修复建议和 patch 生成
@@ -206,6 +207,7 @@ The project now includes the initial backend scaffold and the first usable authe
 - `GET /api/user/me`
 - public GitHub repository clone with JGit
 - Tree-sitter based multi-language index scaffolding for Java, Python, JavaScript, TypeScript, and Go
+- Tree-sitter parser registry and unified AST parsing layer
 - plain-text fallback extractor abstraction
 - `frontend/` web console with React, Vite, TypeScript, TailwindCSS, and shadcn-style UI components
 - unified `Result<T>`
@@ -220,7 +222,7 @@ The following modules are still placeholders only:
 
 - repository management
 - agent task creation
-- Tree-sitter native parsing integration
+- complex symbol extraction rules
 - executable file scanning flow
 - related code retrieval
 - repair suggestion and patch generation
@@ -239,6 +241,12 @@ Before starting the project, prepare:
 - Redis instance
 - a valid JWT secret
 - a writable workspace root via `codepilot.workspace.root`
+
+### Tree-sitter Native Note
+
+- The current `ch.usi.si.seart:java-tree-sitter:1.12.0` integration compiles on Java 17 and is wrapped with graceful fallback.
+- If the native library or a language grammar is unavailable, `TreeSitterParserService` returns `success=false` and upper layers should use `PlainTextFallbackExtractor`.
+- In the current local verification, this artifact reports `The tree-sitter library was not compiled for this platform: windows 11`, so Windows development machines will currently enter fallback mode unless a Windows-compatible native build is provided.
 
 ### Run
 

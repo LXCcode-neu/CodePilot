@@ -6,6 +6,10 @@ import com.codepliot.common.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * 文件级索引实体。
+ * 对应 code_file 表，保存某个源码文件的基础解析信息。
+ */
 @Data
 @TableName("code_file")
 @EqualsAndHashCode(callSuper = true)

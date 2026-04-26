@@ -45,6 +45,7 @@
    - JWT
    - Lombok
    - JGit
+   - Tree-sitter
    - React
    - Vite
    - TypeScript
@@ -121,6 +122,7 @@ Those rules should live in a separate document, for example:
    - JWT
    - Lombok
    - JGit
+   - Tree-sitter
    - React
    - Vite
    - TypeScript

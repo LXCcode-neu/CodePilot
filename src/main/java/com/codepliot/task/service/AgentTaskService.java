@@ -15,10 +15,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
 /**
- * 处理 Agent 任务的创建、查询和内部状态更新。
+ * Agent 任务服务。
+ * 负责任务创建、任务查询以及执行过程中的状态更新。
  */
+@Service
 public class AgentTaskService {
 
     private final AgentTaskMapper agentTaskMapper;
@@ -29,10 +30,10 @@ public class AgentTaskService {
         this.projectRepoMapper = projectRepoMapper;
     }
 
-    @Transactional
     /**
-     * 创建任务前先校验项目是否属于当前用户。
+     * 创建任务前先校验项目是否属于当前登录用户。
      */
+    @Transactional
     public AgentTaskVO create(AgentTaskCreateRequest request) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         requireOwnedProject(currentUserId, request.projectId());
@@ -69,18 +70,18 @@ public class AgentTaskService {
         return AgentTaskVO.from(requireOwnedTask(id));
     }
 
-    @Transactional
     /**
-     * 供后续执行器内部调用，只更新任务状态。
+     * 供执行器内部调用，只更新任务状态。
      */
+    @Transactional
     public void updateStatus(Long taskId, AgentTaskStatus status) {
         updateStatus(taskId, status, null, null);
     }
 
-    @Transactional
     /**
-     * 供后续执行器内部调用，同时更新状态和执行结果字段。
+     * 供执行器内部调用，同时更新状态、结果摘要和错误信息。
      */
+    @Transactional
     public void updateStatus(Long taskId, AgentTaskStatus status, String resultSummary, String errorMessage) {
         AgentTask agentTask = requireTask(taskId);
         agentTask.setStatus(status.name());
@@ -118,7 +119,7 @@ public class AgentTaskService {
     }
 
     /**
-     * 按任务 id 查询任务，供内部状态更新使用。
+     * 按任务 ID 查询任务，供内部状态更新使用。
      */
     private AgentTask requireTask(Long id) {
         AgentTask agentTask = agentTaskMapper.selectById(id);

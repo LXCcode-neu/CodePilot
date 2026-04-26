@@ -12,6 +12,10 @@ import java.util.HexFormat;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
+/**
+ * 文本兜底提取器。
+ * 用于 UNKNOWN 语言或解析失败场景，至少产出一条可落库的文件与符号信息。
+ */
 @Component
 public class PlainTextFallbackExtractor implements LanguageSymbolExtractor {
 
@@ -24,6 +28,9 @@ public class PlainTextFallbackExtractor implements LanguageSymbolExtractor {
         return LanguageType.UNKNOWN == languageType;
     }
 
+    /**
+     * 基于文本信息构建文件级解析结果。
+     */
     public ParsedCodeFile buildParsedCodeFile(Long projectId, TreeSitterParseResult parseResult) {
         String relativePath = normalizePath(parseResult.relativePath(), parseResult.filePath());
         String moduleName = extractModuleName(relativePath);
@@ -45,6 +52,9 @@ public class PlainTextFallbackExtractor implements LanguageSymbolExtractor {
         );
     }
 
+    /**
+     * 生成一个 UNKNOWN 类型的兜底符号记录，保留截断后的文本内容。
+     */
     @Override
     public List<ParsedCodeSymbol> extract(TreeSitterParseResult parseResult) {
         String relativePath = normalizePath(parseResult.relativePath(), parseResult.filePath());

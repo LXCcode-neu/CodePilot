@@ -5,6 +5,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+/**
+ * 工作区配置。
+ * 负责读取本地仓库根目录，例如 data/workspace。
+ */
 @Component
 @Validated
 @ConfigurationProperties(prefix = "codepilot.workspace")

@@ -10,6 +10,10 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Git 领域服务。
+ * 当前只负责公开 GitHub 仓库的 clone，以及 clone 成功后的本地路径回写。
+ */
 @Service
 public class GitService {
 
@@ -21,6 +25,10 @@ public class GitService {
         this.gitWorkspaceService = gitWorkspaceService;
     }
 
+    /**
+     * 根据项目 ID 拉取仓库。
+     * 如果目标目录已存在且包含 .git，则直接复用并回写 localPath。
+     */
     public String cloneRepository(Long projectId) {
         ProjectRepo projectRepo = requireProjectRepo(projectId);
         Path repositoryPath = gitWorkspaceService.getRepositoryPath(projectId);
@@ -46,6 +54,9 @@ public class GitService {
         }
     }
 
+    /**
+     * 查询项目仓库记录，不存在则抛出业务异常。
+     */
     private ProjectRepo requireProjectRepo(Long projectId) {
         ProjectRepo projectRepo = projectRepoMapper.selectById(projectId);
         if (projectRepo == null) {
@@ -54,6 +65,9 @@ public class GitService {
         return projectRepo;
     }
 
+    /**
+     * 将 clone 后的本地路径写回 project_repo.local_path。
+     */
     private String updateLocalPath(ProjectRepo projectRepo, Path repositoryPath) {
         String localPath = repositoryPath.toString();
         projectRepo.setLocalPath(localPath);
@@ -64,6 +78,9 @@ public class GitService {
         return localPath;
     }
 
+    /**
+     * 尽量提取更可读的异常消息，便于统一透传给上层。
+     */
     private String buildErrorMessage(Exception ex) {
         String message = ex.getMessage();
         if (message == null || message.isBlank()) {
