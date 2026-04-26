@@ -18,6 +18,7 @@ public final class AgentContext {
     private final String issueTitle;
     private final String issueDescription;
     private List<RetrievedCodeChunk> retrievedChunks;
+    private String analysis;
 
     public AgentContext(Long taskId,
                         Long userId,
@@ -36,6 +37,7 @@ public final class AgentContext {
         this.issueTitle = issueTitle;
         this.issueDescription = issueDescription;
         this.retrievedChunks = List.of();
+        this.analysis = null;
     }
 
     public Long taskId() {
@@ -74,6 +76,10 @@ public final class AgentContext {
         return retrievedChunks;
     }
 
+    public String analysis() {
+        return analysis;
+    }
+
     /**
      * 在运行过程中更新本地仓库路径，供后续 Tool 复用。
      */
@@ -86,5 +92,12 @@ public final class AgentContext {
      */
     public void updateRetrievedChunks(List<RetrievedCodeChunk> retrievedChunks) {
         this.retrievedChunks = retrievedChunks == null ? List.of() : List.copyOf(retrievedChunks);
+    }
+
+    /**
+     * 保存基于 Issue 和相关代码片段生成的分析结果。
+     */
+    public void updateAnalysis(String analysis) {
+        this.analysis = analysis == null || analysis.isBlank() ? null : analysis.trim();
     }
 }

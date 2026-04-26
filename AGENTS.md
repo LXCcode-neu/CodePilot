@@ -145,6 +145,7 @@ Those rules should live in a separate document, for example:
    - `index`: Tree-sitter based multi-language code scan and retrieval infrastructure, with plain-text fallback for unsupported languages
    - `agent`: orchestration and agent coordination
    - `llm`: model integration abstractions
+   - `patch`: generated patch record storage and retrieval
    - `trace`: execution trace recording
    - `sse`: real-time push
    - `common`: shared foundational classes

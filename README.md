@@ -212,6 +212,9 @@ The project now includes the initial backend scaffold and the first usable authe
 - code index build service that scans repositories and persists `code_file` / `code_symbol`
 - Apache Lucene local index build for `code_symbol` under `workspace/{projectId}/lucene-index`
 - multi-language Lucene code search with reranking for `SearchRelevantCodeTool`
+- configurable LLM abstraction with mock and OpenAI-backed clients
+- issue analysis and patch generation prompt builders
+- `GET /api/tasks/{taskId}/patch` for generated patch record retrieval
 - plain-text fallback extractor abstraction
 - `frontend/` web console with React, Vite, TypeScript, TailwindCSS, and shadcn-style UI components
 - unified `Result<T>`
@@ -228,9 +231,7 @@ The following modules are still placeholders only:
 - agent task creation
 - complex symbol extraction rules
 - executable file scanning flow
-- repair suggestion and patch generation
 - execution trace display
-- LLM integration logic
 
 ### Configuration
 

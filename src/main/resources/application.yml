@@ -10,6 +10,7 @@ spring:
       schema-locations:
         - classpath:db/schema/code_file.sql
         - classpath:db/schema/code_symbol.sql
+        - classpath:db/schema/patch_record.sql
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/codepilot?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
@@ -49,3 +50,5 @@ codepilot:
   llm:
     provider: mock
     api-key: your-llm-api-key
+    base-url: https://api.openai.com/v1
+    model: your-openai-model
