@@ -213,6 +213,7 @@ The project now includes the initial backend scaffold and the first usable authe
 - Apache Lucene local index build for `code_symbol` under `workspace/{projectId}/lucene-index`
 - multi-language Lucene code search with reranking for `SearchRelevantCodeTool`
 - Redis-backed task run lock to prevent duplicate `/run` execution for the same task
+- Spring Async background execution for agent tasks, while `/run` returns immediately
 - configurable LLM abstraction with mock and DeepSeek-backed clients
 - issue analysis and patch generation prompt builders
 - `GET /api/tasks/{taskId}/patch` for generated patch record retrieval
@@ -246,8 +247,15 @@ Before starting the project, prepare:
 - Redis instance
 - a valid JWT secret
 - a writable workspace root via `codepilot.workspace.root`
+- an optional task run lock TTL via `codepilot.lock.task-run.ttl` (default `30m`)
 - `code_file` and `code_symbol` will now be auto-created on Spring Boot startup if they do not exist
 - Lucene index files are rebuilt under `workspace/{projectId}/lucene-index` during the code-index build step
+
+### Async Task Execution Note
+
+- The current MVP uses Spring Async plus Redis task locks instead of MQ.
+- This is sufficient because the app is still a monolith and task execution depends on local workspace files and local Lucene indexes.
+- If the system later evolves into multi-instance scheduling or dedicated worker nodes, RabbitMQ or Redis Stream would be a more suitable upgrade path.
 
 ### Tree-sitter Native Note
 

@@ -16,7 +16,7 @@ import com.codepliot.task.vo.AgentTaskVO;
 import org.springframework.stereotype.Service;
 
 /**
- * Agent 运行入口服务，负责运行前校验和调用执行器。
+ * Agent 运行入口服务，负责运行前校验并异步提交执行器。
  */
 @Service
 public class AgentRunService {
@@ -37,7 +37,7 @@ public class AgentRunService {
     }
 
     /**
-     * 校验当前用户是否可以运行该任务，然后同步执行 Mock Agent。
+     * 校验当前用户是否可以运行该任务，然后异步提交 Agent 执行。
      */
     public AgentTaskVO run(Long taskId) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
@@ -49,10 +49,11 @@ public class AgentRunService {
             claimRunnableTask(taskId, currentUserId);
 
             task.setStatus(AgentTaskStatus.CLONING.name());
-            agentExecutor.execute(task, projectRepo);
+            agentExecutor.executeAsync(task, projectRepo, lockValue);
             return AgentTaskVO.from(agentTaskMapper.selectById(taskId));
-        } finally {
+        } catch (RuntimeException exception) {
             taskRunLockService.unlock(taskId, lockValue);
+            throw exception;
         }
     }
 

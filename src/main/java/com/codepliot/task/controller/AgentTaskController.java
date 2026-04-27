@@ -54,10 +54,10 @@ public class AgentTaskController {
     }
 
     /**
-     * 同步运行当前用户自己的 Agent 任务。
+     * 异步触发当前登录用户自己的 Agent 任务。
      */
     @PostMapping("/{taskId}/run")
     public Result<AgentTaskVO> run(@PathVariable Long taskId) {
-        return Result.success("Agent task run completed", agentRunService.run(taskId));
+        return Result.success("Agent task submitted", agentRunService.run(taskId));
     }
 }

@@ -5,6 +5,7 @@ import com.codepliot.agent.tool.AgentTool;
 import com.codepliot.agent.tool.ToolResult;
 import com.codepliot.common.exception.BusinessException;
 import com.codepliot.common.result.ErrorCode;
+import com.codepliot.lock.service.TaskRunLockService;
 import com.codepliot.project.entity.ProjectRepo;
 import com.codepliot.task.entity.AgentTask;
 import com.codepliot.task.entity.AgentTaskStatus;
@@ -16,6 +17,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,23 +28,45 @@ import org.springframework.stereotype.Component;
 @Component
 public class AgentExecutor {
 
+    private static final Logger log = LoggerFactory.getLogger(AgentExecutor.class);
+
     private final AgentTaskService agentTaskService;
     private final AgentStepService agentStepService;
     private final ObjectMapper objectMapper;
     private final List<AgentTool> agentTools;
+    private final TaskRunLockService taskRunLockService;
 
     public AgentExecutor(AgentTaskService agentTaskService,
                          AgentStepService agentStepService,
                          ObjectMapper objectMapper,
-                         List<AgentTool> agentTools) {
+                         List<AgentTool> agentTools,
+                         TaskRunLockService taskRunLockService) {
         this.agentTaskService = agentTaskService;
         this.agentStepService = agentStepService;
         this.objectMapper = objectMapper;
         this.agentTools = agentTools;
+        this.taskRunLockService = taskRunLockService;
     }
 
     /**
-     * 同步执行 Mock Agent 流程，并把每一步写入执行轨迹。
+     * 异步执行 Agent 流程，并在结束后释放 Redis 运行锁。
+     */
+    @Async("agentTaskExecutor")
+    public void executeAsync(AgentTask task, ProjectRepo projectRepo, String lockValue) {
+        try {
+            execute(task, projectRepo);
+        } catch (RuntimeException exception) {
+            log.error("Agent task async execution failed, taskId={}", task.getId(), exception);
+        } catch (Throwable throwable) {
+            log.error("Agent task async execution failed with unexpected throwable, taskId={}", task.getId(), throwable);
+            agentTaskService.updateStatus(task.getId(), AgentTaskStatus.FAILED, null, errorMessage(throwable));
+        } finally {
+            taskRunLockService.unlock(task.getId(), lockValue);
+        }
+    }
+
+    /**
+     * 同步执行 Agent 流程，并把每一步写入执行轨迹。
      */
     public void execute(AgentTask task, ProjectRepo projectRepo) {
         AgentContext context = buildContext(task, projectRepo);
@@ -51,9 +77,9 @@ public class AgentExecutor {
             agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.COMPLETED,
                     "Mock agent run completed", null);
             runCompletionStep(context);
-        } catch (RuntimeException ex) {
-            agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.FAILED, null, errorMessage(ex));
-            throw ex;
+        } catch (RuntimeException exception) {
+            agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.FAILED, null, errorMessage(exception));
+            throw exception;
         }
     }
 
@@ -84,9 +110,9 @@ public class AgentExecutor {
                 throw new BusinessException(ErrorCode.INTERNAL_ERROR, result.message());
             }
             agentStepService.successStep(stepId, toJson(stepOutput(context, agentTool.stepType(), result)));
-        } catch (RuntimeException ex) {
-            agentStepService.failStep(stepId, errorMessage(ex));
-            throw ex;
+        } catch (RuntimeException exception) {
+            agentStepService.failStep(stepId, errorMessage(exception));
+            throw exception;
         }
     }
 
@@ -131,15 +157,15 @@ public class AgentExecutor {
     private String toJson(Map<String, Object> value) {
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException ex) {
+        } catch (JsonProcessingException exception) {
             throw new BusinessException(ErrorCode.INTERNAL_ERROR, "Failed to serialize agent step data");
         }
     }
 
-    private String errorMessage(RuntimeException ex) {
-        if (ex.getMessage() == null || ex.getMessage().isBlank()) {
-            return ex.getClass().getSimpleName();
+    private String errorMessage(Throwable throwable) {
+        if (throwable.getMessage() == null || throwable.getMessage().isBlank()) {
+            return throwable.getClass().getSimpleName();
         }
-        return ex.getMessage();
+        return throwable.getMessage();
     }
 }

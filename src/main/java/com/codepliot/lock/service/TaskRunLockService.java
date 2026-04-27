@@ -2,9 +2,11 @@ package com.codepliot.lock.service;
 
 import com.codepliot.common.exception.BusinessException;
 import com.codepliot.common.result.ErrorCode;
-import java.time.Duration;
+import com.codepliot.lock.config.TaskRunLockProperties;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,12 +17,24 @@ import org.springframework.stereotype.Service;
 public class TaskRunLockService {
 
     private static final String TASK_RUNNING_KEY_PREFIX = "codepilot:task:running:";
-    private static final Duration LOCK_TTL = Duration.ofMinutes(30);
+    private static final DefaultRedisScript<Long> UNLOCK_SCRIPT = new DefaultRedisScript<>(
+            """
+                    if redis.call('get', KEYS[1]) == ARGV[1] then
+                        return redis.call('del', KEYS[1])
+                    else
+                        return 0
+                    end
+                    """,
+            Long.class
+    );
 
     private final StringRedisTemplate stringRedisTemplate;
+    private final TaskRunLockProperties taskRunLockProperties;
 
-    public TaskRunLockService(StringRedisTemplate stringRedisTemplate) {
+    public TaskRunLockService(StringRedisTemplate stringRedisTemplate,
+                              TaskRunLockProperties taskRunLockProperties) {
         this.stringRedisTemplate = stringRedisTemplate;
+        this.taskRunLockProperties = taskRunLockProperties;
     }
 
     /**
@@ -31,7 +45,8 @@ public class TaskRunLockService {
         validateTaskId(taskId);
         String lockKey = buildLockKey(taskId);
         String lockValue = UUID.randomUUID().toString();
-        Boolean locked = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, LOCK_TTL);
+        Boolean locked = stringRedisTemplate.opsForValue()
+                .setIfAbsent(lockKey, lockValue, taskRunLockProperties.getTtl());
         if (!Boolean.TRUE.equals(locked)) {
             throw new BusinessException(ErrorCode.AGENT_TASK_RUNNING, "任务正在运行");
         }
@@ -47,10 +62,7 @@ public class TaskRunLockService {
             return;
         }
         String lockKey = buildLockKey(taskId);
-        String currentValue = stringRedisTemplate.opsForValue().get(lockKey);
-        if (lockValue.equals(currentValue)) {
-            stringRedisTemplate.delete(lockKey);
-        }
+        stringRedisTemplate.execute(UNLOCK_SCRIPT, List.of(lockKey), lockValue);
     }
 
     public String buildLockKey(Long taskId) {
@@ -58,8 +70,8 @@ public class TaskRunLockService {
         return TASK_RUNNING_KEY_PREFIX + taskId;
     }
 
-    public Duration lockTtl() {
-        return LOCK_TTL;
+    public java.time.Duration lockTtl() {
+        return taskRunLockProperties.getTtl();
     }
 
     private void validateTaskId(Long taskId) {

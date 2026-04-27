@@ -47,6 +47,9 @@ codepilot:
     root: ./data/workspace
   github:
     base-url: https://github.com
+  lock:
+    task-run:
+      ttl: 30m
   llm:
     provider: deepseek
     api-key: sk-c0e745f3ec65481786dbf13c4f17ad01
