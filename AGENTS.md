@@ -13,11 +13,11 @@
 它的目标是统一：
 
 - 技术栈使用范围
-- 目录与模块边界
+- 目录与包结构边界
 - 可实现与不可实现内容
 - 文档同步要求
 
-### 这份文件不是做什么的
+### 这份文件不负责什么
 
 本文件 **不是** CodePilot 平台内部业务 Agent 的运行时规范，不描述：
 
@@ -27,7 +27,7 @@
 - patch 生成流程
 - 平台内 Agent 的输入输出协议
 
-这些内容应放在独立文档中，例如：
+这类内容应放在独立文档中，例如：
 
 - `docs/agent-runtime-spec.md`
 
@@ -46,6 +46,7 @@
    - Lombok
    - JGit
    - Tree-sitter
+   - Apache Lucene
    - React
    - Vite
    - TypeScript
@@ -58,22 +59,23 @@
 5. 除非用户明确要求或任务明确针对 `frontend/` 模块，否则不要生成前端代码。
 6. 不要伪造已完成的业务逻辑。
 7. 所有 Java 包必须保持在 `com.codepliot` 命名空间下。
-8. 模块边界应尽量清晰：
-   - `auth`：认证与授权
-   - `user`：用户领域
-   - `project`：仓库/项目管理
-   - `task`：Agent 任务管理
-   - `git`：Git 仓库同步能力
-   - `index`：基于 Tree-sitter 多语言解析架构的代码扫描与检索基础设施，未支持语言使用文本兜底索引
-   - `agent`：任务编排与 Agent 协调
-   - `llm`：模型调用抽象
-   - `trace`：执行轨迹记录
-   - `sse`：实时推送能力
-   - `common`：共享基础类
-   - `frontend`：基于 React + Vite 的 Web 控制台
-9. 在用户没有明确要求前，不要实现登录、仓库管理、任务执行、Git clone、LLM 调用等具体业务逻辑。
-10. 如果项目结构、技术选型、开发边界或启动方式发生变化，要同步更新 `README.md` 与本文件。
-11. 数据库操作放 Repository 层，业务逻辑放 Service 层。
+8. 当前后端采用**扁平主包结构**，不要在每个主层级下继续按业务二次分层；优先通过类名表达语义：
+   - `config`
+   - `controller`
+   - `entity`
+   - `exception`
+   - `handler`
+   - `model`
+   - `repository`
+   - `service`
+   - `client`
+   - `utils`
+   - `frontend`
+9. 允许通过类名前缀或完整类名表达业务归属，例如 `AuthController`、`ProjectRepoService`、`LuceneCodeSearchService`、`PatchGenerateResult`。
+10. 在用户没有明确要求前，不要额外实现与当前项目范围无关的新业务闭环。
+11. 如果项目结构、技术选型、开发边界或启动方式发生变化，要同步更新 `README.md` 与本文件。
+12. 数据库操作放 `repository` 层，业务逻辑放 `service` 层。
+13. 新增后端表时，优先提供可重复执行的启动初始化路径，例如 Spring Boot SQL init，而不只依赖手工执行。
 
 ### 默认理解
 
@@ -90,7 +92,7 @@ This file is the **repository development specification** for CodePilot. It cons
 It is intended to standardize:
 
 - approved technology choices
-- package and module boundaries
+- package structure boundaries
 - what should and should not be implemented
 - documentation sync requirements
 
@@ -136,24 +138,23 @@ Those rules should live in a separate document, for example:
 5. Do not generate frontend code unless the user explicitly asks for it or the task clearly targets the `frontend/` module.
 6. Do not fake completed business logic.
 7. Keep all Java packages under the `com.codepliot` namespace.
-8. Keep module boundaries clear:
-   - `auth`: authentication and authorization
-   - `user`: user domain
-   - `project`: repository/project management
-   - `task`: agent task management
-   - `git`: Git synchronization
-   - `index`: Tree-sitter based multi-language code scan and retrieval infrastructure, with plain-text fallback for unsupported languages
-   - `agent`: orchestration and agent coordination
-   - `lock`: Redis-backed runtime locks such as task run guards
-   - `llm`: model integration abstractions
-   - `patch`: generated patch record storage and retrieval
-   - `trace`: execution trace recording
-   - `sse`: real-time push
-   - `common`: shared foundational classes
-   - `frontend`: React + Vite web console
-9. Unless explicitly requested, do not implement concrete business logic such as login flow, repository management, task execution, Git clone, or LLM calls.
-10. If project structure, tech choices, development boundaries, or startup instructions change, update both `README.md` and this file.
-11. Database tables introduced by new backend modules should preferably provide a repeatable startup initialization path, for example Spring Boot SQL init scripts, instead of relying only on manual execution.
+8. The backend now uses a **flat top-level package layout**. Do not keep creating domain subpackages under each main layer; prefer semantic class names instead:
+   - `config`
+   - `controller`
+   - `entity`
+   - `exception`
+   - `handler`
+   - `model`
+   - `repository`
+   - `service`
+   - `client`
+   - `utils`
+   - `frontend`
+9. Express business meaning through class names such as `AuthController`, `ProjectRepoService`, `LuceneCodeSearchService`, or `PatchGenerateResult`.
+10. Unless explicitly requested, do not introduce unrelated new business flows beyond the current project scope.
+11. If project structure, tech choices, development boundaries, or startup instructions change, update both `README.md` and this file.
+12. Keep database access in `repository` and business orchestration in `service`.
+13. New backend tables should preferably provide a repeatable startup initialization path, such as Spring Boot SQL init scripts, instead of relying only on manual execution.
 
 ### Default Interpretation
 
