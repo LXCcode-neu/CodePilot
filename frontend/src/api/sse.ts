@@ -27,6 +27,14 @@ export function parseTaskEventMessage(raw: MessageEvent<string>): TaskEventMessa
           : typeof payload.status === "string"
             ? payload.status
             : undefined,
+      phase:
+        typeof payload.phase === "string"
+          ? payload.phase
+          : undefined,
+      stepType:
+        typeof payload.stepType === "string"
+          ? payload.stepType
+          : undefined,
       message:
         typeof payload.message === "string"
           ? payload.message
