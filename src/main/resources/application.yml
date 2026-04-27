@@ -50,5 +50,5 @@ codepilot:
   llm:
     provider: deepseek
     api-key: sk-c0e745f3ec65481786dbf13c4f17ad01
-    base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
-    model: ${DEEPSEEK_MODEL:deepseek-chat}
+    base-url: https://api.deepseek.com
+    model: deepseek-v4-flash

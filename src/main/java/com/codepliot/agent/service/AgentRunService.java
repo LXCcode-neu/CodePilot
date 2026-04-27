@@ -6,6 +6,7 @@ import com.codepliot.agent.executor.AgentExecutor;
 import com.codepliot.auth.security.SecurityUtils;
 import com.codepliot.common.exception.BusinessException;
 import com.codepliot.common.result.ErrorCode;
+import com.codepliot.lock.service.TaskRunLockService;
 import com.codepliot.project.entity.ProjectRepo;
 import com.codepliot.project.mapper.ProjectRepoMapper;
 import com.codepliot.task.entity.AgentTask;
@@ -23,13 +24,16 @@ public class AgentRunService {
     private final AgentTaskMapper agentTaskMapper;
     private final ProjectRepoMapper projectRepoMapper;
     private final AgentExecutor agentExecutor;
+    private final TaskRunLockService taskRunLockService;
 
     public AgentRunService(AgentTaskMapper agentTaskMapper,
                            ProjectRepoMapper projectRepoMapper,
-                           AgentExecutor agentExecutor) {
+                           AgentExecutor agentExecutor,
+                           TaskRunLockService taskRunLockService) {
         this.agentTaskMapper = agentTaskMapper;
         this.projectRepoMapper = projectRepoMapper;
         this.agentExecutor = agentExecutor;
+        this.taskRunLockService = taskRunLockService;
     }
 
     /**
@@ -38,13 +42,18 @@ public class AgentRunService {
     public AgentTaskVO run(Long taskId) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         AgentTask task = requireOwnedTask(taskId, currentUserId);
-        requireRunnableStatus(task);
-        ProjectRepo projectRepo = requireOwnedProject(task.getProjectId(), currentUserId);
-        claimRunnableTask(taskId, currentUserId);
+        String lockValue = taskRunLockService.lock(taskId);
+        try {
+            requireRunnableStatus(task);
+            ProjectRepo projectRepo = requireOwnedProject(task.getProjectId(), currentUserId);
+            claimRunnableTask(taskId, currentUserId);
 
-        task.setStatus(AgentTaskStatus.CLONING.name());
-        agentExecutor.execute(task, projectRepo);
-        return AgentTaskVO.from(agentTaskMapper.selectById(taskId));
+            task.setStatus(AgentTaskStatus.CLONING.name());
+            agentExecutor.execute(task, projectRepo);
+            return AgentTaskVO.from(agentTaskMapper.selectById(taskId));
+        } finally {
+            taskRunLockService.unlock(taskId, lockValue);
+        }
     }
 
     private AgentTask requireOwnedTask(Long taskId, Long currentUserId) {

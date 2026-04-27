@@ -19,6 +19,7 @@ public enum ErrorCode {
     INVALID_GITHUB_REPO_URL(2002, "Invalid GitHub repository URL"),
     AGENT_TASK_NOT_FOUND(3001, "Agent task not found"),
     AGENT_STEP_NOT_FOUND(3002, "Agent step not found"),
+    AGENT_TASK_RUNNING(3003, "Agent task is already running"),
     PATCH_RECORD_NOT_FOUND(4001, "Patch record not found"),
     INTERNAL_ERROR(500, "Internal server error");
 
