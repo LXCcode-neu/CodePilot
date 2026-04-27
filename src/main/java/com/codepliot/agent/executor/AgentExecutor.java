@@ -7,6 +7,8 @@ import com.codepliot.common.exception.BusinessException;
 import com.codepliot.common.result.ErrorCode;
 import com.codepliot.lock.service.TaskRunLockService;
 import com.codepliot.project.entity.ProjectRepo;
+import com.codepliot.sse.dto.TaskEventMessage;
+import com.codepliot.sse.service.SseService;
 import com.codepliot.task.entity.AgentTask;
 import com.codepliot.task.entity.AgentTaskStatus;
 import com.codepliot.task.service.AgentTaskService;
@@ -14,6 +16,7 @@ import com.codepliot.trace.entity.AgentStepType;
 import com.codepliot.trace.service.AgentStepService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,17 +38,20 @@ public class AgentExecutor {
     private final ObjectMapper objectMapper;
     private final List<AgentTool> agentTools;
     private final TaskRunLockService taskRunLockService;
+    private final SseService sseService;
 
     public AgentExecutor(AgentTaskService agentTaskService,
                          AgentStepService agentStepService,
                          ObjectMapper objectMapper,
                          List<AgentTool> agentTools,
-                         TaskRunLockService taskRunLockService) {
+                         TaskRunLockService taskRunLockService,
+                         SseService sseService) {
         this.agentTaskService = agentTaskService;
         this.agentStepService = agentStepService;
         this.objectMapper = objectMapper;
         this.agentTools = agentTools;
         this.taskRunLockService = taskRunLockService;
+        this.sseService = sseService;
     }
 
     /**
@@ -60,6 +66,8 @@ public class AgentExecutor {
         } catch (Throwable throwable) {
             log.error("Agent task async execution failed with unexpected throwable, taskId={}", task.getId(), throwable);
             agentTaskService.updateStatus(task.getId(), AgentTaskStatus.FAILED, null, errorMessage(throwable));
+            pushTaskEvent(task.getId(), AgentTaskStatus.FAILED.name(), null, errorMessage(throwable));
+            sseService.complete(task.getId());
         } finally {
             taskRunLockService.unlock(task.getId(), lockValue);
         }
@@ -77,8 +85,12 @@ public class AgentExecutor {
             agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.COMPLETED,
                     "Mock agent run completed", null);
             runCompletionStep(context);
+            pushTaskEvent(context.taskId(), AgentTaskStatus.COMPLETED.name(), null, "任务执行完成");
+            sseService.complete(context.taskId());
         } catch (RuntimeException exception) {
             agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.FAILED, null, errorMessage(exception));
+            pushTaskEvent(context.taskId(), AgentTaskStatus.FAILED.name(), null, errorMessage(exception));
+            sseService.complete(context.taskId());
             throw exception;
         }
     }
@@ -104,14 +116,20 @@ public class AgentExecutor {
                 agentTool.stepName(),
                 toJson(stepInput(context, agentTool.stepType()))
         );
+        pushTaskEvent(context.taskId(), agentTool.taskStatus().name(), agentTool.stepType().name(),
+                agentTool.stepName() + " started");
         try {
             ToolResult result = agentTool.execute(context);
             if (!result.success()) {
                 throw new BusinessException(ErrorCode.INTERNAL_ERROR, result.message());
             }
             agentStepService.successStep(stepId, toJson(stepOutput(context, agentTool.stepType(), result)));
+            pushTaskEvent(context.taskId(), agentTool.taskStatus().name(), agentTool.stepType().name(),
+                    agentTool.stepName() + " succeeded");
         } catch (RuntimeException exception) {
             agentStepService.failStep(stepId, errorMessage(exception));
+            pushTaskEvent(context.taskId(), AgentTaskStatus.FAILED.name(), agentTool.stepType().name(),
+                    agentTool.stepName() + " failed: " + errorMessage(exception));
             throw exception;
         }
     }
@@ -123,11 +141,15 @@ public class AgentExecutor {
                 "Mock 流程完成",
                 toJson(stepInput(context, AgentStepType.COMPLETE_RUN))
         );
+        pushTaskEvent(context.taskId(), AgentTaskStatus.COMPLETED.name(), AgentStepType.COMPLETE_RUN.name(),
+                "COMPLETE_RUN started");
         agentStepService.successStep(stepId, toJson(stepOutput(
                 context,
                 AgentStepType.COMPLETE_RUN,
                 ToolResult.success("mock agent run completed", Map.of("taskId", context.taskId()))
         )));
+        pushTaskEvent(context.taskId(), AgentTaskStatus.COMPLETED.name(), AgentStepType.COMPLETE_RUN.name(),
+                "COMPLETE_RUN succeeded");
     }
 
     private Map<String, Object> stepInput(AgentContext context, AgentStepType stepType) {
@@ -167,5 +189,15 @@ public class AgentExecutor {
             return throwable.getClass().getSimpleName();
         }
         return throwable.getMessage();
+    }
+
+    private void pushTaskEvent(Long taskId, String taskStatus, String stepType, String message) {
+        sseService.push(new TaskEventMessage(
+                taskId,
+                taskStatus,
+                stepType,
+                message,
+                LocalDateTime.now()
+        ));
     }
 }

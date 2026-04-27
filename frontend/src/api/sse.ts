@@ -15,8 +15,18 @@ export function parseTaskEventMessage(raw: MessageEvent<string>): TaskEventMessa
     const payload = JSON.parse(raw.data) as Record<string, unknown>;
     return {
       id: crypto.randomUUID(),
-      time: typeof payload.time === "string" ? payload.time : new Date().toISOString(),
-      status: typeof payload.status === "string" ? payload.status : undefined,
+      time:
+        typeof payload.timestamp === "string"
+          ? payload.timestamp
+          : typeof payload.time === "string"
+            ? payload.time
+            : new Date().toISOString(),
+      status:
+        typeof payload.taskStatus === "string"
+          ? payload.taskStatus
+          : typeof payload.status === "string"
+            ? payload.status
+            : undefined,
       message:
         typeof payload.message === "string"
           ? payload.message

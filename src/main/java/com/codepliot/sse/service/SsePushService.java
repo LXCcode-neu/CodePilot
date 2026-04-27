@@ -1,7 +1,8 @@
 package com.codepliot.sse.service;
 
 /**
- * SSE push service placeholder.
+ * 已由 {@link SseService} 替代的兼容占位类。
  */
+@Deprecated
 public class SsePushService {
 }

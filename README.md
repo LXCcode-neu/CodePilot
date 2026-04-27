@@ -214,6 +214,7 @@ The project now includes the initial backend scaffold and the first usable authe
 - multi-language Lucene code search with reranking for `SearchRelevantCodeTool`
 - Redis-backed task run lock to prevent duplicate `/run` execution for the same task
 - Spring Async background execution for agent tasks, while `/run` returns immediately
+- SSE task event subscription via `GET /api/tasks/{taskId}/events`
 - configurable LLM abstraction with mock and DeepSeek-backed clients
 - issue analysis and patch generation prompt builders
 - `GET /api/tasks/{taskId}/patch` for generated patch record retrieval

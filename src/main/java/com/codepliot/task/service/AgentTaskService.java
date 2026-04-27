@@ -71,6 +71,13 @@ public class AgentTaskService {
     }
 
     /**
+     * 查询当前用户自己的任务实体，供需要读取实时状态的模块使用。
+     */
+    public AgentTask getOwnedTaskEntity(Long id) {
+        return requireOwnedTask(id);
+    }
+
+    /**
      * 供执行器内部调用，只更新任务状态。
      */
     @Transactional
