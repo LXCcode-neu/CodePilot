@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { LoaderCircle, PlayCircle, RefreshCcw } from "lucide-react";
+import { getTaskPatch } from "@/api/patch";
 import { getProject } from "@/api/project";
 import { createTaskEventSource, parseTaskEventMessage } from "@/api/sse";
 import { getTaskSteps } from "@/api/step";
 import { getTask, runTask } from "@/api/task";
-import { getTaskPatch } from "@/api/patch";
 import { AgentStepTimeline } from "@/components/AgentStepTimeline";
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingBlock } from "@/components/LoadingBlock";
@@ -107,18 +107,22 @@ export function TaskDetailPage() {
 
     try {
       source = createTaskEventSource(taskId, token);
-      source.onmessage = (event) => {
+      const handleTaskEvent = (event: MessageEvent<string>) => {
         const message = parseTaskEventMessage(event);
         setEvents((prev) => [message, ...prev].slice(0, 50));
         void loadAll().catch(() => undefined);
       };
+
+      source.addEventListener("task-event", handleTaskEvent as EventListener);
+      source.onmessage = handleTaskEvent;
       source.onerror = () => {
         setEvents((prev) => [
           {
             id: crypto.randomUUID(),
             time: new Date().toISOString(),
             status: "SSE",
-            message: "SSE 连接中断或后端尚未实现事件推送。",
+            phase: "COMPLETED",
+            message: "SSE 连接中断，已停止接收实时事件。",
           },
           ...prev,
         ].slice(0, 50));
@@ -147,7 +151,8 @@ export function TaskDetailPage() {
           id: crypto.randomUUID(),
           time: new Date().toISOString(),
           status: "RUN",
-          message: "已触发 Agent 运行请求。",
+          phase: "STARTED",
+          message: "已提交 Agent 运行请求。",
         },
         ...prev,
       ]);
@@ -226,7 +231,7 @@ export function TaskDetailPage() {
           </CardContent>
         </Card>
 
-        <RealtimeEventPanel events={events} />
+        <RealtimeEventPanel events={events} taskStatus={task.status} />
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">

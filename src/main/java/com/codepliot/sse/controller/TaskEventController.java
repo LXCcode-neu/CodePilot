@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
- * 任务实时事件订阅接口。
+ * Task SSE event subscription endpoint.
  */
 @RestController
 @RequestMapping("/api/tasks/{taskId}/events")
@@ -36,6 +36,7 @@ public class TaskEventController {
             sseService.send(emitter, new TaskEventMessage(
                     agentTask.getId(),
                     agentTask.getStatus(),
+                    resolvePhase(agentTask.getStatus()),
                     null,
                     "当前任务状态：" + agentTask.getStatus(),
                     LocalDateTime.now()
@@ -51,5 +52,15 @@ public class TaskEventController {
 
     private boolean isTerminalStatus(String status) {
         return "COMPLETED".equals(status) || "FAILED".equals(status);
+    }
+
+    private String resolvePhase(String status) {
+        if ("COMPLETED".equals(status) || "FAILED".equals(status)) {
+            return "COMPLETED";
+        }
+        if ("PENDING".equals(status)) {
+            return "PENDING";
+        }
+        return "RUNNING";
     }
 }

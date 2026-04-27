@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public record TaskEventMessage(
         Long taskId,
         String taskStatus,
+        String phase,
         String stepType,
         String message,
         LocalDateTime timestamp

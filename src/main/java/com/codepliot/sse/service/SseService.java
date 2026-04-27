@@ -28,7 +28,10 @@ public class SseService {
             emitter.complete();
             removeEmitter(taskId, emitter);
         });
-        emitter.onError(ignored -> removeEmitter(taskId, emitter));
+        emitter.onError(ignored -> {
+            emitter.complete();
+            removeEmitter(taskId, emitter);
+        });
         return emitter;
     }
 

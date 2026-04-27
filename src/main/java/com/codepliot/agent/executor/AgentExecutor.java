@@ -26,7 +26,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * Agent 执行器，负责编排工具、更新任务状态并记录执行轨迹。
+ * Coordinates Agent tool execution, step persistence, and SSE progress events.
  */
 @Component
 public class AgentExecutor {
@@ -54,28 +54,23 @@ public class AgentExecutor {
         this.sseService = sseService;
     }
 
-    /**
-     * 异步执行 Agent 流程，并在结束后释放 Redis 运行锁。
-     */
     @Async("agentTaskExecutor")
     public void executeAsync(AgentTask task, ProjectRepo projectRepo, String lockValue) {
         try {
+            pushTaskEvent(task.getId(), task.getStatus(), "RUNNING", null, "任务已进入后台执行。");
             execute(task, projectRepo);
         } catch (RuntimeException exception) {
             log.error("Agent task async execution failed, taskId={}", task.getId(), exception);
         } catch (Throwable throwable) {
             log.error("Agent task async execution failed with unexpected throwable, taskId={}", task.getId(), throwable);
             agentTaskService.updateStatus(task.getId(), AgentTaskStatus.FAILED, null, errorMessage(throwable));
-            pushTaskEvent(task.getId(), AgentTaskStatus.FAILED.name(), null, errorMessage(throwable));
+            pushTaskEvent(task.getId(), AgentTaskStatus.FAILED.name(), "COMPLETED", null, errorMessage(throwable));
             sseService.complete(task.getId());
         } finally {
             taskRunLockService.unlock(task.getId(), lockValue);
         }
     }
 
-    /**
-     * 同步执行 Agent 流程，并把每一步写入执行轨迹。
-     */
     public void execute(AgentTask task, ProjectRepo projectRepo) {
         AgentContext context = buildContext(task, projectRepo);
         try {
@@ -85,11 +80,11 @@ public class AgentExecutor {
             agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.COMPLETED,
                     "Mock agent run completed", null);
             runCompletionStep(context);
-            pushTaskEvent(context.taskId(), AgentTaskStatus.COMPLETED.name(), null, "任务执行完成");
+            pushTaskEvent(context.taskId(), AgentTaskStatus.COMPLETED.name(), "COMPLETED", null, "任务执行完成。");
             sseService.complete(context.taskId());
         } catch (RuntimeException exception) {
             agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.FAILED, null, errorMessage(exception));
-            pushTaskEvent(context.taskId(), AgentTaskStatus.FAILED.name(), null, errorMessage(exception));
+            pushTaskEvent(context.taskId(), AgentTaskStatus.FAILED.name(), "COMPLETED", null, errorMessage(exception));
             sseService.complete(context.taskId());
             throw exception;
         }
@@ -116,20 +111,35 @@ public class AgentExecutor {
                 agentTool.stepName(),
                 toJson(stepInput(context, agentTool.stepType()))
         );
-        pushTaskEvent(context.taskId(), agentTool.taskStatus().name(), agentTool.stepType().name(),
-                agentTool.stepName() + " started");
+        pushTaskEvent(
+                context.taskId(),
+                agentTool.taskStatus().name(),
+                "RUNNING",
+                agentTool.stepType().name(),
+                agentTool.stepName() + " 开始执行"
+        );
         try {
             ToolResult result = agentTool.execute(context);
             if (!result.success()) {
                 throw new BusinessException(ErrorCode.INTERNAL_ERROR, result.message());
             }
             agentStepService.successStep(stepId, toJson(stepOutput(context, agentTool.stepType(), result)));
-            pushTaskEvent(context.taskId(), agentTool.taskStatus().name(), agentTool.stepType().name(),
-                    agentTool.stepName() + " succeeded");
+            pushTaskEvent(
+                    context.taskId(),
+                    agentTool.taskStatus().name(),
+                    "RUNNING",
+                    agentTool.stepType().name(),
+                    agentTool.stepName() + " 执行成功"
+            );
         } catch (RuntimeException exception) {
             agentStepService.failStep(stepId, errorMessage(exception));
-            pushTaskEvent(context.taskId(), AgentTaskStatus.FAILED.name(), agentTool.stepType().name(),
-                    agentTool.stepName() + " failed: " + errorMessage(exception));
+            pushTaskEvent(
+                    context.taskId(),
+                    AgentTaskStatus.FAILED.name(),
+                    "RUNNING",
+                    agentTool.stepType().name(),
+                    agentTool.stepName() + " 执行失败：" + errorMessage(exception)
+            );
             throw exception;
         }
     }
@@ -138,18 +148,18 @@ public class AgentExecutor {
         Long stepId = agentStepService.startStep(
                 context.taskId(),
                 AgentStepType.COMPLETE_RUN,
-                "Mock 流程完成",
+                "Agent 流程完成",
                 toJson(stepInput(context, AgentStepType.COMPLETE_RUN))
         );
-        pushTaskEvent(context.taskId(), AgentTaskStatus.COMPLETED.name(), AgentStepType.COMPLETE_RUN.name(),
-                "COMPLETE_RUN started");
+        pushTaskEvent(context.taskId(), AgentTaskStatus.COMPLETED.name(), "COMPLETED",
+                AgentStepType.COMPLETE_RUN.name(), "任务收尾开始");
         agentStepService.successStep(stepId, toJson(stepOutput(
                 context,
                 AgentStepType.COMPLETE_RUN,
                 ToolResult.success("mock agent run completed", Map.of("taskId", context.taskId()))
         )));
-        pushTaskEvent(context.taskId(), AgentTaskStatus.COMPLETED.name(), AgentStepType.COMPLETE_RUN.name(),
-                "COMPLETE_RUN succeeded");
+        pushTaskEvent(context.taskId(), AgentTaskStatus.COMPLETED.name(), "COMPLETED",
+                AgentStepType.COMPLETE_RUN.name(), "任务收尾完成");
     }
 
     private Map<String, Object> stepInput(AgentContext context, AgentStepType stepType) {
@@ -191,10 +201,11 @@ public class AgentExecutor {
         return throwable.getMessage();
     }
 
-    private void pushTaskEvent(Long taskId, String taskStatus, String stepType, String message) {
+    private void pushTaskEvent(Long taskId, String taskStatus, String phase, String stepType, String message) {
         sseService.push(new TaskEventMessage(
                 taskId,
                 taskStatus,
+                phase,
                 stepType,
                 message,
                 LocalDateTime.now()

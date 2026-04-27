@@ -8,6 +8,8 @@ export interface TaskEventMessage {
   id: string;
   time: string;
   status?: string;
+  phase?: string;
+  stepType?: string;
   message: string;
-  payload?: unknown;
+  payload?: Record<string, unknown>;
 }
