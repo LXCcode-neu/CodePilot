@@ -68,6 +68,7 @@
    - `model`
    - `repository`
    - `service`
+   - `policy`
    - `client`
    - `utils`
    - `frontend`
@@ -147,6 +148,7 @@ Those rules should live in a separate document, for example:
    - `model`
    - `repository`
    - `service`
+   - `policy`
    - `client`
    - `utils`
    - `frontend`

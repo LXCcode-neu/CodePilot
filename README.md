@@ -46,6 +46,8 @@ src/main/java/com/codepliot
 ├── model
 ├── repository
 ├── service
+├── policy
+├── policy
 └── utils
 ```
 
@@ -165,7 +167,7 @@ This repository contains:
 - local Lucene index build and multi-language code search
 - CodeRanker reranking
 - LLM analysis and patch generation abstraction
-- patch record persistence and retrieval
+- patch record persistence, safety review, and manual confirmation
 - Redis-backed task run lock
 - Spring Async background execution
 - SSE task event subscription
@@ -252,6 +254,14 @@ The current frontend condenses SSE into three stages:
 - started
 - running
 - completed / failed
+
+### Patch Confirmation
+
+- After patch generation, tasks now enter `WAITING_CONFIRM` instead of going directly to `COMPLETED`
+- The backend runs a rule-based patch safety check before manual confirmation
+- Manual confirmation endpoint:
+  - `POST /api/tasks/{taskId}/confirm`
+- This MVP still does not auto-apply patches or create PRs
 
 ### Async Execution Note
 

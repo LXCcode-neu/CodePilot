@@ -6,8 +6,10 @@ import com.codepliot.entity.AgentTaskStatus;
 import com.codepliot.entity.ProjectRepo;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.AgentContext;
+import com.codepliot.model.AgentExecutionDecision;
 import com.codepliot.model.ErrorCode;
 import com.codepliot.model.TaskEventMessage;
+import com.codepliot.policy.AgentExecutionPolicy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
@@ -35,6 +37,7 @@ public class AgentExecutor {
     private final List<AgentTool> agentTools;
     private final TaskRunLockService taskRunLockService;
     private final SseService sseService;
+    private final AgentExecutionPolicy agentExecutionPolicy;
 
     /**
      * 创建 Agent 执行器。
@@ -44,13 +47,15 @@ public class AgentExecutor {
                          ObjectMapper objectMapper,
                          List<AgentTool> agentTools,
                          TaskRunLockService taskRunLockService,
-                         SseService sseService) {
+                         SseService sseService,
+                         AgentExecutionPolicy agentExecutionPolicy) {
         this.agentTaskService = agentTaskService;
         this.agentStepService = agentStepService;
         this.objectMapper = objectMapper;
         this.agentTools = agentTools;
         this.taskRunLockService = taskRunLockService;
         this.sseService = sseService;
+        this.agentExecutionPolicy = agentExecutionPolicy;
     }
 
     /**
@@ -71,7 +76,6 @@ public class AgentExecutor {
             pushTaskEvent(task.getId(), AgentTaskStatus.FAILED.name(), "COMPLETED", null, errorMessage(throwable));
             sseService.complete(task.getId());
         } finally {
-            // 不论任务成功、失败还是线程异常，最终都要释放运行锁。
             taskRunLockService.unlock(task.getId(), lockValue);
         }
     }
@@ -86,10 +90,9 @@ public class AgentExecutor {
                 runTool(context, agentTool);
             }
 
-            agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.COMPLETED,
-                    "Mock agent run completed", null);
-            runCompletionStep(context);
-            pushTaskEvent(context.taskId(), AgentTaskStatus.COMPLETED.name(), "COMPLETED", null, "任务执行完成。");
+            AgentExecutionDecision decision = agentExecutionPolicy.afterPatchGenerated(context.patchSafetyCheckResult());
+            agentTaskService.updateStatus(context.taskId(), decision.status(), decision.resultSummary(), null);
+            pushTaskEvent(context.taskId(), decision.status().name(), "COMPLETED", null, decision.eventMessage());
             sseService.complete(context.taskId());
         } catch (RuntimeException exception) {
             agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.FAILED, null, errorMessage(exception));
@@ -161,37 +164,6 @@ public class AgentExecutor {
             );
             throw exception;
         }
-    }
-
-    /**
-     * 写入流程收尾步骤。
-     */
-    private void runCompletionStep(AgentContext context) {
-        Long stepId = agentStepService.startStep(
-                context.taskId(),
-                AgentStepType.COMPLETE_RUN,
-                "Agent 流程完成",
-                toJson(stepInput(context, AgentStepType.COMPLETE_RUN))
-        );
-        pushTaskEvent(
-                context.taskId(),
-                AgentTaskStatus.COMPLETED.name(),
-                "COMPLETED",
-                AgentStepType.COMPLETE_RUN.name(),
-                "任务收尾开始"
-        );
-        agentStepService.successStep(stepId, toJson(stepOutput(
-                context,
-                AgentStepType.COMPLETE_RUN,
-                ToolResult.success("mock agent run completed", Map.of("taskId", context.taskId()))
-        )));
-        pushTaskEvent(
-                context.taskId(),
-                AgentTaskStatus.COMPLETED.name(),
-                "COMPLETED",
-                AgentStepType.COMPLETE_RUN.name(),
-                "任务收尾完成"
-        );
     }
 
     /**

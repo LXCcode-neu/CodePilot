@@ -1,23 +1,23 @@
 package com.codepliot.service;
 
-import com.codepliot.model.AgentContext;
-import com.codepliot.service.AgentTool;
-import com.codepliot.service.ToolResult;
-import com.codepliot.exception.BusinessException;
-import com.codepliot.model.ErrorCode;
-import com.codepliot.service.PatchPromptBuilder;
-import com.codepliot.service.LlmService;
-import com.codepliot.model.PatchGenerateResult;
-import com.codepliot.entity.PatchRecord;
-import com.codepliot.service.PatchService;
-import com.codepliot.model.PatchRecordVO;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.codepliot.entity.AgentTaskStatus;
 import com.codepliot.entity.AgentStepType;
+import com.codepliot.entity.AgentTaskStatus;
+import com.codepliot.entity.PatchRecord;
+import com.codepliot.exception.BusinessException;
+import com.codepliot.model.AgentContext;
+import com.codepliot.model.ErrorCode;
+import com.codepliot.model.PatchGenerateResult;
+import com.codepliot.model.PatchRecordVO;
+import com.codepliot.model.PatchSafetyCheckResult;
+import com.codepliot.policy.PatchSafetyPolicy;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
 /**
- * GeneratePatchTool 服务类，负责封装业务流程和领域能力。
+ * Patch 生成工具。
+ *
+ * <p>负责调用 LLM 生成结构化 patch 结果，并在落库前执行安全检查。
  */
 @Component
 @Order(50)
@@ -26,44 +26,52 @@ public class GeneratePatchTool implements AgentTool {
     private final LlmService llmService;
     private final PatchPromptBuilder promptBuilder;
     private final PatchService patchService;
+    private final PatchSafetyPolicy patchSafetyPolicy;
     private final ObjectMapper objectMapper;
-/**
- * 创建 GeneratePatchTool 实例。
- */
-public GeneratePatchTool(LlmService llmService,
+
+    /**
+     * 创建 Patch 生成工具。
+     */
+    public GeneratePatchTool(LlmService llmService,
                              PatchPromptBuilder promptBuilder,
                              PatchService patchService,
+                             PatchSafetyPolicy patchSafetyPolicy,
                              ObjectMapper objectMapper) {
         this.llmService = llmService;
         this.promptBuilder = promptBuilder;
         this.patchService = patchService;
+        this.patchSafetyPolicy = patchSafetyPolicy;
         this.objectMapper = objectMapper;
     }
+
     /**
-     * 执行 taskStatus 相关逻辑。
+     * 返回当前步骤对应的任务状态。
      */
-@Override
+    @Override
     public AgentTaskStatus taskStatus() {
         return AgentTaskStatus.GENERATING_PATCH;
     }
+
     /**
-     * 执行 stepType 相关逻辑。
+     * 返回当前步骤类型。
      */
-@Override
+    @Override
     public AgentStepType stepType() {
         return AgentStepType.GENERATE_PATCH;
     }
+
     /**
-     * 执行 stepName 相关逻辑。
+     * 返回当前步骤名称。
      */
-@Override
+    @Override
     public String stepName() {
         return "生成 Patch";
     }
+
     /**
-     * 执行 execute 相关逻辑。
+     * 执行 patch 生成、安全检查和落库。
      */
-@Override
+    @Override
     public ToolResult execute(AgentContext context) {
         String rawOutput = llmService.generate(
                 promptBuilder.buildSystemPrompt(),
@@ -77,7 +85,14 @@ public GeneratePatchTool(LlmService llmService,
 
         try {
             PatchGenerateResult result = PatchGenerateResult.fromRawOutput(objectMapper, rawOutput);
-            PatchRecord patchRecord = patchService.saveGeneratedPatch(context.taskId(), result, rawOutput);
+            PatchSafetyCheckResult safetyCheckResult = patchSafetyPolicy.evaluate(result.patch());
+            PatchRecord patchRecord = patchService.saveGeneratedPatch(
+                    context.taskId(),
+                    result,
+                    rawOutput,
+                    safetyCheckResult
+            );
+            context.updatePatchSafetyCheckResult(safetyCheckResult);
             return ToolResult.success("patch generation completed", PatchRecordVO.from(patchRecord));
         } catch (IllegalArgumentException exception) {
             patchService.saveFailedPatch(context.taskId(), rawOutput, "Failed to parse LLM JSON output");
@@ -85,4 +100,3 @@ public GeneratePatchTool(LlmService llmService,
         }
     }
 }
-

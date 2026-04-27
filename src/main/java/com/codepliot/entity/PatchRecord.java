@@ -2,11 +2,14 @@ package com.codepliot.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.codepliot.entity.BaseEntity;
+import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
 /**
- * PatchRecord 实体类，用于映射数据库表或持久化结构。
+ * Patch 记录实体。
+ *
+ * <p>用于保存 LLM 生成的 patch 建议、风险说明、安全检查结果以及人工确认状态。
  */
 @Data
 @TableName("patch_record")
@@ -28,7 +31,15 @@ public class PatchRecord extends BaseEntity {
     @TableField("risk")
     private String risk;
 
+    @TableField("safety_check_result")
+    private String safetyCheckResult;
+
     @TableField("raw_output")
     private String rawOutput;
-}
 
+    @TableField("confirmed")
+    private Boolean confirmed;
+
+    @TableField("confirmed_at")
+    private LocalDateTime confirmedAt;
+}

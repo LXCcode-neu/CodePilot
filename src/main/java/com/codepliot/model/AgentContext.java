@@ -1,9 +1,11 @@
 package com.codepliot.model;
 
-import com.codepliot.model.RetrievedCodeChunk;
 import java.util.List;
+
 /**
- * AgentContext 模型类，用于承载流程中的数据结构。
+ * Agent 执行上下文。
+ *
+ * <p>用于在各个 AgentTool 之间传递仓库路径、Issue 信息、检索结果、分析结果和 patch 安全检查结果。
  */
 public final class AgentContext {
 
@@ -17,10 +19,12 @@ public final class AgentContext {
     private final String issueDescription;
     private List<RetrievedCodeChunk> retrievedChunks;
     private String analysis;
-/**
- * 创建 AgentContext 实例。
- */
-public AgentContext(Long taskId,
+    private PatchSafetyCheckResult patchSafetyCheckResult;
+
+    /**
+     * 创建 Agent 执行上下文。
+     */
+    public AgentContext(Long taskId,
                         Long userId,
                         Long projectId,
                         String repoUrl,
@@ -38,84 +42,111 @@ public AgentContext(Long taskId,
         this.issueDescription = issueDescription;
         this.retrievedChunks = List.of();
         this.analysis = null;
+        this.patchSafetyCheckResult = null;
     }
-/**
- * 执行 taskId 相关逻辑。
- */
-public Long taskId() {
+
+    /**
+     * 返回任务 ID。
+     */
+    public Long taskId() {
         return taskId;
     }
-/**
- * 执行 userId 相关逻辑。
- */
-public Long userId() {
+
+    /**
+     * 返回用户 ID。
+     */
+    public Long userId() {
         return userId;
     }
-/**
- * 执行 projectId 相关逻辑。
- */
-public Long projectId() {
+
+    /**
+     * 返回项目 ID。
+     */
+    public Long projectId() {
         return projectId;
     }
-/**
- * 执行 repoUrl 相关逻辑。
- */
-public String repoUrl() {
+
+    /**
+     * 返回仓库 URL。
+     */
+    public String repoUrl() {
         return repoUrl;
     }
-/**
- * 执行 repoName 相关逻辑。
- */
-public String repoName() {
+
+    /**
+     * 返回仓库名称。
+     */
+    public String repoName() {
         return repoName;
     }
-/**
- * 执行 localPath 相关逻辑。
- */
-public String localPath() {
+
+    /**
+     * 返回本地工作目录。
+     */
+    public String localPath() {
         return localPath;
     }
-/**
- * 执行 issueTitle 相关逻辑。
- */
-public String issueTitle() {
+
+    /**
+     * 返回 Issue 标题。
+     */
+    public String issueTitle() {
         return issueTitle;
     }
-/**
- * 执行 issueDescription 相关逻辑。
- */
-public String issueDescription() {
+
+    /**
+     * 返回 Issue 描述。
+     */
+    public String issueDescription() {
         return issueDescription;
     }
-/**
- * 执行 retrievedChunks 相关逻辑。
- */
-public List<RetrievedCodeChunk> retrievedChunks() {
+
+    /**
+     * 返回检索到的相关代码片段。
+     */
+    public List<RetrievedCodeChunk> retrievedChunks() {
         return retrievedChunks;
     }
-/**
- * 执行 analysis 相关逻辑。
- */
-public String analysis() {
+
+    /**
+     * 返回 LLM 分析结果。
+     */
+    public String analysis() {
         return analysis;
     }
-/**
- * 更新Local Path相关逻辑。
- */
-public void updateLocalPath(String localPath) {
+
+    /**
+     * 返回 patch 安全检查结果。
+     */
+    public PatchSafetyCheckResult patchSafetyCheckResult() {
+        return patchSafetyCheckResult;
+    }
+
+    /**
+     * 更新本地工作目录。
+     */
+    public void updateLocalPath(String localPath) {
         this.localPath = localPath;
     }
-/**
- * 更新Retrieved Chunks相关逻辑。
- */
-public void updateRetrievedChunks(List<RetrievedCodeChunk> retrievedChunks) {
+
+    /**
+     * 更新检索结果。
+     */
+    public void updateRetrievedChunks(List<RetrievedCodeChunk> retrievedChunks) {
         this.retrievedChunks = retrievedChunks == null ? List.of() : List.copyOf(retrievedChunks);
     }
-/**
- * 更新Analysis相关逻辑。
- */
-public void updateAnalysis(String analysis) {
+
+    /**
+     * 更新分析结果。
+     */
+    public void updateAnalysis(String analysis) {
         this.analysis = analysis == null || analysis.isBlank() ? null : analysis.trim();
     }
-}
 
+    /**
+     * 更新 patch 安全检查结果。
+     */
+    public void updatePatchSafetyCheckResult(PatchSafetyCheckResult patchSafetyCheckResult) {
+        this.patchSafetyCheckResult = patchSafetyCheckResult;
+    }
+}
