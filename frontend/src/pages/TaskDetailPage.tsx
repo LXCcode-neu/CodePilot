@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { LoaderCircle, PlayCircle, RefreshCcw } from "lucide-react";
-import { getTaskPatch } from "@/api/patch";
+import { confirmTaskPatch, getTaskPatch } from "@/api/patch";
 import { getProject } from "@/api/project";
 import { createTaskEventSource, parseTaskEventMessage } from "@/api/sse";
 import { getTaskSteps } from "@/api/step";
@@ -23,6 +23,26 @@ import type { ProjectRepo } from "@/types/project";
 import type { AgentStep } from "@/types/step";
 import type { AgentTask } from "@/types/task";
 
+const INVALID_TASK_ID = "\u65e0\u6548\u7684\u4efb\u52a1 ID";
+const LOAD_TASK_ERROR = "\u52a0\u8f7d\u4efb\u52a1\u8be6\u60c5\u5931\u8d25";
+const RUN_TASK_ERROR = "\u8fd0\u884c Agent \u5931\u8d25";
+const LOAD_FAILED = "\u52a0\u8f7d\u5931\u8d25";
+const TASK_NOT_FOUND = "\u4efb\u52a1\u4e0d\u5b58\u5728";
+const TASK_NOT_FOUND_DESC = "\u8bf7\u8fd4\u56de\u4efb\u52a1\u5217\u8868\u91cd\u65b0\u9009\u62e9\u4efb\u52a1\u3002";
+const RUN_REQUESTED = "\u5df2\u63d0\u4ea4 Agent \u8fd0\u884c\u8bf7\u6c42\u3002";
+const REFRESH_LABEL = "\u5237\u65b0";
+const CONFIRM_LABEL = "\u786e\u8ba4 Patch";
+const CONFIRMING_LABEL = "\u786e\u8ba4\u4e2d";
+const CONFIRM_REQUESTED = "\u5df2\u786e\u8ba4 Patch\uff0c\u4efb\u52a1\u5df2\u5b8c\u6210\u3002";
+const CONFIRM_ERROR = "\u786e\u8ba4 Patch \u5931\u8d25";
+const TASK_INFO_TITLE = "\u4efb\u52a1\u4fe1\u606f";
+const PROJECT_LABEL = "\u5173\u8054\u4ed3\u5e93";
+const CREATED_AT_LABEL = "\u521b\u5efa\u65f6\u95f4";
+const UPDATED_AT_LABEL = "\u6700\u8fd1\u66f4\u65b0\u65f6\u95f4";
+const SUMMARY_LABEL = "\u7ed3\u679c\u6458\u8981";
+const EMPTY_SUMMARY = "\u4efb\u52a1\u5c1a\u672a\u4ea7\u51fa\u6458\u8981\u3002";
+const TIMELINE_TITLE = "\u6267\u884c\u8f68\u8ff9";
+
 export function TaskDetailPage() {
   const params = useParams();
   const taskId = params.id ?? "";
@@ -34,6 +54,7 @@ export function TaskDetailPage() {
   const [events, setEvents] = useState<TaskEventMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState("");
 
   async function loadTaskData() {
@@ -76,12 +97,12 @@ export function TaskDetailPage() {
   useEffect(() => {
     if (!taskId) {
       setLoading(false);
-      setError("无效的任务 ID");
+      setError(INVALID_TASK_ID);
       return;
     }
 
     loadAll()
-      .catch((err) => setError(err instanceof Error ? err.message : "加载任务详情失败"))
+      .catch((err) => setError(err instanceof Error ? err.message : LOAD_TASK_ERROR))
       .finally(() => setLoading(false));
   }, [taskId]);
 
@@ -116,16 +137,6 @@ export function TaskDetailPage() {
       source.addEventListener("task-event", handleTaskEvent as EventListener);
       source.onmessage = handleTaskEvent;
       source.onerror = () => {
-        setEvents((prev) => [
-          {
-            id: crypto.randomUUID(),
-            time: new Date().toISOString(),
-            status: "SSE",
-            phase: "COMPLETED",
-            message: "SSE 连接中断，已停止接收实时事件。",
-          },
-          ...prev,
-        ].slice(0, 50));
         source?.close();
       };
     } catch {
@@ -136,6 +147,10 @@ export function TaskDetailPage() {
   }, [taskId]);
 
   const canRun = useMemo(() => task?.status === "PENDING" || task?.status === "FAILED", [task?.status]);
+  const canConfirm = useMemo(
+    () => task?.status === "WAITING_CONFIRM" && Boolean(patch) && !patch?.confirmed,
+    [patch, task?.status]
+  );
 
   async function handleRun() {
     if (!taskId) {
@@ -152,15 +167,42 @@ export function TaskDetailPage() {
           time: new Date().toISOString(),
           status: "RUN",
           phase: "STARTED",
-          message: "已提交 Agent 运行请求。",
+          message: RUN_REQUESTED,
         },
         ...prev,
       ]);
       await loadAll();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "运行 Agent 失败");
+      setError(err instanceof Error ? err.message : RUN_TASK_ERROR);
     } finally {
       setRunning(false);
+    }
+  }
+
+  async function handleConfirmPatch() {
+    if (!taskId || !canConfirm) {
+      return;
+    }
+
+    setConfirming(true);
+    setError("");
+    try {
+      await confirmTaskPatch(taskId);
+      setEvents((prev) => [
+        {
+          id: crypto.randomUUID(),
+          time: new Date().toISOString(),
+          status: "COMPLETED",
+          phase: "COMPLETED",
+          message: CONFIRM_REQUESTED,
+        },
+        ...prev,
+      ]);
+      await loadAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : CONFIRM_ERROR);
+    } finally {
+      setConfirming(false);
     }
   }
 
@@ -169,11 +211,11 @@ export function TaskDetailPage() {
   }
 
   if (error && !task) {
-    return <EmptyState title="加载失败" description={error} />;
+    return <EmptyState title={LOAD_FAILED} description={error} />;
   }
 
   if (!task) {
-    return <EmptyState title="任务不存在" description="请返回任务列表重新选择任务。" />;
+    return <EmptyState title={TASK_NOT_FOUND} description={TASK_NOT_FOUND_DESC} />;
   }
 
   return (
@@ -186,11 +228,17 @@ export function TaskDetailPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={task.status} />
-          <Button variant="secondary" onClick={() => void loadAll()} disabled={running}>
+          <Button variant="secondary" onClick={() => void loadAll()} disabled={running || confirming}>
             <RefreshCcw className="h-4 w-4" />
-            刷新
+            {REFRESH_LABEL}
           </Button>
-          <Button onClick={handleRun} disabled={!canRun || running}>
+          {canConfirm ? (
+            <Button variant="secondary" onClick={handleConfirmPatch} disabled={confirming || running}>
+              {confirming ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
+              {confirming ? CONFIRMING_LABEL : CONFIRM_LABEL}
+            </Button>
+          ) : null}
+          <Button onClick={handleRun} disabled={!canRun || running || confirming}>
             {running ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
             Run Agent
           </Button>
@@ -198,35 +246,39 @@ export function TaskDetailPage() {
       </section>
 
       {task.errorMessage || error ? (
-        <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">{task.errorMessage || error}</div>
+        <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
+          {task.errorMessage || error}
+        </div>
       ) : null}
 
       <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <Card>
           <CardHeader>
-            <CardTitle className="section-title">任务信息</CardTitle>
+            <CardTitle className="section-title">{TASK_INFO_TITLE}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 text-sm text-slate-600">
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-400">关联仓库</p>
+              <p className="text-xs uppercase tracking-wide text-slate-400">{PROJECT_LABEL}</p>
               <p className="mt-1 font-semibold text-slate-900">{project?.repoName || `Project #${task.projectId}`}</p>
               <p className="mt-1 break-all text-xs text-slate-500">{project?.repoUrl || "--"}</p>
             </div>
             <Separator />
             <div className="grid gap-3 md:grid-cols-2">
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-400">创建时间</p>
+                <p className="text-xs uppercase tracking-wide text-slate-400">{CREATED_AT_LABEL}</p>
                 <p className="mt-1 text-slate-700">{formatDateTime(task.createdAt)}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-400">最近更新时间</p>
+                <p className="text-xs uppercase tracking-wide text-slate-400">{UPDATED_AT_LABEL}</p>
                 <p className="mt-1 text-slate-700">{formatDateTime(task.updatedAt)}</p>
               </div>
             </div>
             <Separator />
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-400">结果摘要</p>
-              <p className="mt-1 whitespace-pre-wrap leading-7 text-slate-700">{task.resultSummary || "任务尚未产出摘要。"}</p>
+              <p className="text-xs uppercase tracking-wide text-slate-400">{SUMMARY_LABEL}</p>
+              <p className="mt-1 whitespace-pre-wrap leading-7 text-slate-700">
+                {task.resultSummary || EMPTY_SUMMARY}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -238,7 +290,7 @@ export function TaskDetailPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="section-title">执行轨迹</CardTitle>
+              <CardTitle className="section-title">{TIMELINE_TITLE}</CardTitle>
             </CardHeader>
             <CardContent>
               <AgentStepTimeline steps={steps} />

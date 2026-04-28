@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * Agent 执行策略。
  *
- * <p>负责决定 patch 生成后以及人工确认后的任务状态流转。
+ * <p>负责决定 patch 生成之后，以及用户人工确认之后，任务应该进入的状态和摘要文案。
  */
 @Component
 public class AgentExecutionPolicy {

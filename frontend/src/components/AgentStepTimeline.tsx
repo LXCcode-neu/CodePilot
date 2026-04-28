@@ -14,8 +14,21 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
+import { getStepDisplayName, getStepTypeLabel } from "@/lib/task-display";
 import { formatDateTime, parseJsonString, stringifyPretty } from "@/lib/utils";
 import type { AgentStep } from "@/types/step";
+
+const EMPTY_TITLE = "\u8fd8\u6ca1\u6709\u6267\u884c\u8f68\u8ff9";
+const EMPTY_DESCRIPTION =
+  "\u8fd0\u884c Agent \u540e\uff0c\u8fd9\u91cc\u4f1a\u6309\u65f6\u95f4\u987a\u5e8f\u5c55\u793a\u6b65\u9aa4\u660e\u7ec6\u3002";
+const START_TIME_LABEL = "\u5f00\u59cb\u65f6\u95f4";
+const END_TIME_LABEL = "\u7ed3\u675f\u65f6\u95f4";
+const VIEW_IO_LABEL = "\u67e5\u770b input / output";
+const DIALOG_DESCRIPTION =
+  "\u67e5\u770b\u5f53\u524d\u6b65\u9aa4\u7684\u8f93\u5165\u8f93\u51fa\u548c\u5931\u8d25\u4fe1\u606f\u3002";
+const CURRENT_STEP_LABEL = "\u5f53\u524d\u6b65\u9aa4";
+const EMPTY_INPUT = "\u65e0\u8f93\u5165\u5185\u5bb9";
+const EMPTY_OUTPUT = "\u65e0\u8f93\u51fa\u5185\u5bb9";
 
 export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
   const [activeStep, setActiveStep] = useState<AgentStep | null>(null);
@@ -32,7 +45,7 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
   }, [activeStep]);
 
   if (!steps.length) {
-    return <EmptyState title="还没有执行轨迹" description="运行 Agent 后，这里会按时间顺序展示步骤明细。" />;
+    return <EmptyState title={EMPTY_TITLE} description={EMPTY_DESCRIPTION} />;
   }
 
   return (
@@ -46,14 +59,20 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
                   <span>Step {index + 1}</span>
                   <span>{step.stepType}</span>
                 </div>
-                <CardTitle className="text-base">{step.stepName}</CardTitle>
+                <CardTitle className="text-base">
+                  {getStepDisplayName(step.stepType, step.stepName)}
+                </CardTitle>
               </div>
               <StatusBadge status={step.status} />
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3 text-sm text-slate-500 md:grid-cols-2">
-                <p>开始时间：{formatDateTime(step.startTime)}</p>
-                <p>结束时间：{formatDateTime(step.endTime)}</p>
+                <p>
+                  {START_TIME_LABEL}: {formatDateTime(step.startTime)}
+                </p>
+                <p>
+                  {END_TIME_LABEL}: {formatDateTime(step.endTime)}
+                </p>
               </div>
               {step.errorMessage ? (
                 <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -63,7 +82,7 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
               <Separator />
               <Button variant="ghost" size="sm" onClick={() => setActiveStep(step)}>
                 <FileJson2 className="h-4 w-4" />
-                查看 input / output
+                {VIEW_IO_LABEL}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </CardContent>
@@ -74,8 +93,13 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
       <Dialog open={Boolean(activeStep)} onOpenChange={(open) => !open && setActiveStep(null)}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>{activeStep?.stepName}</DialogTitle>
-            <DialogDescription>查看当前步骤的输入输出和失败信息。</DialogDescription>
+            <DialogTitle>{getStepDisplayName(activeStep?.stepType, activeStep?.stepName)}</DialogTitle>
+            <DialogDescription>
+              {DIALOG_DESCRIPTION}
+              {activeStep?.stepType
+                ? ` ${CURRENT_STEP_LABEL}: ${getStepTypeLabel(activeStep.stepType)}`
+                : ""}
+            </DialogDescription>
           </DialogHeader>
           <Tabs defaultValue="input">
             <TabsList>
@@ -84,12 +108,12 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
             </TabsList>
             <TabsContent value="input">
               <ScrollArea className="h-72 rounded-2xl border border-border bg-slate-950 p-4 text-sm text-slate-100">
-                <pre className="whitespace-pre-wrap break-all">{details.input || "无输入内容"}</pre>
+                <pre className="whitespace-pre-wrap break-all">{details.input || EMPTY_INPUT}</pre>
               </ScrollArea>
             </TabsContent>
             <TabsContent value="output">
               <ScrollArea className="h-72 rounded-2xl border border-border bg-slate-950 p-4 text-sm text-slate-100">
-                <pre className="whitespace-pre-wrap break-all">{details.output || "无输出内容"}</pre>
+                <pre className="whitespace-pre-wrap break-all">{details.output || EMPTY_OUTPUT}</pre>
               </ScrollArea>
             </TabsContent>
           </Tabs>
