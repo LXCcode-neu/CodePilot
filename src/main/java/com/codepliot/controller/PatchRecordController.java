@@ -1,7 +1,7 @@
 package com.codepliot.controller;
 
 import com.codepliot.model.Result;
-import com.codepliot.service.PatchService;
+import com.codepliot.service.patch.PatchService;
 import com.codepliot.model.PatchRecordVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

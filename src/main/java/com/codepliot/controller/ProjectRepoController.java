@@ -2,7 +2,7 @@ package com.codepliot.controller;
 
 import com.codepliot.model.Result;
 import com.codepliot.model.ProjectCreateRequest;
-import com.codepliot.service.ProjectRepoService;
+import com.codepliot.service.project.ProjectRepoService;
 import com.codepliot.model.ProjectRepoVO;
 import jakarta.validation.Valid;
 import java.util.List;

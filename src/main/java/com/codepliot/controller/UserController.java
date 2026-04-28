@@ -1,6 +1,6 @@
 package com.codepliot.controller;
 
-import com.codepliot.service.AuthService;
+import com.codepliot.service.auth.AuthService;
 import com.codepliot.model.Result;
 import com.codepliot.model.UserVO;
 import org.springframework.web.bind.annotation.GetMapping;

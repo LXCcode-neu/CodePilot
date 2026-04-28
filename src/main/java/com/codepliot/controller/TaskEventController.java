@@ -1,9 +1,9 @@
 package com.codepliot.controller;
 
 import com.codepliot.model.TaskEventMessage;
-import com.codepliot.service.SseService;
+import com.codepliot.service.sse.SseService;
 import com.codepliot.entity.AgentTask;
-import com.codepliot.service.AgentTaskService;
+import com.codepliot.service.task.AgentTaskService;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import org.springframework.http.MediaType;

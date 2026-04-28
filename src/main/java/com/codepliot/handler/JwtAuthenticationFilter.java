@@ -1,6 +1,6 @@
 package com.codepliot.handler;
 
-import com.codepliot.service.CustomUserDetailsService;
+import com.codepliot.service.auth.CustomUserDetailsService;
 import com.codepliot.model.LoginUser;
 import com.codepliot.utils.JwtUtils;
 import jakarta.servlet.FilterChain;
