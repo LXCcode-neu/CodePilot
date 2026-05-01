@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import com.codepliot.service.index.lucene.analyzer.CodeAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
@@ -56,7 +56,7 @@ public class LuceneCodeIndexService {
         List<CodeSymbol> symbols = loadProjectSymbols(projectId);
         Path indexPath = prepareIndexDirectory(projectId);
 
-        IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer());
+        IndexWriterConfig config = new IndexWriterConfig(new CodeAnalyzer());
         config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
 
         int indexDocCount = 0;

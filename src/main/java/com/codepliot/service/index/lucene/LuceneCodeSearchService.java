@@ -7,10 +7,10 @@ import com.codepliot.model.RetrievedCodeChunk;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import com.codepliot.service.index.KeywordExtractor;
+import com.codepliot.service.index.lucene.analyzer.CodeAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
@@ -37,14 +37,14 @@ public class LuceneCodeSearchService {
     };
 
     private static final Map<String, Float> FIELD_BOOSTS = Map.of(
-            "symbolName", 3.0f,
-            "filePathText", 2.2f,
-            "routePath", 2.0f,
-            "parentSymbol", 1.7f,
-            "signature", 1.4f,
+            "symbolName", 2.0f,
+            "filePathText", 2.0f,
+            "routePath", 1.8f,
+            "content", 1.8f,
+            "parentSymbol", 1.5f,
+            "signature", 1.5f,
             "annotations", 1.2f,
-            "importText", 1.1f,
-            "content", 1.0f
+            "importText", 1.1f
     );
 
     private final GitWorkspaceService gitWorkspaceService;
@@ -97,8 +97,8 @@ public List<RetrievedCodeChunk> search(Long projectId, String query, int topK) {
  * 构建Query相关逻辑。
  */
 private Query buildQuery(String queryText) throws Exception {
-        MultiFieldQueryParser parser = new MultiFieldQueryParser(SEARCH_FIELDS, new StandardAnalyzer(), FIELD_BOOSTS);
-        parser.setDefaultOperator(QueryParser.Operator.OR);
+        MultiFieldQueryParser parser = new MultiFieldQueryParser(SEARCH_FIELDS, new CodeAnalyzer(), FIELD_BOOSTS);
+        parser.setDefaultOperator(QueryParser.Operator.AND);
         parser.setAllowLeadingWildcard(false);
         return parser.parse(buildEscapedKeywordQuery(queryText));
     }
@@ -106,7 +106,7 @@ private Query buildQuery(String queryText) throws Exception {
  * 构建Escaped Keyword Query相关逻辑。
  */
 private String buildEscapedKeywordQuery(String queryText) {
-        List<String> keywords = extractKeywords(queryText);
+        List<String> keywords = KeywordExtractor.extractKeywords(queryText);
         if (keywords.isEmpty()) {
             return QueryParser.escape(queryText.trim());
         }
@@ -114,21 +114,6 @@ private String buildEscapedKeywordQuery(String queryText) {
                 .map(QueryParser::escape)
                 .reduce((left, right) -> left + " " + right)
                 .orElse(QueryParser.escape(queryText.trim()));
-    }
-/**
- * 提取Keywords相关逻辑。
- */
-private List<String> extractKeywords(String queryText) {
-        String normalized = queryText == null ? "" : queryText.toLowerCase();
-        String[] tokens = normalized.split("[^a-z0-9_./-]+");
-        Map<String, Boolean> ordered = new LinkedHashMap<>();
-        for (String token : tokens) {
-            if (token == null || token.isBlank() || token.length() <= 1) {
-                continue;
-            }
-            ordered.put(token, Boolean.TRUE);
-        }
-        return new ArrayList<>(ordered.keySet());
     }
 /**
  * 转换为Retrieved Code Chunk相关逻辑。
