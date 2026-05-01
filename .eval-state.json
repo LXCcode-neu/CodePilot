@@ -1,0 +1,6 @@
+﻿{
+    "base":  "http://localhost:8080",
+    "username":  "eval20260501161356",
+    "password":  "EvalPass123",
+    "token":  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJldmFsMjAyNjA1MDExNjEzNTYiLCJ1c2VySWQiOjIwNTAxMjY1NjI0MTgyMDA1NzcsImVtYWlsIjoiZXZhbDIwMjYwNTAxMTYxMzU2QGV4YW1wbGUuY29tIiwiaWF0IjoxNzc3NjIzMjM2LCJleHAiOjE3Nzc3MDk2MzZ9.AC9hgGsSQqsPiQw-o2QZxHKbqUareTTAM5dnsh6gin4"
+}

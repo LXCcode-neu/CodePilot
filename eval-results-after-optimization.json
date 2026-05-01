@@ -1,0 +1,159 @@
+﻿[
+    {
+        "caseId":  "sse_fields",
+        "commit":  "a51cd1d",
+        "baseCommit":  "631d6c3daccf15cdf97db8aec4711cd80595e032",
+        "taskId":  "2050135275036110849",
+        "finalStatus":  "WAITING_CONFIRM",
+        "goldFiles":  [
+                          "frontend/src/api/sse.ts"
+                      ],
+        "topFiles":  [
+                         "src/main/java/com/codepliot/sse/dto/TaskEventMessage.java",
+                         "src/main/java/com/codepliot/sse/controller/TaskEventController.java",
+                         "src/main/java/com/codepliot/sse/service/SseService.java",
+                         "src/main/java/com/codepliot/task/controller/AgentTaskController.java",
+                         "frontend/src/pages/TaskDetailPage.tsx",
+                         "src/main/java/com/codepliot/sse/service/SsePushService.java",
+                         "src/main/java/com/codepliot/task/mapper/AgentTaskMapper.java",
+                         "src/main/java/com/codepliot/task/service/AgentTaskService.java",
+                         "frontend/src/pages/TaskListPage.tsx",
+                         "src/main/java/com/codepliot/task/dto/AgentTaskCreateRequest.java"
+                     ],
+        "matchedGoldFiles":  [
+
+                             ],
+        "firstGoldRank":  null,
+        "recall10":  0,
+        "mrr":  0,
+        "retrievalScore":  0,
+        "patchNonEmpty":  false,
+        "analysisText":  "SSE äºä»¶è§£æä¸¢å¤± `phase` å `stepType` å­æ®µãç´æ¥åå ï¼1) `TaskEventMessage` record æªå\u0085å« `phase` å­æ®µï¼2) `TaskEventController.subscribe()` ä¸­ `stepType` è¢«ç¡¬ç¼ç ä¸º `null`ï¼ä¸æªä¼ é `phase` å¼ãç°æä»£ç çæ®µæ æ³ç¡®è®¤ `AgentTask` å®ä½æ¯å¦å\u0085å« `stepType` å `phase` å­æ®µï¼ä¸åç«¯ç±»å `TaskEventMessage` å®ä¹æªæä¾ï¼å æ­¤æ æ³çæå®æ´ patchã",
+        "solutionText":  "1. å¨ `TaskEventMessage.java` record ä¸­æ·»å  `String phase` å­æ®µã2. å¨ `TaskEventController.subscribe()` ä¸­ï¼ä½¿ç¨ `agentTask.getStepType()` æ¿ä»£ `null`ï¼å¹¶æ°å¢ `agentTask.getPhase()` åæ°ã3. åæ­¥æ´æ°åç«¯ `@/types/common` ä¸­ç `TaskEventMessage` ç±»åï¼å¢å  `phase` å­æ®µã4. æ£æ¥ææè°ç¨ `SseService.send()` æ `SseService.push()` çå°æ¹ï¼ç¡®ä¿ä¼ å\u0085¥æ­£ç¡®ç `stepType` å `phase`ã",
+        "patchText":  "",
+        "riskText":  "æ æ³å¯é çæ patchï¼1) `AgentTask` å®ä½ä»£ç æªæä¾ï¼æ æ³ç¡®è®¤æ¯å¦å­å¨ `getStepType()` å `getPhase()` æ¹æ³ï¼è¥ä¸å­å¨ï¼éå\u0085ä¿®æ¹å®ä½åæ°æ®åºã2) åç«¯ `TaskEventMessage` ç±»åå®ä¹æªæä¾ï¼æ æ³çæå¯¹åºä¿®æ¹ã3) é¤ `subscribe` å¤å\u0085¶ä»äºä»¶æ¨éè·¯å¾ï¼å¦ `AgentRunService` ä¸­çç¶æåæ´ï¼æ¯å¦ä¹ä½¿ç¨ `TaskEventMessage` ä¸ä¸¢å¤±å­æ®µæªç¥ï¼éåç»­ææ¥ã"
+    },
+    {
+        "caseId":  "task_run_lock",
+        "commit":  "3c030f5",
+        "baseCommit":  "1587660a424612ae883aec221a215639a90129f5",
+        "taskId":  "2050135429382303745",
+        "finalStatus":  "WAITING_CONFIRM",
+        "goldFiles":  [
+                          "src/main/java/com/codepliot/agent/service/AgentRunService.java",
+                          "src/main/java/com/codepliot/lock/service/TaskRunLockService.java",
+                          "src/main/java/com/codepliot/common/result/ErrorCode.java",
+                          "src/main/resources/application.yml"
+                      ],
+        "topFiles":  [
+                         "src/main/java/com/codepliot/task/controller/AgentTaskController.java",
+                         "src/main/java/com/codepliot/agent/service/AgentRunService.java",
+                         "src/main/java/com/codepliot/task/mapper/AgentTaskMapper.java",
+                         "src/main/java/com/codepliot/task/service/AgentTaskService.java",
+                         "src/main/java/com/codepliot/task/dto/AgentTaskCreateRequest.java",
+                         "src/main/java/com/codepliot/task/entity/AgentTask.java",
+                         "src/main/java/com/codepliot/task/vo/AgentTaskVO.java",
+                         "src/main/java/com/codepliot/task/entity/AgentTaskStatus.java",
+                         "src/main/java/com/codepliot/agent/context/AgentContext.java",
+                         "src/main/java/com/codepliot/trace/controller/AgentStepController.java"
+                     ],
+        "matchedGoldFiles":  [
+                                 "src/main/java/com/codepliot/agent/service/AgentRunService.java"
+                             ],
+        "firstGoldRank":  2,
+        "recall10":  0.25,
+        "mrr":  0.5,
+        "retrievalScore":  37.5,
+        "patchNonEmpty":  true,
+        "analysisText":  "é®é¢æ ¹å å¨äº `AgentRunService.run()` ä¸­ç¶æè½¬æ¢éåå­æ§ãå½åæµç¨ï¼å\u0085éè¿ `requireRunnableStatus(task)` æ£æ¥ç¶æï¼æ éï¼ï¼åè°ç¨ `claimRunnableTask(taskId, currentUserId)`ï¼æ¨æµä¸ºæ®é UPDATEï¼ä¸å¸¦æ¡ä»¶ï¼ï¼æåè®¾ç½® `task.setStatus(CLONING)`ãä¸¤ä¸ªå¹¶åè¯·æ±åå¯éè¿æ£æ¥ï¼å¯¼è´åä¸ä»»å¡è¢«å¤æ¬¡æ§è¡ã\n\nç¼ºå° `claimRunnableTask` å\u0085·ä½å®ç°ï¼ä½åºäºå·²æä»£ç çæ®µï¼å\u0085¶å¾å¯è½æªä½¿ç¨åå­æ¡ä»¶æ´æ°ãæ°æ®åºè¡¨ `agent_task` æ é¢å¤å¹¶åä¿æ¤ã\n\nè§£å³æ¹æ¡ï¼å°ç¶ææ£æ¥ä¸æ´æ°åå¹¶ä¸ºä¸æ¡åå­ SQLï¼ä½¿ç¨ MyBatis-Plus ç `LambdaUpdateWrapper` é\u0085å WHERE æ¡ä»¶ï¼åªæå½åç¶æä¸º `PENDING` æ¶ææ´æ°ä¸º `CLONING`ï¼å¹¶éè¿å½±åè¡æ°å¤æ­æ¯å¦æåï¼è¥å¤±è´¥åæåºå¼å¸¸ï¼æç»éå¤æ§è¡ã",
+        "solutionText":  "ä¿®æ¹ `AgentRunService.run()` æ¹æ³ï¼ç§»é¤ `requireRunnableStatus(task)` å `claimRunnableTask(taskId, currentUserId)`ï¼æ¹ç¨ `agentTaskMapper.update()` æ§è¡åå­æ¡ä»¶æ´æ°ï¼åªå°ç¶æä¸º `PENDING` çä»»å¡æ´æ°ä¸º `CLONING`ãè¥æ´æ°å¤±è´¥ï¼å½±åè¡æ°ä¸º 0ï¼ï¼è¯´æä»»å¡å·²è¢«å\u0085¶ä»è¯·æ±åæ´ç¶æï¼æåº `BusinessException` æç¡®æç¤ºéå¤è¿è¡ãåæ¶ä¿çæ¬å° `task.setStatus(CLONING)` ä»¥ä¿æå¯¹è±¡ä¸è´æ§ã",
+        "patchText":  "--- a/src/main/java/com/codepliot/agent/service/AgentRunService.java\n+++ b/src/main/java/com/codepliot/agent/service/AgentRunService.java\n@@ -34,14 +34,16 @@\n     public AgentTaskVO run(Long taskId) {\n         Long currentUserId = SecurityUtils.getCurrentUserId();\n         AgentTask task = requireOwnedTask(taskId, currentUserId);\n-        requireRunnableStatus(task);\n         ProjectRepo projectRepo = requireOwnedProject(task.getProjectId(), currentUserId);\n-        claimRunnableTask(taskId, currentUserId);\n \n+        // åå­ç¶æè½¬æ¢ï¼ä» PENDING -\u003e CLONINGï¼å¹¶åå®å\u0085¨\n+        LambdaUpdateWrapper\u003cAgentTask\u003e updateWrapper = new LambdaUpdateWrapper\u003cAgentTask\u003e()\n+                .eq(AgentTask::getId, taskId)\n+                .eq(AgentTask::getStatus, AgentTaskStatus.PENDING.name())\n+                .set(AgentTask::getStatus, AgentTaskStatus.CLONING.name());\n+        boolean updated = agentTaskMapper.update(null, updateWrapper) \u003e 0;\n+\n+        if (!updated) {\n+            throw new BusinessException(\"Task is not in PENDING state or has been taken by another request\");\n+        }\n+        task.setStatus(AgentTaskStatus.CLONING.name());\n         agentExecutor.execute(task, projectRepo);\n         return AgentTaskVO.from(agentTaskMapper.selectById(taskId));\n     }",
+        "riskText":  "1. `claimRunnableTask` çå\u0085·ä½å®ç°æªç¥ï¼è¥å\u0085¶å\u0085å«é¤æ´æ°ç¶æå¤çå\u0085¶ä»é»è¾ï¼å¦åå®¡è®¡æ¥å¿ãæ´æ°å\u0085¶ä»è¡¨ï¼ï¼ç´æ¥ç§»é¤å¯è½å¯¼è´åè½ç¼ºå¤±ï¼éç¡®è®¤å\u0085¶å®ç°å¹¶è°æ´ patchã\n2. `requireRunnableStatus` çæ£æ¥æ¡ä»¶æªç¥ï¼ä½åå­æ´æ°å·²è¦çç¸åè¯­ä¹ï¼ç§»é¤å®å\u0085¨ã\n3. å½å `run()` æ¹æ³æªæ¾å¼å£°æ `@Transactional`ï¼ä½åå­æ´æ°æ¬èº«å·²ä¿è¯ç¶æè½¬æ¢çå®å\u0085¨ãè¥åç»­æ­¥éª¤ï¼`agentExecutor.execute`ï¼å¤±è´¥ï¼ç¶æå·²åä¸º `CLONING`ï¼éé\u0085åè¡¥å¿æºå¶ï¼å¦å¼å¸¸å¤çä¸­åæ»ç¶æï¼ï¼ä½éæ­¤ Issue éç¹ã\n4. è¥æ°æ®åºéç¦»çº§å«ä¸º `READ_COMMITTED` ä»¥ä¸ï¼å¯è½å­å¨å¹»è¯»é®é¢ï¼ä½éå¸¸ä¸å½±åæ¡ä»¶æ´æ°ã"
+    },
+    {
+        "caseId":  "patch_confirm_complete",
+        "commit":  "4dee831",
+        "baseCommit":  "3c5c60b3851df3f6dca6f37f7dbd5b187e88cd42",
+        "taskId":  "2050135620122472449",
+        "finalStatus":  "WAITING_CONFIRM",
+        "goldFiles":  [
+                          "frontend/src/api/patch.ts",
+                          "frontend/src/components/PatchViewer.tsx",
+                          "frontend/src/pages/TaskDetailPage.tsx",
+                          "frontend/src/types/patch.ts",
+                          "src/main/java/com/codepliot/policy/AgentExecutionPolicy.java",
+                          "src/main/resources/db/schema/patch_record.sql"
+                      ],
+        "topFiles":  [
+                         "frontend/src/types/task.ts",
+                         "src/main/java/com/codepliot/service/GeneratePatchTool.java",
+                         "frontend/src/api/patch.ts",
+                         "frontend/src/api/task.ts",
+                         "frontend/src/pages/TaskListPage.tsx",
+                         "frontend/src/pages/TaskDetailPage.tsx",
+                         "frontend/src/components/TaskCard.tsx",
+                         "frontend/src/types/patch.ts",
+                         "src/main/java/com/codepliot/entity/AgentTaskStatus.java",
+                         "frontend/src/components/PatchViewer.tsx"
+                     ],
+        "matchedGoldFiles":  [
+                                 "frontend/src/api/patch.ts",
+                                 "frontend/src/components/PatchViewer.tsx",
+                                 "frontend/src/pages/TaskDetailPage.tsx",
+                                 "frontend/src/types/patch.ts"
+                             ],
+        "firstGoldRank":  3,
+        "recall10":  0.6667,
+        "mrr":  0.3333,
+        "retrievalScore":  50,
+        "patchNonEmpty":  false,
+        "analysisText":  "Issue è¦æ±ï¼ç¨æ·ç¡®è®¤çæç patch åï¼ä»»å¡ç¶æä» `WAITING_CONFIRM` è½¬æ¢ä¸º `COMPLETED`ãç°æåç«¯ä»£ç ä¸­ï¼`TaskDetailPage` æªæä¾ç¡®è®¤æé®ï¼`api/task.ts` ç¼ºå°ç¡®è®¤ API è°ç¨ï¼åç«¯ç¼ºå°ç¡®è®¤ç«¯ç¹ï¼`POST /api/tasks/{id}/confirm`ï¼åç¶ææä¹\u0085åé»è¾ãåç«¯ç¶ææä¸¾ååç«¯æä¸¾å·²å®ä¹ `WAITING_CONFIRM` å `COMPLETED`ï¼ä½ç¡®è®¤é¾è·¯å®å\u0085¨ä¸­æ­ã",
+        "solutionText":  "1. åç«¯æ°å¢ç¡®è®¤ç«¯ç¹ï¼`@PostMapping(\u0027/{id}/confirm\u0027)`ï¼è°ç¨ Service å±å°ä»»å¡ç¶æä» `WAITING_CONFIRM` æ´æ°ä¸º `COMPLETED`ï¼å¹¶æä¹\u0085åå°æ°æ®åºã\n2. åç«¯ `api/task.ts` æ·»å  `confirmTask(id)` å½æ°ï¼è°ç¨ `request.post\u003cAgentTask\u003e(\u0027/api/tasks/${id}/confirm\u0027)`ã\n3. `TaskDetailPage` ä¸­æ ¹æ® `task.status === \u0027WAITING_CONFIRM\u0027` æ¸²æç¡®è®¤æé®ï¼ç¹å»åè°ç¨ `confirmTask` å¹¶å·æ°ä»»å¡æ°æ®ã\n4. ä¼åç¨æ·åé¦ï¼ç¡®è®¤æååç¦ç¨æé®å¹¶æ¾ç¤ºå·²ç¡®è®¤ï¼å¤ç loading/error ç¶æã",
+        "patchText":  "",
+        "riskText":  "æ æ³å¯é çæ patchï¼åç«¯ç¼ºå° ControllerãService åæ°æ®åºæä½ä»£ç ï¼ä»\u0085æä¾æä¸¾å GeneratePatchToolï¼ï¼æ æ³ç¼ååç«¯ç¡®è®¤ç«¯ç¹çå\u0085·ä½å®ç°ãåç«¯é¨åå¯åºäºæä¾ççæ®µæ¨æµï¼ä½ç¼ºå°å®æ´åç«¯ä»£ç ä¼å¯¼è´ patch ä¸å®æ´ä¸æ æ³éªè¯ãå æ­¤ patch å­æ®µä¸ºç©ºã"
+    },
+    {
+        "caseId":  "task_delete_cascade",
+        "commit":  "d4f20fe",
+        "baseCommit":  "d49a929511f6a9ed53ee69b0e47339289c747df1",
+        "taskId":  "2050135772845469698",
+        "finalStatus":  "WAITING_CONFIRM",
+        "goldFiles":  [
+                          "frontend/src/api/task.ts",
+                          "frontend/src/components/TaskCard.tsx",
+                          "frontend/src/pages/DashboardPage.tsx",
+                          "frontend/src/pages/TaskDetailPage.tsx",
+                          "frontend/src/pages/TaskListPage.tsx",
+                          "src/main/java/com/codepliot/controller/AgentTaskController.java",
+                          "src/main/java/com/codepliot/service/project/ProjectRepoService.java",
+                          "src/main/java/com/codepliot/service/task/AgentTaskService.java"
+                      ],
+        "topFiles":  [
+                         "frontend/src/lib/task-display.ts",
+                         "src/main/java/com/codepliot/service/task/AgentTaskService.java",
+                         "src/main/java/com/codepliot/repository/AgentTaskMapper.java",
+                         "frontend/src/pages/TaskListPage.tsx",
+                         "src/main/java/com/codepliot/service/task/TaskRunLockService.java",
+                         "frontend/src/api/task.ts",
+                         "src/main/java/com/codepliot/controller/AgentTaskController.java",
+                         "src/main/java/com/codepliot/service/agent/tool/CloneRepositoryTool.java",
+                         "src/main/java/com/codepliot/service/index/TreeSitterLanguageRegistry.java",
+                         "src/main/java/com/codepliot/controller/TaskEventController.java"
+                     ],
+        "matchedGoldFiles":  [
+                                 "frontend/src/api/task.ts",
+                                 "frontend/src/pages/TaskListPage.tsx",
+                                 "src/main/java/com/codepliot/controller/AgentTaskController.java",
+                                 "src/main/java/com/codepliot/service/task/AgentTaskService.java"
+                             ],
+        "firstGoldRank":  2,
+        "recall10":  0.5,
+        "mrr":  0.5,
+        "retrievalScore":  50,
+        "patchNonEmpty":  true,
+        "analysisText":  "æ ¹æ®æä¾çä»£ç çæ®µåæï¼å½åç³»ç»å­å¨ä»¥ä¸é®é¢ï¼\n1. åç«¯ `AgentTaskController` ä»\u0085æä¾äº `POST /api/tasks`ï¼åå»ºï¼å `GET /api/tasks` / `GET /api/tasks/{id}`ï¼æ¥è¯¢ï¼ç«¯ç¹ï¼ç¼ºå°å é¤ä»»å¡ç `DELETE` ç«¯ç¹ã\n2. `AgentTaskService` æªå°è£\u0085å é¤æ¹æ³ï¼ä½åºå± `AgentTaskMapper` ç»§æ¿ `BaseMapper\u003cAgentTask\u003e` å·²å\u0085·å¤ `deleteById` è½åã\n3. åç«¯ `frontend/src/api/task.ts` ç¼ºå° `deleteTask` å½æ°ã\n4. åç«¯ `TaskListPage.tsx` çæ®µï¼ä»\u0085æä¾å°ç¬¬92è¡ï¼ä¸å®æ´ï¼æªå\u0085å«å é¤æé®æå é¤äº¤äºé»è¾ã\n5. ä»åºå é¤ç¸å\u0085³ä»£ç å®å\u0085¨ç¼ºå¤±ï¼æ æ³å®ç°çº§èå é¤ä»»å¡ã\n\nå æ­¤éè¦ï¼åç«¯æ·»å å é¤ç«¯ç¹ä¸æå¡æ¹æ³ï¼åç«¯æ·»å å é¤ API å UI æé®ã",
+        "solutionText":  "1. åç«¯ï¼å¨ `AgentTaskService` ä¸­æ·»å  `delete(Long id)` æ¹æ³ï¼è°ç¨ `agentTaskMapper.deleteById(id)`ï¼å¹¶æ·»å æéæ ¡éªï¼ä»\u0085å\u0085è®¸ä»»å¡æå±ç¨æ·å é¤ï¼ãå¨ `AgentTaskController` ä¸­æ·»å  `@DeleteMapping(\"/{id}\")` ç«¯ç¹ï¼è¿å `Result.success`ã\n2. åç«¯ï¼å¨ `frontend/src/api/task.ts` ä¸­æ·»å  `deleteTask(id: string)` å½æ°ï¼åé `DELETE /api/tasks/{id}` è¯·æ±ãå¨ `TaskListPage.tsx` ä¸­ä¸ºæ¯ä¸ªä»»å¡å¡çæ·»å âå é¤âæé®ï¼ç¹å»åè°ç¨ `deleteTask` å¹¶å·æ°åè¡¨ã\n3. ç±äºæªæä¾ä»åºå é¤çä»»ä½ä»£ç ï¼æ æ³å¨æ­¤ patch ä¸­å®ç°ä»åºå é¤æ¶ççº§èæ¸\u0085çï¼éè¡¥å\u0085\u0085ç¸å\u0085³ä»£ç ååå®ç°ã",
+        "patchText":  "--- a/src/main/java/com/codepliot/service/task/AgentTaskService.java\n+++ b/src/main/java/com/codepliot/service/task/AgentTaskService.java\n@@ -128,6 +128,19 @@ public class AgentTaskService {\n         // ... existing listCurrentUserTasks method ...\n     }\n \n+    /**\n+     * å é¤ä»»å¡ï¼ä»\u0085å\u0085è®¸ä»»å¡æå±ç¨æ·å é¤ï¼ã\n+     */\n+    public void delete(Long id) {\n+        AgentTask task = agentTaskMapper.selectById(id);\n+        if (task == null) {\n+            throw new BusinessException(ErrorCode.NOT_FOUND, \"ä»»å¡ä¸å­å¨\");\n+        }\n+        if (!task.getUserId().equals(SecurityUtils.getCurrentUserId())) {\n+            throw new BusinessException(ErrorCode.FORBIDDEN, \"åªè½å é¤èªå·±çä»»å¡\");\n+        }\n+        agentTaskMapper.deleteById(id);\n+    }\n }\n--- a/src/main/java/com/codepliot/controller/AgentTaskController.java\n+++ b/src/main/java/com/codepliot/controller/AgentTaskController.java\n@@ -76,4 +76,12 @@ public class AgentTaskController {\n     public Result\u003cAgentTaskVO\u003e detail(@PathVariable Long id) {\n         return Result.success(agentTaskService.getOwnedTaskEntity(id));\n     }\n+\n+    /**\n+     * å é¤ä»»å¡ã\n+     */\n+    @DeleteMapping(\"/{id}\")\n+    public Result\u003cVoid\u003e delete(@PathVariable Long id) {\n+        agentTaskService.delete(id);\n+        return Result.success(\"ä»»å¡å·²å é¤\");\n+    }\n }\n--- a/frontend/src/api/task.ts\n+++ b/frontend/src/api/task.ts\n@@ -16,3 +16,7 @@ export function getTask(id: string) {\n export function runTask(id: string) {\n   return request.post\u003cAgentTask\u003e(`/api/tasks/${id}/run`);\n }\n+\n+export function deleteTask(id: string) {\n+  return request.delete(`/api/tasks/${id}`);\n+}\n",
+        "riskText":  "1. `AgentTaskService.java` å `AgentTaskController.java` çåå§çæ®µä¸å®æ´ï¼ä»\u0085æä¾å131è¡åå80è¡ï¼ï¼diff ä¸­çè¡å·æ¯åºäºåè®¾çï¼å®é\u0085åºç¨æ¶å¯è½éè¦è°æ´ä½ç½®ã\n2. `frontend/src/pages/TaskListPage.tsx` ä»\u0085æä¾äºå92è¡ï¼æ æ³ç¡®å®ä»»å¡åè¡¨æ¸²æçå®æ´ç»æï¼å æ­¤æªçæè¯¥æä»¶çåç«¯ UI é¨å patchï¼éå¼åè\u0085å¨å®æåç«¯ä»£ç è·ååèªè¡æ·»å å é¤æé®ï¼ä¾å¦å¨æ¯ä¸ª TaskCard ææ·»å ä¸ä¸ªå¾æ æé®ï¼è°ç¨ `deleteTask` å¹¶å·æ°åè¡¨ï¼ã\n3. ä»åºå é¤æ¶ççº§èæ¸\u0085çæªå®ç°ï¼éæ¿æ¢ä»åºå é¤ç¸å\u0085³ä»£ç ï¼æªæä¾ï¼åè¡¥å\u0085\u0085ã\n4. åç«¯ `request.delete` æ¹æ³åè®¾å­å¨ï¼è¥å®é\u0085ä¸æ¯æåéæ¿æ¢ä¸º `request.post` æ `request.put` çåéæ¹å¼ã"
+    }
+]

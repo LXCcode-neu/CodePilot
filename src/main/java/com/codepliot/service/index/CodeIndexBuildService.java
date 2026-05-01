@@ -37,11 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 代码索引构建服务。
- *
- * <p>负责扫描仓库文件、调用 Tree-sitter 解析、提取符号，并把结果写入 code_file 与 code_symbol。
- */
 @Service
 public class CodeIndexBuildService {
 
@@ -50,8 +45,32 @@ public class CodeIndexBuildService {
     private static final String PARSE_STATUS_PARSED = "PARSED";
 
     private static final Set<String> SKIPPED_DIRECTORIES = Set.of(
-            ".git", "target", "node_modules", "dist", "build", ".idea", ".vscode", "out", "coverage"
+            ".git", "target", "node_modules", "dist", "build", ".idea", ".vscode", "out", "coverage",
+            ".m2repo", ".gradle", ".yarn", ".pnpm-store", ".cache", ".next", ".nuxt", "__pycache__",
+            ".pytest_cache", "storybook-static", "tmp", "temp", "logs"
     );
+
+    private static final Set<String> SKIPPED_FILE_NAMES = Set.of(
+            "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "_remote.repositories", ".ds_store"
+    );
+
+    private static final Set<String> SKIPPED_FILE_SUFFIXES = Set.of(
+            ".jar", ".war", ".ear", ".zip", ".gz", ".tgz", ".7z", ".class", ".dll", ".exe", ".so", ".dylib",
+            ".sha1", ".md5", ".png", ".jpg", ".jpeg", ".gif", ".ico", ".pdf", ".woff", ".woff2", ".ttf", ".eot",
+            ".map", ".min.js", ".min.css"
+    );
+
+    private static final Set<String> INDEXABLE_UNKNOWN_SUFFIXES = Set.of(
+            ".md", ".txt", ".json", ".yml", ".yaml", ".xml", ".properties", ".sql", ".sh", ".bash", ".env"
+    );
+
+    private static final Set<String> INDEXABLE_UNKNOWN_FILE_NAMES = Set.of(
+            "dockerfile", "makefile", "jenkinsfile"
+    );
+
+    private static final int MAX_INDEXABLE_UNKNOWN_FILE_SIZE = 256 * 1024;
+
+    private static final int MAX_INDEXABLE_SOURCE_FILE_SIZE = 1024 * 1024;
 
     private static final Pattern JAVA_PACKAGE_PATTERN = Pattern.compile("(?m)^\\s*package\\s+([A-Za-z0-9_.$]+)\\s*;");
     private static final Pattern GO_PACKAGE_PATTERN = Pattern.compile("(?m)^\\s*package\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*$");
@@ -64,9 +83,6 @@ public class CodeIndexBuildService {
     private final CodeFileMapper codeFileMapper;
     private final CodeSymbolMapper codeSymbolMapper;
 
-    /**
-     * 创建代码索引构建服务。
-     */
     public CodeIndexBuildService(ProjectRepoMapper projectRepoMapper,
                                  LanguageDetector languageDetector,
                                  TreeSitterParserService treeSitterParserService,
@@ -83,17 +99,11 @@ public class CodeIndexBuildService {
         this.codeSymbolMapper = codeSymbolMapper;
     }
 
-    /**
-     * 重建指定项目的数据库索引。
-     *
-     * <p>该方法会清空旧的 code_file 与 code_symbol，再按当前仓库内容重新入库。
-     */
     @Transactional
     public CodeIndexBuildResult build(Long projectId) {
         ProjectRepo projectRepo = requireProjectRepo(projectId);
         Path repoRoot = resolveRepositoryRoot(projectRepo);
 
-        // 先清空旧索引，保证数据库中的文件和符号快照与当前仓库一致。
         deleteExistingIndex(projectId);
 
         List<Path> files = scanRepositoryFiles(repoRoot);
@@ -110,9 +120,6 @@ public class CodeIndexBuildService {
         return new CodeIndexBuildResult(files.size(), symbolCount, warningCount, new LinkedHashMap<>(languageStats));
     }
 
-    /**
-     * 校验项目是否存在。
-     */
     private ProjectRepo requireProjectRepo(Long projectId) {
         if (projectId == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "Project id must not be null");
@@ -125,9 +132,6 @@ public class CodeIndexBuildService {
         return projectRepo;
     }
 
-    /**
-     * 解析并校验仓库根目录。
-     */
     private Path resolveRepositoryRoot(ProjectRepo projectRepo) {
         String localPath = projectRepo.getLocalPath();
         if (localPath == null || localPath.isBlank()) {
@@ -141,26 +145,15 @@ public class CodeIndexBuildService {
         return repoRoot;
     }
 
-    /**
-     * 删除项目已有的文件和符号索引数据。
-     */
     private void deleteExistingIndex(Long projectId) {
         codeSymbolMapper.delete(new LambdaQueryWrapper<CodeSymbol>().eq(CodeSymbol::getProjectId, projectId));
         codeFileMapper.delete(new LambdaQueryWrapper<CodeFile>().eq(CodeFile::getProjectId, projectId));
     }
 
-    /**
-     * 扫描仓库中的全部候选文件。
-     *
-     * <p>会跳过 Git、构建产物和前端依赖目录，减少无意义的索引开销。
-     */
     private List<Path> scanRepositoryFiles(Path repoRoot) {
         List<Path> files = new ArrayList<>();
         try {
             Files.walkFileTree(repoRoot, new SimpleFileVisitor<>() {
-                /**
-                 * 进入目录前过滤不需要扫描的目录。
-                 */
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                     Path fileName = dir.getFileName();
@@ -170,12 +163,9 @@ public class CodeIndexBuildService {
                     return FileVisitResult.CONTINUE;
                 }
 
-                /**
-                 * 收集普通文件，后续统一进入解析流程。
-                 */
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                    if (attrs.isRegularFile()) {
+                    if (attrs.isRegularFile() && shouldIndexFile(repoRoot, file, attrs)) {
                         files.add(file);
                     }
                     return FileVisitResult.CONTINUE;
@@ -187,11 +177,56 @@ public class CodeIndexBuildService {
         return files;
     }
 
-    /**
-     * 为单个文件构建索引记录。
-     *
-     * <p>正常情况下走 Tree-sitter + 语言专属提取器；失败时回退到纯文本提取，确保流程不中断。
-     */
+    private boolean shouldIndexFile(Path repoRoot, Path file, BasicFileAttributes attrs) {
+        String fileName = file.getFileName() == null ? "" : file.getFileName().toString().toLowerCase();
+        String relativePath = normalizePath(repoRoot.relativize(file).toString(), file.toString()).toLowerCase();
+
+        if (SKIPPED_FILE_NAMES.contains(fileName)) {
+            return false;
+        }
+        if (relativePath.contains("/src/main/resources/static/assets/")) {
+            return false;
+        }
+        if (hasSkippedSuffix(fileName)) {
+            return false;
+        }
+        if (attrs.size() > MAX_INDEXABLE_SOURCE_FILE_SIZE) {
+            return false;
+        }
+
+        LanguageType languageType = languageDetector.detect(file);
+        if (languageType != LanguageType.UNKNOWN) {
+            return true;
+        }
+
+        if (attrs.size() > MAX_INDEXABLE_UNKNOWN_FILE_SIZE) {
+            return false;
+        }
+
+        return isIndexableUnknownFile(fileName);
+    }
+
+    private boolean hasSkippedSuffix(String fileName) {
+        for (String suffix : SKIPPED_FILE_SUFFIXES) {
+            if (fileName.endsWith(suffix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isIndexableUnknownFile(String fileName) {
+        if (INDEXABLE_UNKNOWN_FILE_NAMES.contains(fileName)) {
+            return true;
+        }
+        for (String suffix : INDEXABLE_UNKNOWN_SUFFIXES) {
+            if (fileName.endsWith(suffix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private FileBuildOutcome buildSingleFile(Long projectId,
                                              Path repoRoot,
                                              Path filePath,
@@ -212,7 +247,6 @@ public class CodeIndexBuildService {
         } catch (Exception exception) {
             log.warn("Failed to build code index for file {}", filePath, exception);
 
-            // 文件解析失败时仍然保留最基础的文件记录和纯文本符号，避免整次建索引中断。
             TreeSitterParseResult fallbackResult = buildFileReadFailureResult(repoRoot, filePath, languageType, exception);
             ParsedCodeFile parsedCodeFile = plainTextFallbackExtractor.buildParsedCodeFile(projectId, fallbackResult);
             CodeFile codeFile = toCodeFileEntity(parsedCodeFile);
@@ -223,9 +257,6 @@ public class CodeIndexBuildService {
         }
     }
 
-    /**
-     * 解析单个文件。
-     */
     private TreeSitterParseResult parseFile(Path repoRoot, Path filePath, LanguageType languageType) {
         if (languageType == LanguageType.UNKNOWN) {
             return buildUnknownLanguageResult(repoRoot, filePath);
@@ -243,9 +274,6 @@ public class CodeIndexBuildService {
         );
     }
 
-    /**
-     * 根据语言和解析结果提取代码符号。
-     */
     private SymbolExtractionOutcome extractSymbols(TreeSitterParseResult parseResult, LanguageType languageType) {
         if (languageType == LanguageType.UNKNOWN) {
             return new SymbolExtractionOutcome(parseResult, plainTextFallbackExtractor.extract(parseResult), 0);
@@ -273,9 +301,6 @@ public class CodeIndexBuildService {
         }
     }
 
-    /**
-     * 构建文件级索引模型。
-     */
     private ParsedCodeFile buildParsedCodeFile(Long projectId,
                                                TreeSitterParseResult parseResult,
                                                List<ParsedCodeSymbol> symbols) {
@@ -298,9 +323,6 @@ public class CodeIndexBuildService {
         );
     }
 
-    /**
-     * 保存符号记录并返回写入数量。
-     */
     private int saveSymbols(Long projectId, Long fileId, List<ParsedCodeSymbol> symbols) {
         int savedCount = 0;
         for (ParsedCodeSymbol parsedCodeSymbol : symbols) {
@@ -311,9 +333,6 @@ public class CodeIndexBuildService {
         return savedCount;
     }
 
-    /**
-     * 把文件索引模型转换为数据库实体。
-     */
     private CodeFile toCodeFileEntity(ParsedCodeFile parsedCodeFile) {
         CodeFile codeFile = new CodeFile();
         codeFile.setProjectId(parsedCodeFile.projectId());
@@ -329,9 +348,6 @@ public class CodeIndexBuildService {
         return codeFile;
     }
 
-    /**
-     * 把符号模型转换为数据库实体。
-     */
     private CodeSymbol toCodeSymbolEntity(Long projectId, Long fileId, ParsedCodeSymbol parsedCodeSymbol) {
         CodeSymbol codeSymbol = new CodeSymbol();
         codeSymbol.setProjectId(projectId);
@@ -351,9 +367,6 @@ public class CodeIndexBuildService {
         return codeSymbol;
     }
 
-    /**
-     * 为未识别语言构建基础解析结果。
-     */
     private TreeSitterParseResult buildUnknownLanguageResult(Path repoRoot, Path filePath) {
         try {
             String sourceCode = Files.readString(filePath, StandardCharsets.UTF_8);
@@ -371,9 +384,6 @@ public class CodeIndexBuildService {
         }
     }
 
-    /**
-     * 为文件读取失败场景构建回退结果。
-     */
     private TreeSitterParseResult buildFileReadFailureResult(Path repoRoot,
                                                              Path filePath,
                                                              LanguageType languageType,
@@ -389,9 +399,6 @@ public class CodeIndexBuildService {
         );
     }
 
-    /**
-     * 把当前解析结果标记为回退状态。
-     */
     private TreeSitterParseResult markAsFallback(TreeSitterParseResult parseResult, String errorMessage) {
         return new TreeSitterParseResult(
                 parseResult.language(),
@@ -404,24 +411,15 @@ public class CodeIndexBuildService {
         );
     }
 
-    /**
-     * 计算仓库内相对路径。
-     */
     private String toRelativePath(Path repoRoot, Path filePath) {
         return normalizePath(repoRoot.relativize(filePath).toString(), filePath.toString());
     }
 
-    /**
-     * 统一路径分隔符格式。
-     */
     private String normalizePath(String relativePath, String fallbackPath) {
         String value = (relativePath == null || relativePath.isBlank()) ? fallbackPath : relativePath;
         return value == null ? "" : value.replace('\\', '/');
     }
 
-    /**
-     * 从相对路径中提取顶层模块名。
-     */
     private String extractModuleName(String relativePath, String filePath) {
         String normalized = normalizePath(relativePath, filePath);
         int index = normalized.indexOf('/');
@@ -431,9 +429,6 @@ public class CodeIndexBuildService {
         return normalized.substring(0, index);
     }
 
-    /**
-     * 根据语言规则提取包名。
-     */
     private String extractPackageName(TreeSitterParseResult parseResult) {
         if (parseResult.sourceCode() == null || parseResult.language() == null) {
             return null;
@@ -452,9 +447,6 @@ public class CodeIndexBuildService {
         return matcher.find() ? matcher.group(1) : null;
     }
 
-    /**
-     * 从符号列表中选出主类名。
-     */
     private String extractPrimaryClassName(List<ParsedCodeSymbol> symbols) {
         if (symbols == null) {
             return null;
@@ -470,9 +462,6 @@ public class CodeIndexBuildService {
         return null;
     }
 
-    /**
-     * 计算源码内容的 SHA-256 摘要。
-     */
     private String sha256(String sourceCode) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
@@ -483,9 +472,6 @@ public class CodeIndexBuildService {
         }
     }
 
-    /**
-     * 提取适合展示的错误信息。
-     */
     private String buildErrorMessage(Exception exception) {
         String message = exception.getMessage();
         if (message == null || message.isBlank()) {
@@ -494,17 +480,11 @@ public class CodeIndexBuildService {
         return message;
     }
 
-    /**
-     * 单文件建索引结果。
-     */
     private record SymbolExtractionOutcome(TreeSitterParseResult parseResult,
                                            List<ParsedCodeSymbol> symbols,
                                            int warningCount) {
     }
 
-    /**
-     * 单文件入库统计结果。
-     */
     private record FileBuildOutcome(int symbolCount, int warningCount) {
     }
 }

@@ -1,0 +1,153 @@
+﻿[
+    {
+        "caseId":  "sse_fields",
+        "commit":  "a51cd1d",
+        "baseCommit":  "631d6c3daccf15cdf97db8aec4711cd80595e032",
+        "taskId":  "2050127902573826049",
+        "finalStatus":  "WAITING_CONFIRM",
+        "goldFiles":  [
+                          "frontend/src/api/sse.ts"
+                      ],
+        "topFiles":  [
+                         "frontend/src/pages/TaskDetailPage.tsx",
+                         "demo/.m2repo/org/eclipse/jetty/jetty-server/9.4.46.v20220331/jetty-server-9.4.46.v20220331.pom",
+                         "frontend/src/components/RealtimeEventPanel.tsx",
+                         "src/main/java/com/codepliot/sse/dto/TaskEventMessage.java",
+                         "demo/.m2repo/com/vladsch/flexmark/flexmark-html-parser/0.42.14/flexmark-html-parser-0.42.14.pom",
+                         "frontend/src/api/step.ts",
+                         "demo/.m2repo/com/vladsch/flexmark/flexmark-html-parser/0.42.14/flexmark-html-parser-0.42.14.jar",
+                         "demo/.m2repo/com/vladsch/flexmark/flexmark-html-parser/0.42.14/flexmark-html-parser-0.42.14.jar.sha1",
+                         "demo/.m2repo/com/vladsch/flexmark/flexmark-html-parser/0.42.14/flexmark-html-parser-0.42.14.pom.sha1",
+                         "demo/.m2repo/org/eclipse/jetty/jetty-server/9.4.46.v20220331/jetty-server-9.4.46.v20220331.jar"
+                     ],
+        "matchedGoldFiles":  [
+
+                             ],
+        "firstGoldRank":  null,
+        "recall10":  0,
+        "mrr":  0,
+        "retrievalScore":  0,
+        "patchNonEmpty":  false,
+        "analysisText":  "## åæç»è®º\n\n### 1. è¯æ®å\u0085\u0085åæ§è¯ä¼°\n**ä¸è¶³**ï¼ç¼ºä¹å\u0085³é®æä»¶ï¼æ æ³å®æ´å®ä½ä¸¢å¤±å­æ®µçå\u0085·ä½åå ãéè¦ä»¥ä¸ç¼ºå¤±ä¿¡æ¯ï¼\n- `frontend/src/api/sse.ts`ï¼`parseTaskEventMessage` å½æ°çå®ç°ï¼\n- `frontend/src/types/common.ts`ï¼`TaskEventMessage` ç±»åå®ä¹ï¼\n- åç«¯ SSE äºä»¶åéçåå§ JSON æ ¼å¼ï¼ç¡®å® `phase` å `stepType` å­æ®µçå®é\u0085åç§°ï¼\n\n### 2. å¯è§çè·¨è¯­è¨å\u0085³èå\u0085³ç³»\n| æä»¶ | è¯­è¨ | å\u0085³é®å\u0085å®¹ |\n|------|------|----------|\n| `TaskEventMessage.java` (åç«¯) | Java | `record TaskEventMessage(Long taskId, String taskStatus, String stepType, String message, LocalDateTime timestamp)` |\n| `RealtimeEventPanel.tsx` (åç«¯) | TypeScript | ä»\u0085ä½¿ç¨ `event.status`, `event.time`, `event.message` å­æ®µæ¸²æ |\n| `TaskDetailPage.tsx` (åç«¯) | TypeScript | å¯¼å\u0085¥å¹¶ä½¿ç¨ `parseTaskEventMessage` å¤ç SSE äºä»¶ï¼ä½æªå±ç¤ºå\u0085·ä½è§£æé»è¾ |\n\n**ç´æ¥å\u0085³è**ï¼  \n- åç«¯ Java è®°å½å\u0085å« `stepType` å `taskStatus`ï¼å¯è½å¯¹åº Issue ä¸­ç `phase`ï¼ã\n- åç«¯ `RealtimeEventPanel` åªç¨äº `status`ï¼å¯¹åº `taskStatus`ï¼ã`time`ï¼å¯¹åº `timestamp`ï¼ã`message`ï¼**æ²¡æä½¿ç¨ `stepType`**ã\n- åç«¯ `TaskDetailPage` ä¾èµ `parseTaskEventMessage` è¿è¡äºä»¶è§£æï¼è¯¥å½æ°æªæä¾ã\n\n### 3. é®é¢å®ä½\n- **åç«¯**ï¼`TaskEventMessage.java` å·²å®ä¹ `stepType` å `taskStatus`ï¼è¯´ææå¡ç«¯å¯è½æ­£ç¡®åéäºè¿äºå­æ®µï¼åè®¾åºååæ¶å­æ®µåä¸è´ï¼ã\n- **åç«¯ç»ä»¶**ï¼`RealtimeEventPanel.tsx` å®å\u0085¨å¿½ç¥äº `stepType`ï¼ä¸æ²¡ææ¸²æä»»ä½ä¸é¶æ®µ/æ­¥éª¤ç±»åç¸å\u0085³çå\u0085å®¹ã\n- **åç«¯è§£æå½æ°**ï¼`parseTaskEventMessage`ï¼æªç¥ï¼å¯è½åªæåäº `status`/`time`/`message`ï¼ä¸¢å¼äº `stepType` åå¯è½ç `phase` å­æ®µã\n\n### 4. ä¿®å¤å»ºè®®ï¼åºäºç°æè¯æ®ï¼\n#### (a) å¿\u0085é¡»è·åçæä»¶\n- `frontend/src/api/sse.ts` ä¸­ç `parseTaskEventMessage` å½æ°ã\n- `frontend/src/types/common.ts` ä¸­ `TaskEventMessage` æ¥å£å®ä¹ã\n\n#### (b) åè®¾åç«¯ç `stepType` å¯¹åº Issue ä¸­ç `stepType`ï¼`taskStatus` å¯¹åº `phase`ï¼ä¿®å¤æ­¥éª¤ï¼\n1. **ä¿®æ¹ç±»åå®ä¹**ï¼`types/common.ts`ï¼ï¼ç¡®ä¿ `TaskEventMessage` å\u0085å« `stepType` å `phase`ï¼æ `taskStatus`ï¼å­æ®µã\n2. **ä¿®æ¹è§£æå½æ°**ï¼`api/sse.ts`ï¼ï¼å¨ `parseTaskEventMessage` ä¸­ä¿çæå¡ç«¯åå§ `stepType` å `taskStatus`/`phase` å­æ®µï¼ä¸è¦ä¸¢å¼ã\n3. **ä¿®æ¹åç«¯ç»ä»¶**ï¼`RealtimeEventPanel.tsx`ï¼ï¼æ·»å  `event.stepType` å `event.status`ï¼æ `event.phase`ï¼çæ¸²æé»è¾ï¼ä¾å¦æ¾ç¤ºæ­¥éª¤ç±»åæ ç­¾æé¶æ®µæç¤ºã\n\n#### (c) å½åæªå®æçæ­¥éª¤\n- éè¦ç¡®è®¤æå¡ç«¯ SSE äºä»¶ JSON è´è½½ä¸­å­æ®µåï¼`stepType`? `phase`? `taskStatus`? å»ºè®®æ¥çåç«¯åéä»£ç æç½ç»æå\u0085ç¡®è®¤ã",
+        "solutionText":  "éè¦è·å `frontend/src/api/sse.ts` ä¸­ç `parseTaskEventMessage` å½æ°å `frontend/src/types/common.ts` ä¸­ç `TaskEventMessage` ç±»åå®ä¹ï¼ä»¥ç¡®è®¤å­æ®µæ å°åè§£æé»è¾ãä¹åï¼å¨ `RealtimeEventPanel.tsx` ä¸­æ·»å å¯¹ `event.stepType` çæ¸²æï¼ä¾å¦æ¾ç¤ºæ­¥éª¤ç±»åæ ç­¾ï¼ï¼å¹¶ç¡®ä¿ `TaskEventMessage` ç±»åå\u0085å« `stepType` å `phase`ï¼æ `taskStatus`ï¼å­æ®µã",
+        "patchText":  "",
+        "riskText":  "æ æ³å¯é çæ patchï¼å ä¸ºç¼ºå°å\u0085³é®æä»¶ `frontend/src/api/sse.ts`ï¼`parseTaskEventMessage` å®ç°ï¼å `frontend/src/types/common.ts`ï¼`TaskEventMessage` ç±»åå®ä¹ï¼ãæ²¡æè¿äºæä»¶æ æ³ç¡®å®ç°æè§£æé»è¾æ¯å¦ä¸¢å¼å­æ®µï¼ä¹æ æ³ç¥éå­æ®µåæ å°ï¼ä¾å¦ `taskStatus` æ¯å¦å¯¹åºåç«¯ä½¿ç¨ç `status`ï¼ãä»\u0085å­ `RealtimeEventPanel.tsx` å `TaskEventMessage.java` ä¸è¶³ä»¥æé æ­£ç¡®ç patchãå¿\u0085é¡»è·åç¼ºå¤±æä»¶åæè½è¿è¡ä¿®æ¹ã"
+    },
+    {
+        "caseId":  "task_run_lock",
+        "commit":  "3c030f5",
+        "baseCommit":  "1587660a424612ae883aec221a215639a90129f5",
+        "taskId":  "2050128047432503297",
+        "finalStatus":  "WAITING_CONFIRM",
+        "goldFiles":  [
+                          "src/main/java/com/codepliot/agent/service/AgentRunService.java",
+                          "src/main/java/com/codepliot/lock/service/TaskRunLockService.java",
+                          "src/main/java/com/codepliot/common/result/ErrorCode.java",
+                          "src/main/resources/application.yml"
+                      ],
+        "topFiles":  [
+                         "docs/agent-runtime-spec.md",
+                         "src/main/java/com/codepliot/task/controller/AgentTaskController.java",
+                         "src/main/java/com/codepliot/agent/service/AgentRunService.java",
+                         "demo/.m2repo/net/bytebuddy/byte-buddy-agent/1.14.19/byte-buddy-agent-1.14.19.pom",
+                         "src/main/java/com/codepliot/user/service/CustomUserDetailsService.java",
+                         "src/main/java/com/codepliot/task/dto/AgentTaskCreateRequest.java",
+                         "src/main/java/com/codepliot/agent/executor/AgentExecutor.java",
+                         "src/main/java/com/codepliot/task/entity/AgentTaskStatus.java",
+                         "demo/.m2repo/net/bytebuddy/byte-buddy-agent/1.14.19/byte-buddy-agent-1.14.19.jar",
+                         "demo/.m2repo/net/bytebuddy/byte-buddy-agent/1.14.19/byte-buddy-agent-1.14.19.jar.sha1"
+                     ],
+        "matchedGoldFiles":  [
+                                 "src/main/java/com/codepliot/agent/service/AgentRunService.java"
+                             ],
+        "firstGoldRank":  3,
+        "recall10":  0.25,
+        "mrr":  0.3333,
+        "retrievalScore":  29.16,
+        "patchNonEmpty":  true,
+        "analysisText":  "## åæç»è®º\n\nåºäºæ£ç´¢å°çä»£ç çæ®µï¼å¯ç¡®è®¤ **Issue æè¿°çéå¤æ§è¡é®é¢ç¡®å®å­å¨**ï¼å\u0085·ä½åå å¦ä¸ï¼\n\n### å½åæµç¨ä¸­çç¼ºé·\n\n1. **å\u0085¥å£è·¯å¾**  \n   `AgentTaskController.run()` â `AgentRunService.run()` æ¯åæ­¥æ§è¡çï¼æ ä»»ä½é²éå\u0085¥ä¿æ¤ã\n\n2. **ç¶ææ£æ¥ä¸åå­**  \n   `AgentRunService.run()` ä¸­ä¾æ¬¡è°ç¨äºï¼\n   - `requireRunnableStatus(task)` ââ ä»\u0085è¯»åç¶æå¤æ­æ¯å¦å¯è¿è¡ï¼çæ®µæªæ¾ç¤ºå®ç°ï¼æ¨æµä¸ºæ£æ¥ status æ¯å¦ä¸º PENDINGï¼\n   - `claimRunnableTask(taskId, currentUserId)` ââ å°è¯æ´æ°ç¶æå ç¨ä»»å¡ï¼çæ®µæªæ¾ç¤ºå®ç°ï¼\n   - ç¶å `task.setStatus(AgentTaskStatus.CLONING.name())` ââ ç´æ¥èµå¼ï¼åè°ç¨ `agentExecutor.execute()`\n\n   ä¸ä¸ªæ­¥éª¤ä¹é´**æ²¡æåå­æ§ä¿é**ãä¸¤æ¬¡å¿«éç¹å»å¯è½å¯¼è´ä¸¤ä¸ªè¯·æ±åæ¶éè¿ `requireRunnableStatus` æ£æ¥ï¼æ­¤æ¶ç¶æåä¸º PENDINGï¼ï¼ç¶åé½æ§è¡ `claimRunnableTask`ï¼è¥æªä½¿ç¨ä¹è§éæå¯ä¸ç´¢å¼ï¼å¯è½ä¸¤ä¸ªé½æåï¼ï¼æç»å¯¼è´åä¸ä»»å¡è¢«å¹¶åå¯å¨ä¸¤æ¬¡ã\n\n3. **ç¼ºå¤±æºå¶**  \n   - æ åå¸å¼éï¼å¦ Redis éãæ°æ®åºè¡çº§éï¼\n   - æ ä¹è§éï¼å¦ UPDATE ... WHERE status = \u0027PENDING\u0027 å¹¶å¤æ­å½±åè¡æ°ï¼\n   - æ ç¶ææºåç½®æ ¡éªåç´æ¥å ç¨ï¼å¯è½ `claimRunnableTask` å\u0085é¨æªåå¹ç­æ£æ¥ï¼\n\n### ä¸åè¯­è¨æä»¶ä¹é´çå\u0085³è\n\n- **ä¸­æè§èæä»¶**ï¼`docs/agent-runtime-spec.md`ï¼å®ä¹äº Agent æ§è¡é¶æ®µï¼å¦ CLONINGãINDEXING ç­ï¼ï¼ä½ **æªæ¶åè¿è¡æ¶å¹¶åæ§å¶è¦æ±**ã\n- **Java æä»¶**ï¼ControllerãServiceãExecutorï¼å®ç°äºè§èä¸­çé¶æ®µæµè½¬ï¼ä½ **ç¼ºå°å¹¶åä¿æ¤**ï¼ä¸ Issue æè¿°ä¸è´ã\n\n### è¯æ®ä¸è¶³ä¹å¤\n\n- `requireRunnableStatus` å `claimRunnableTask` çå\u0085·ä½å®ç°ç¼ºå¤±ï¼æ æ³å¤æ­ç°æä»£ç æ¯å¦å·²æåæ­¥é²éï¼å¦ä¹è§éï¼ã\n- `agentExecutor.execute()` å\u0085é¨æ¯å¦æå¯è½éå¤æ§è¡ï¼å¦å¹ç­æ§ï¼ä¹æªå±ç¤ºï¼ä½å³ä½¿å\u0085é¨å¯éå\u0085¥ï¼å¤é¨ä¹åºä¿è¯ä¸éå¤å¯å¨ã\n\n### å¯æ§è¡ä¿®å¤æ¹åï¼ä¾ patch çæåèï¼\n\nå¨ `AgentRunService.run()` æ¹æ³ä¸­ï¼å å\u0085¥åå­æ§çä»»å¡å ç¨é»è¾ï¼å»ºè®®æ¹æ¡ï¼\n\n1. **ä½¿ç¨æ°æ®åºä¹è§é**  \n   å°ç¶ææ´æ°ä¸æ¡ä»¶ç»å®ï¼\n   ```sql\n   UPDATE agent_task SET status = \u0027CLONING\u0027 WHERE id = ? AND status = \u0027PENDING\u0027\n   ```\n   è¥å½±åè¡æ°ä¸º 0ï¼åè¿åéå¤è¿è¡éè¯¯ã\n\n2. **æå¼å\u0085¥åå¸å¼é**  \n   å¨ `run()` æ¹æ³å\u0085¥å£å¤å éï¼å¦ `redisson`ï¼ï¼é key ä¸º `task:run:${taskId}`ï¼ç¡®ä¿åä¸æ¶å»åªæä¸ä¸ªçº¿ç¨æ§è¡åç»­é»è¾ã\n\n3. **è¿åæç¡®éè¯¯ç **  \n   å½æ£æµå°ä»»å¡æ­£å¨è¿è¡æå·²è¿è¡å®æ¯æ¶ï¼è¿å `ErrorCode.TASK_ALREADY_RUNNING` æç±»ä¼¼éè¯¯ï¼èä¸æ¯éé»æåã\n\n**ç»è®º**ï¼å½åä»£ç å­å¨å¹¶åç¼ºé·ï¼éå¨ `AgentRunService.run()` ä¸­å¢å åå­ç¶æè½¬æ¢æºå¶ï¼å®ç°âä¸æ¬¡æ§è¡âä¿è¯ã",
+        "solutionText":  "å¨ AgentRunService.run() ä¸­ï¼å°åæç requireRunnableStatus + claimRunnableTask + setStatus æ¿æ¢ä¸ºä»¥ä¸åå­æä½ï¼ä½¿ç¨ MyBatis-Plus ç LambdaUpdateWrapper æ§è¡ UPDATE agent_task SET status = \u0027CLONING\u0027 WHERE id = ? AND status = \u0027PENDING\u0027ï¼è¥å½±åè¡æ°ä¸º 0 åæåºéå¤è¿è¡éè¯¯ï¼å¹¶åæ­¥æ´æ°å\u0085å­ä¸­ task çç¶æãéè¦æ·»å  LambdaUpdateWrapper ç import è¯­å¥ã",
+        "patchText":  "--- a/src/main/java/com/codepliot/agent/service/AgentRunService.java\n+++ b/src/main/java/com/codepliot/agent/service/AgentRunService.java\n@@ -1,4 +1,5 @@\n package com.codepliot.agent.service;\n \n+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;\n import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;\n import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;\n import com.codepliot.agent.executor.AgentExecutor;\n@@ -13,6 +14,7 @@\n     private final AgentTaskMapper agentTaskMapper;\n     private final ProjectRepoMapper projectRepoMapper;\n     private final AgentExecutor agentExecutor;\n+    private static final String ERR_MSG_DUPLICATE_RUN = \"Task is already running or completed\";\n \n     public AgentRunService(AgentTaskMapper agentTaskMapper,\n                            ProjectRepoMapper projectRepoMapper,\n@@ -28,23 +30,27 @@\n     public AgentTaskVO run(Long taskId) {\n         Long currentUserId = SecurityUtils.getCurrentUserId();\n         AgentTask task = requireOwnedTask(taskId, currentUserId);\n-        requireRunnableStatus(task);\n         ProjectRepo projectRepo = requireOwnedProject(task.getProjectId(), currentUserId);\n-        claimRunnableTask(taskId, currentUserId);\n \n-        task.setStatus(AgentTaskStatus.CLONING.name());\n+        // åå­å°å°è¯å°ä»»å¡ç¶æä» PENDING æ´æ°ä¸º CLONINGï¼é²æ­¢éå¤æ§è¡\n+        boolean updated = agentTaskMapper.update(null,\n+                new LambdaUpdateWrapper\u003cAgentTask\u003e()\n+                        .eq(AgentTask::getId, taskId)\n+                        .eq(AgentTask::getStatus, AgentTaskStatus.PENDING.name())\n+                        .set(AgentTask::getStatus, AgentTaskStatus.CLONING.name())) \u003e 0;\n+        if (!updated) {\n+            throw new BusinessException(ERR_MSG_DUPLICATE_RUN);\n+        }\n+        // æ´æ°å\u0085å­ä¸­ç task ç¶æä»¥ä¿æä¸è´\n+        task.setStatus(AgentTaskStatus.CLONING.name());\n+\n         agentExecutor.execute(task, projectRepo);\n         return AgentTaskVO.from(agentTaskMapper.selectById(taskId));\n     }\n \n     private AgentTask requireOwnedTask(Long taskId, Long currentUserId) {\n         // ... æ¹æ³ä½ä¿æä¸å\n     }\n \n-    private void requireRunnableStatus(AgentTask task) {\n-        // æ­¤æ¹æ³å·²ç±ä¹è§éæ¿ä»£ï¼å¯æ ¹æ®éè¦ä¿çæå é¤\n-    }\n-\n-    private void claimRunnableTask(Long taskId, Long currentUserId) {\n-        // æ­¤æ¹æ³å·²ç±ä¹è§éæ¿ä»£ï¼å¯æ ¹æ®éè¦ä¿çæå é¤\n-    }\n-\n     // å\u0085¶ä½æ¹æ³ä¿æä¸å\n }",
+        "riskText":  "patch åºäºä»¥ä¸åè®¾ï¼1) AgentTask å®ä½ä¸­å­å¨ getId() å getStatus() æ¹æ³ï¼2) AgentTaskStatus æä¸¾å\u0085å« PENDING å CLONINGï¼3) agentTaskMapper.update è¿å int ç±»åå½±åè¡æ°ï¼4) BusinessException æ¯æåå­ç¬¦ä¸²æé å½æ°ï¼5) LambdaUpdateWrapper ç import å¨æä»¶å¤´é¨å¯è¡ï¼6) ç§»é¤äº requireRunnableStatus å claimRunnableTask æ¹æ³ï¼å\u0085¶å\u0085é¨é»è¾åè®¾å·²è¢«åå­æ´æ°æ¿ä»£ï¼ãè¥ä¸è¿°åè®¾ä¸æç«ï¼patch å¯è½å¯¼è´ç¼è¯éè¯¯æé»è¾ç¼ºé·ãå»ºè®®å¨å®é\u0085åºç¨åç¡®è®¤è¿äºç»èï¼å¹¶èèå¼å\u0085¥ ErrorCode.TASK_ALREADY_RUNNING å¸¸éã"
+    },
+    {
+        "caseId":  "patch_confirm_complete",
+        "commit":  "4dee831",
+        "baseCommit":  "3c5c60b3851df3f6dca6f37f7dbd5b187e88cd42",
+        "taskId":  "2050128362076606465",
+        "finalStatus":  "WAITING_CONFIRM",
+        "goldFiles":  [
+                          "frontend/src/api/patch.ts",
+                          "frontend/src/components/PatchViewer.tsx",
+                          "frontend/src/pages/TaskDetailPage.tsx",
+                          "frontend/src/types/patch.ts",
+                          "src/main/java/com/codepliot/policy/AgentExecutionPolicy.java",
+                          "src/main/resources/db/schema/patch_record.sql"
+                      ],
+        "topFiles":  [
+                         "demo/.m2repo/org/apache/logging/log4j/log4j-to-slf4j/2.23.1/log4j-to-slf4j-2.23.1.pom",
+                         "demo/.m2repo/org/slf4j/jul-to-slf4j/2.0.16/jul-to-slf4j-2.0.16.pom",
+                         "demo/.m2repo/org/slf4j/jul-to-slf4j/2.0.16/jul-to-slf4j-2.0.16.jar",
+                         "demo/.m2repo/org/slf4j/jul-to-slf4j/2.0.16/jul-to-slf4j-2.0.16.pom.sha1",
+                         "demo/.m2repo/org/apache/logging/log4j/log4j-to-slf4j/2.23.1/log4j-to-slf4j-2.23.1.jar",
+                         "demo/.m2repo/org/apache/logging/log4j/log4j-to-slf4j/2.23.1/log4j-to-slf4j-2.23.1.pom.sha1",
+                         "frontend/src/pages/TaskDetailPage.tsx",
+                         "frontend/src/components/ui/separator.tsx",
+                         "frontend/src/components/ui/button.tsx",
+                         "src/main/java/com/codepliot/entity/AgentTaskStatus.java"
+                     ],
+        "matchedGoldFiles":  [
+                                 "frontend/src/pages/TaskDetailPage.tsx"
+                             ],
+        "firstGoldRank":  7,
+        "recall10":  0.1667,
+        "mrr":  0.1429,
+        "retrievalScore":  15.48,
+        "patchNonEmpty":  false,
+        "analysisText":  "## åæç»è®º\n\nåºäºæä¾çä»£ç çæ®µï¼**æ æ³ç´æ¥å®ä½å¹¶è§£å³ Issue**ãç°æä¿¡æ¯ä¸¥éä¸è¶³ï¼å\u0085·ä½çç±å¦ä¸ï¼\n\n### 1. ç¼ºå°å\u0085³é®ä¸å¡é»è¾ä»£ç \n- **åç«¯ç¡®è®¤äº¤äº**ï¼`TaskDetailPage.tsx` åªå±ç¤ºäºå 254 è¡ï¼å\u0085å« importãstate å£°æã`loadTaskData` å½æ°å¤´é¨ï¼ï¼**æ²¡æ**ä¸âç¡®è®¤è¡¥ä¸âç¸å\u0085³çæé®ãäºä»¶å¤çæ API è°ç¨ï¼å¦ `confirmPatch` æç±»ä¼¼å½æ°ï¼ã  \n- **åç«¯ç¡®è®¤æ¥å£**ï¼æªæä¾ä»»ä½ Java Controller / Service ä»£ç ï¼æ æ³å¾ç¥æ¯å¦å­å¨æ¥æ¶ç¡®è®¤è¯·æ±å¹¶å°ç¶æä» `WAITING_CONFIRM` æ¹ä¸º `COMPLETED` çé»è¾ã  \n- **UI ç¶æå±ç¤º**ï¼æªæä¾ `StatusBadge` æå\u0085¶ä»ç»ä»¶å¦ä½æ ¹æ® `WAITING_CONFIRM` / `COMPLETED` æ¸²æ UI çä»£ç ã\n\n### 2. ç°æä»£ç çæ®µçå\u0085³èæ§\n- `AgentTaskStatus.java` å®ä¹äºç¶ææä¸¾ï¼å\u0085å« `WAITING_CONFIRM` å `COMPLETED`ï¼ï¼è¯´æåç«¯ææå­å¨è¿äºç¶æï¼ä½**æ é»è¾å¦ä½è§¦åè½¬æ¢**ã  \n- `TaskDetailPage.tsx` ä¸­å¼ç¨äº `getTask`ã`getTaskPatch` ç­ APIï¼ä½æªæ¾ç¤ºå¦ä½è°ç¨ç¡®è®¤æä½ã  \n- å\u0085¶ä½ `.pom`ã`.jar`ã`separator.tsx`ã`button.tsx` ä¸ Issue å¤çæµç¨**æ å\u0085³**ã\n\n### 3. ä¸åè¯­è¨æä»¶é´çå\u0085³è\n- Java æä¸¾ `AgentTaskStatus` ä¸ TypeScript ç±»å `AgentTask`ï¼`@/types/task`ï¼ä¹é´å­å¨æ°æ®æ å°ï¼ä½ TypeScript ç±»åå®ä¹**æªæä¾**ï¼æ æ³éªè¯åç«¯æ¯å¦æ­£ç¡®å®ä¹äº `WAITING_CONFIRM`ã  \n- åç«¯ `TaskDetailPage.tsx` éè¿ API è·åä»»å¡ç¶æï¼ä½å\u0085·ä½å¦ä½æ ¹æ®ç¶ææ¸²æç¡®è®¤æé®å¹¶è°ç¨ç¡®è®¤æ¥å£çä»£ç **ç¼ºå¤±**ã\n\n### å»ºè®®è¡¥å\u0085\u0085çä¿¡æ¯ï¼ä¾åç»­ patch çæä½¿ç¨ï¼\n1. **åç«¯**ï¼  \n   - æ¾ç¤ºç¡®è®¤æé®ç TSX çæ®µï¼ä¾å¦ `\u003cButton onClick={handleConfirm}\u003e`ï¼  \n   - `handleConfirm` å½æ°ä¸­è°ç¨ç APIï¼å¦ `confirmTask(taskId)`ï¼ä»¥åå\u0085¶å®ç°  \n   - ç¡®è®¤æååå¦ä½æ´æ°æ¬å°ç¶æå¹¶å·æ° UIï¼ä¾å¦ `setTask({...task, status: \u0027COMPLETED\u0027})`ï¼  \n2. **åç«¯**ï¼  \n   - æ¥æ¶ç¡®è®¤è¯·æ±ç REST æ¥å£ï¼å¦ `POST /api/task/{id}/confirm`ï¼ç Controller æ¹æ³  \n   - Service å±ä¸­æ´æ°ä»»å¡ç¶æå¹¶æä¹\u0085åçé»è¾ï¼ä¾å¦ `task.setStatus(AgentTaskStatus.COMPLETED)`ï¼  \n3. **æµè¯**ï¼  \n   - ç¡®è®¤æ¥å£çåå\u0085/éææµè¯ï¼éªè¯ç¶æè½¬æ¢åè¿åç»æ\n\n### å½åå¯æ§è¡çåæ­¥å¤æ­\n- å¦æåç«¯ç¼ºå°ç¡®è®¤æ¥å£ï¼åéæ°å¢ `POST /api/task/{id}/confirm`ï¼å¹¶å°ç¶æä» `WAITING_CONFIRM` æ´æ°ä¸º `COMPLETED`ã  \n- å¦æåç«¯ç¼ºå°è°ç¨ç¡®è®¤æ¥å£çé»è¾ï¼åéå¨ `TaskDetailPage` ä¸­æ·»å ç¡®è®¤æé®åå¯¹åºçäºä»¶å¤çï¼è°ç¨åç«¯ç¡®è®¤æ¥å£ï¼å¹¶å°æ¬å° `task.status` æ´æ°ä¸º `COMPLETED`ã  \n\nä½**ç¼ºå°å\u0085·ä½ä»£ç çæ®µï¼æ æ³ç¡®å®ç¼ºå¤±çæ¯åªä¸ç«¯**ï¼ä¹æ æ³çæç²¾åç patchãè¯·æä¾ä¸è¿°è¡¥å\u0085\u0085ææååè¿è¡åæã",
+        "solutionText":  "éè¦è¡¥å\u0085\u0085åç«¯ç¡®è®¤æé®åäºä»¶å¤çãè°ç¨åç«¯ç¡®è®¤æ¥å£çé»è¾ï¼ä»¥ååç«¯æ¥æ¶ç¡®è®¤è¯·æ±å¹¶å°ç¶æä» WAITING_CONFIRM æ´æ°ä¸º COMPLETED çæ¥å£ãä½åºäºç°æçæ®µæ æ³çæå¯é ç patchã",
+        "patchText":  "",
+        "riskText":  "æ æ³ä»\u0085åºäºæä¾çä»£ç çæ®µå¯é çæ patchãåå ï¼ç¼ºå°åç«¯ç¡®è®¤äº¤äºä»£ç ï¼æé®ãäºä»¶å¤çãAPIè°ç¨ï¼ãåç«¯ç¡®è®¤æ¥å£ï¼Controller/Serviceï¼ä»¥å UI ç¶æå±ç¤ºä»£ç ãæä¾ççæ®µä¸­ä»\u0085æé¨ååç«¯ç»ä»¶æä»¶ï¼button.tsx, separator.tsxï¼åä¸ä¸ªæä¸¾å®ä¹ï¼ä¸ Issue ç´æ¥ç¸å\u0085³çé»è¾ä»£ç å®å\u0085¨ç¼ºå¤±ãå»ºè®®è¡¥å\u0085\u0085 TaskDetailPage.tsx ä¸­ç¡®è®¤æé®åç¸å\u0085³äºä»¶å¤ççå®æ´ä»£ç ãåç«¯ç¡®è®¤æ¥å£ç Controller å Service ä»£ç ååçæ patchã"
+    },
+    {
+        "caseId":  "task_delete_cascade",
+        "commit":  "d4f20fe",
+        "baseCommit":  "d49a929511f6a9ed53ee69b0e47339289c747df1",
+        "taskId":  "2050128499108712450",
+        "finalStatus":  "WAITING_CONFIRM",
+        "goldFiles":  [
+                          "frontend/src/api/task.ts",
+                          "frontend/src/components/TaskCard.tsx",
+                          "frontend/src/pages/DashboardPage.tsx",
+                          "frontend/src/pages/TaskDetailPage.tsx",
+                          "frontend/src/pages/TaskListPage.tsx",
+                          "src/main/java/com/codepliot/controller/AgentTaskController.java",
+                          "src/main/java/com/codepliot/service/project/ProjectRepoService.java",
+                          "src/main/java/com/codepliot/service/task/AgentTaskService.java"
+                      ],
+        "topFiles":  [
+                         "frontend/src/lib/task-display.ts",
+                         "demo/.m2repo/org/apache/maven/maven-repository-metadata/3.1.1/maven-repository-metadata-3.1.1.pom",
+                         "demo/.m2repo/org/apache/maven/maven-repository-metadata/3.2.5/maven-repository-metadata-3.2.5.pom",
+                         "demo/.m2repo/org/apache/maven/maven-repository-metadata/3.1.0/maven-repository-metadata-3.1.0.pom",
+                         "demo/.m2repo/org/apache/maven/maven-repository-metadata/3.0/maven-repository-metadata-3.0.pom",
+                         "demo/.m2repo/org/sonatype/aether/aether-api/1.7/aether-api-1.7.pom",
+                         "demo/.m2repo/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.pom",
+                         "frontend/src/api/task.ts",
+                         "demo/.m2repo/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.pom",
+                         "demo/.m2repo/javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.pom"
+                     ],
+        "matchedGoldFiles":  [
+                                 "frontend/src/api/task.ts"
+                             ],
+        "firstGoldRank":  8,
+        "recall10":  0.125,
+        "mrr":  0.125,
+        "retrievalScore":  12.5,
+        "patchNonEmpty":  false,
+        "analysisText":  "## åæç»è®ºï¼åºäºæä¾çä»£ç çæ®µï¼\n\n### 1. è¯æ®å\u0085\u0085è¶³é¨å\nä» `frontend/src/api/task.ts`ï¼çæ®µ8ï¼å¯ä»¥æç¡®çå°ï¼  \n- å½ååç«¯ä»»å¡ API ä»\u0085å\u0085å« `createTask`ã`getTasks`ã`getTask`ã`runTask`ï¼**æ²¡æ** `deleteTask` å½æ°ã  \n- è¿ä¸ Issue æè¿°ä¸­âåç«¯éè¦ delete task APIâä»¥åâä»»å¡é¢æ¿éè¦å é¤æä½âå®å\u0085¨å»åã\n\n### 2. è¯æ®ä¸è¶³é¨å\n- **ä»åºå é¤ä¸ä»»å¡å\u0085³èé»è¾**ï¼æªæ£ç´¢å°ä»»ä½å\u0085³äºä»åºå é¤æ¶å¦ä½å¤çç¸å\u0085³ä»»å¡çä»£ç ï¼å¦çº§èå é¤ãå¤é®çº¦æãäºä»¶çå¬ç­ï¼ã  \n- **åç«¯å é¤ä»»å¡ API**ï¼æªæä¾ä»»ä½åç«¯æ§å¶å¨ï¼Controllerï¼ãæå¡ï¼Serviceï¼æä»å¨ï¼Repositoryï¼ä»£ç ï¼æ æ³å¤æ­åç«¯æ¯å¦å­å¨ `/api/tasks/:id` ç DELETE è·¯ç±ã  \n- **åç«¯ä»»å¡é¢æ¿å é¤æä½**ï¼æªæä¾ä»»å¡é¢æ¿ç»ä»¶ï¼å¦ `TaskPanel.tsx` æç±»ä¼¼æä»¶ï¼ï¼æ æ³è¯ä¼°åç«¯ UI çå é¤äº¤äºå®ç°ã\n\n### 3. ä¸åè¯­è¨æä»¶ä¹é´çå\u0085³è\n- çæ®µ8ï¼TypeScript APIå±ï¼åçæ®µ1ï¼TypeScript å·¥å\u0085·å½æ°å±ï¼åå±åç«¯ï¼å­å¨é»è¾ä¾èµï¼çæ®µ1å¯¼åºäº `getStepTypeLabel` ç­å½æ°ï¼å¯è½è¢«ä»»å¡æ¾ç¤ºç»ä»¶ä½¿ç¨ã  \n- å\u0085¶ä»çæ®µåä¸º Java/XMLï¼Maven POMï¼ï¼ä¸ä»»å¡å é¤æ ç´æ¥å\u0085³èï¼å±äºæ å\u0085³ä»£ç ã\n\n### 4. ç»¼åç»è®ºï¼æ¯æ Patch çæï¼\n**ç´æ¥å¯æ§è¡çéæ±ï¼**\n1. å¨åç«¯æ°å¢ `DELETE /api/tasks/:id` ç«¯ç¹ï¼å³å é¤åä¸ªä»»å¡ APIï¼ã  \n2. å¨ `frontend/src/api/task.ts` ä¸­æ°å¢ `deleteTask(id: string)` å½æ°ã  \n3. å¨åç«¯ä»»å¡é¢æ¿ç»ä»¶ä¸­å¢å å é¤æé®åç¡®è®¤é»è¾ï¼è°ç¨ `deleteTask` å¹¶å·æ°åè¡¨ã  \n\n**å¾\u0085è¡¥å\u0085\u0085ä¿¡æ¯ï¼å»ºè®®å¨åç»­ patch åè·åï¼ï¼**\n- åç«¯ä»»å¡æ¨¡åçå®ä¹ï¼ç¹å«æ¯ `task` è¡¨ä¸ `repository` è¡¨çå\u0085³èå­æ®µï¼ï¼ä»¥ç¡®å®çº§èå é¤çå®ç°æ¹å¼ã  \n- ä»åºå é¤çå®æ´åç«¯å¤çæµç¨ï¼ä¾å¦æ¯è½¯å é¤è¿æ¯ç©çå é¤ï¼æ¯å¦æé©å­å½æ°æäºä»¶æºå¶ï¼ã  \n- åç«¯ä»»å¡é¢æ¿çå\u0085·ä½ä½ç½®ï¼æä»¶è·¯å¾ï¼åç°ææ¸²æé»è¾ã  \n\nç®åä»\u0085å­ä»£ç çæ®µæ æ³å®å\u0085¨å®ç° Issue ä¸­çâå é¤ä»åºæ¶èªå¨æ¸\u0085çä»»å¡âéæ±ï¼ä½å¯ä»¥ç¬ç«å®æâæ°å¢å é¤ä»»å¡ API ååç«¯å é¤æä½âçä¿®å¤ã",
+        "solutionText":  "1. å¨åç«¯æ°å¢ `DELETE /api/tasks/:id` ç«¯ç¹ã2. å¨ `frontend/src/api/task.ts` ä¸­æ°å¢ `deleteTask` å½æ°ã3. å¨åç«¯ä»»å¡é¢æ¿ç»ä»¶ä¸­æ·»å å é¤æé®åé»è¾ã4. å¨ä»åºå é¤é»è¾ä¸­å¢å çº§èå é¤å\u0085³èä»»å¡çä»£ç ã",
+        "patchText":  "",
+        "riskText":  "æ æ³å¯é çæ patchï¼å ä¸ºç¼ºå°åç«¯ä»£ç ãåç«¯ä»»å¡é¢æ¿ç»ä»¶ä»¥åä»åºå é¤å¤çé»è¾çç¸å\u0085³ä»£ç çæ®µãä»\u0085å­ç°æçæ®µæ æ³ç¡®å®å\u0085·ä½å®ç°ç»èï¼å¦ä»»å¡æ¨¡åå®ä¹ãåç«¯è·¯ç±ãæ°æ®åºå\u0085³èç­ã"
+    }
+]

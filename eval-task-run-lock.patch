@@ -1,0 +1,56 @@
+﻿--- a/src/main/java/com/codepliot/agent/service/AgentRunService.java
++++ b/src/main/java/com/codepliot/agent/service/AgentRunService.java
+@@ -1,4 +1,5 @@
+ package com.codepliot.agent.service;
+ 
++import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+ import com.codepliot.agent.executor.AgentExecutor;
+@@ -13,6 +14,7 @@
+     private final AgentTaskMapper agentTaskMapper;
+     private final ProjectRepoMapper projectRepoMapper;
+     private final AgentExecutor agentExecutor;
++    private static final String ERR_MSG_DUPLICATE_RUN = "Task is already running or completed";
+ 
+     public AgentRunService(AgentTaskMapper agentTaskMapper,
+                            ProjectRepoMapper projectRepoMapper,
+@@ -28,23 +30,27 @@
+     public AgentTaskVO run(Long taskId) {
+         Long currentUserId = SecurityUtils.getCurrentUserId();
+         AgentTask task = requireOwnedTask(taskId, currentUserId);
+-        requireRunnableStatus(task);
+         ProjectRepo projectRepo = requireOwnedProject(task.getProjectId(), currentUserId);
+-        claimRunnableTask(taskId, currentUserId);
+ 
+-        task.setStatus(AgentTaskStatus.CLONING.name());
++        // åå­å°å°è¯å°ä»»å¡ç¶æä» PENDING æ´æ°ä¸º CLONINGï¼é²æ­¢éå¤æ§è¡
++        boolean updated = agentTaskMapper.update(null,
++                new LambdaUpdateWrapper<AgentTask>()
++                        .eq(AgentTask::getId, taskId)
++                        .eq(AgentTask::getStatus, AgentTaskStatus.PENDING.name())
++                        .set(AgentTask::getStatus, AgentTaskStatus.CLONING.name())) > 0;
++        if (!updated) {
++            throw new BusinessException(ERR_MSG_DUPLICATE_RUN);
++        }
++        // æ´æ°åå­ä¸­ç task ç¶æä»¥ä¿æä¸è´
++        task.setStatus(AgentTaskStatus.CLONING.name());
++
+         agentExecutor.execute(task, projectRepo);
+         return AgentTaskVO.from(agentTaskMapper.selectById(taskId));
+     }
+ 
+     private AgentTask requireOwnedTask(Long taskId, Long currentUserId) {
+         // ... æ¹æ³ä½ä¿æä¸å
+     }
+ 
+-    private void requireRunnableStatus(AgentTask task) {
+-        // æ­¤æ¹æ³å·²ç±ä¹è§éæ¿ä»£ï¼å¯æ ¹æ®éè¦ä¿çæå é¤
+-    }
+-
+-    private void claimRunnableTask(Long taskId, Long currentUserId) {
+-        // æ­¤æ¹æ³å·²ç±ä¹è§éæ¿ä»£ï¼å¯æ ¹æ®éè¦ä¿çæå é¤
+-    }
+-
+     // å¶ä½æ¹æ³ä¿æä¸å
+ }
