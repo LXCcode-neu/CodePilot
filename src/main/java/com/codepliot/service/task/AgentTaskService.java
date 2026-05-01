@@ -1,38 +1,51 @@
 package com.codepliot.service.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.codepliot.utils.SecurityUtils;
-import com.codepliot.exception.BusinessException;
-import com.codepliot.model.ErrorCode;
-import com.codepliot.entity.ProjectRepo;
-import com.codepliot.repository.ProjectRepoMapper;
-import com.codepliot.model.AgentTaskCreateRequest;
+import com.codepliot.entity.AgentStep;
 import com.codepliot.entity.AgentTask;
 import com.codepliot.entity.AgentTaskStatus;
-import com.codepliot.repository.AgentTaskMapper;
+import com.codepliot.entity.PatchRecord;
+import com.codepliot.entity.ProjectRepo;
+import com.codepliot.exception.BusinessException;
+import com.codepliot.model.AgentTaskCreateRequest;
 import com.codepliot.model.AgentTaskVO;
+import com.codepliot.model.ErrorCode;
+import com.codepliot.repository.AgentStepMapper;
+import com.codepliot.repository.AgentTaskMapper;
+import com.codepliot.repository.PatchRecordMapper;
+import com.codepliot.repository.ProjectRepoMapper;
+import com.codepliot.service.sse.SseService;
+import com.codepliot.utils.SecurityUtils;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-/**
- * AgentTaskService 服务类，负责封装业务流程和领域能力。
- */
+
 @Service
 public class AgentTaskService {
 
     private final AgentTaskMapper agentTaskMapper;
+    private final AgentStepMapper agentStepMapper;
+    private final PatchRecordMapper patchRecordMapper;
     private final ProjectRepoMapper projectRepoMapper;
-/**
- * 创建 AgentTaskService 实例。
- */
-public AgentTaskService(AgentTaskMapper agentTaskMapper, ProjectRepoMapper projectRepoMapper) {
+    private final TaskRunLockService taskRunLockService;
+    private final SseService sseService;
+
+    public AgentTaskService(AgentTaskMapper agentTaskMapper,
+                            AgentStepMapper agentStepMapper,
+                            PatchRecordMapper patchRecordMapper,
+                            ProjectRepoMapper projectRepoMapper,
+                            TaskRunLockService taskRunLockService,
+                            SseService sseService) {
         this.agentTaskMapper = agentTaskMapper;
+        this.agentStepMapper = agentStepMapper;
+        this.patchRecordMapper = patchRecordMapper;
         this.projectRepoMapper = projectRepoMapper;
+        this.taskRunLockService = taskRunLockService;
+        this.sseService = sseService;
     }
-    /**
-     * 执行 create 相关逻辑。
-     */
-@Transactional
+
+    @Transactional
     public AgentTaskVO create(AgentTaskCreateRequest request) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         requireOwnedProject(currentUserId, request.projectId());
@@ -48,10 +61,8 @@ public AgentTaskService(AgentTaskMapper agentTaskMapper, ProjectRepoMapper proje
         agentTaskMapper.insert(agentTask);
         return AgentTaskVO.from(agentTask);
     }
-/**
- * 列出Current User Tasks相关逻辑。
- */
-public List<AgentTaskVO> listCurrentUserTasks() {
+
+    public List<AgentTaskVO> listCurrentUserTasks() {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         return agentTaskMapper.selectList(new LambdaQueryWrapper<AgentTask>()
                         .eq(AgentTask::getUserId, currentUserId)
@@ -60,29 +71,49 @@ public List<AgentTaskVO> listCurrentUserTasks() {
                 .map(AgentTaskVO::from)
                 .toList();
     }
-/**
- * 获取Detail相关逻辑。
- */
-public AgentTaskVO getDetail(Long id) {
+
+    public AgentTaskVO getDetail(Long id) {
         return AgentTaskVO.from(requireOwnedTask(id));
     }
-/**
- * 获取Owned Task Entity相关逻辑。
- */
-public AgentTask getOwnedTaskEntity(Long id) {
+
+    public AgentTask getOwnedTaskEntity(Long id) {
         return requireOwnedTask(id);
     }
-    /**
-     * 更新Status相关逻辑。
-     */
-@Transactional
+
+    @Transactional
+    public void delete(Long id) {
+        AgentTask agentTask = requireOwnedTask(id);
+        List<TaskLock> taskLocks = lockTasks(List.of(agentTask));
+        try {
+            deleteTasksByIds(List.of(agentTask.getId()));
+        } finally {
+            unlockTasks(taskLocks);
+        }
+    }
+
+    @Transactional
+    public void deleteByProjectId(Long projectId) {
+        List<AgentTask> tasks = agentTaskMapper.selectList(new LambdaQueryWrapper<AgentTask>()
+                .eq(AgentTask::getProjectId, projectId)
+                .orderByAsc(AgentTask::getId));
+        if (tasks.isEmpty()) {
+            return;
+        }
+
+        List<TaskLock> taskLocks = lockTasks(tasks);
+        try {
+            deleteTasksByIds(tasks.stream().map(AgentTask::getId).toList());
+        } finally {
+            unlockTasks(taskLocks);
+        }
+    }
+
+    @Transactional
     public void updateStatus(Long taskId, AgentTaskStatus status) {
         updateStatus(taskId, status, null, null);
     }
-    /**
-     * 更新Status相关逻辑。
-     */
-@Transactional
+
+    @Transactional
     public void updateStatus(Long taskId, AgentTaskStatus status, String resultSummary, String errorMessage) {
         AgentTask agentTask = requireTask(taskId);
         agentTask.setStatus(status.name());
@@ -90,10 +121,8 @@ public AgentTask getOwnedTaskEntity(Long id) {
         agentTask.setErrorMessage(errorMessage);
         agentTaskMapper.updateById(agentTask);
     }
-/**
- * 检查并返回Owned Project相关逻辑。
- */
-private void requireOwnedProject(Long currentUserId, Long projectId) {
+
+    private void requireOwnedProject(Long currentUserId, Long projectId) {
         ProjectRepo projectRepo = projectRepoMapper.selectOne(new LambdaQueryWrapper<ProjectRepo>()
                 .eq(ProjectRepo::getId, projectId)
                 .eq(ProjectRepo::getUserId, currentUserId)
@@ -102,10 +131,8 @@ private void requireOwnedProject(Long currentUserId, Long projectId) {
             throw new BusinessException(ErrorCode.PROJECT_REPO_NOT_FOUND);
         }
     }
-/**
- * 检查并返回Owned Task相关逻辑。
- */
-private AgentTask requireOwnedTask(Long id) {
+
+    private AgentTask requireOwnedTask(Long id) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         AgentTask agentTask = agentTaskMapper.selectOne(new LambdaQueryWrapper<AgentTask>()
                 .eq(AgentTask::getId, id)
@@ -116,15 +143,71 @@ private AgentTask requireOwnedTask(Long id) {
         }
         return agentTask;
     }
-/**
- * 检查并返回Task相关逻辑。
- */
-private AgentTask requireTask(Long id) {
+
+    private AgentTask requireTask(Long id) {
         AgentTask agentTask = agentTaskMapper.selectById(id);
         if (agentTask == null) {
             throw new BusinessException(ErrorCode.AGENT_TASK_NOT_FOUND);
         }
         return agentTask;
     }
-}
 
+    private void deleteTasksByIds(List<Long> taskIds) {
+        if (taskIds == null || taskIds.isEmpty()) {
+            return;
+        }
+
+        List<AgentTask> currentTasks = agentTaskMapper.selectList(new LambdaQueryWrapper<AgentTask>()
+                .in(AgentTask::getId, taskIds));
+        if (currentTasks.size() != taskIds.size()) {
+            throw new BusinessException(ErrorCode.AGENT_TASK_NOT_FOUND);
+        }
+        requireDeletableTasks(currentTasks);
+
+        agentStepMapper.delete(new LambdaQueryWrapper<AgentStep>()
+                .in(AgentStep::getTaskId, taskIds));
+        patchRecordMapper.delete(new LambdaQueryWrapper<PatchRecord>()
+                .in(PatchRecord::getTaskId, taskIds));
+        agentTaskMapper.delete(new LambdaQueryWrapper<AgentTask>()
+                .in(AgentTask::getId, taskIds));
+
+        taskIds.forEach(sseService::complete);
+    }
+
+    private List<TaskLock> lockTasks(List<AgentTask> tasks) {
+        List<TaskLock> taskLocks = new ArrayList<>();
+        try {
+            for (AgentTask task : tasks) {
+                taskLocks.add(new TaskLock(task.getId(), taskRunLockService.lock(task.getId())));
+            }
+            return taskLocks;
+        } catch (RuntimeException exception) {
+            unlockTasks(taskLocks);
+            throw exception;
+        }
+    }
+
+    private void unlockTasks(List<TaskLock> taskLocks) {
+        for (TaskLock taskLock : taskLocks) {
+            taskRunLockService.unlock(taskLock.taskId(), taskLock.lockValue());
+        }
+    }
+
+    private void requireDeletableTasks(List<AgentTask> tasks) {
+        boolean hasRunningTask = tasks.stream().anyMatch(task -> isRunningStatus(task.getStatus()));
+        if (hasRunningTask) {
+            throw new BusinessException(ErrorCode.AGENT_TASK_RUNNING, "Running agent tasks cannot be deleted");
+        }
+    }
+
+    private boolean isRunningStatus(String status) {
+        return AgentTaskStatus.CLONING.name().equals(status)
+                || AgentTaskStatus.INDEXING.name().equals(status)
+                || AgentTaskStatus.RETRIEVING.name().equals(status)
+                || AgentTaskStatus.ANALYZING.name().equals(status)
+                || AgentTaskStatus.GENERATING_PATCH.name().equals(status);
+    }
+
+    private record TaskLock(Long taskId, String lockValue) {
+    }
+}

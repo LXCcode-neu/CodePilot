@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, LoaderCircle } from "lucide-react";
+import { LoaderCircle, Plus } from "lucide-react";
 import { createProject, deleteProject, getProjects } from "@/api/project";
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingBlock } from "@/components/LoadingBlock";
@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import type { ProjectRepo } from "@/types/project";
+
+const CREATE_ERROR = "添加仓库失败";
+const DELETE_CONFIRM_MESSAGE = "确定删除这个仓库吗？删除后该仓库下的相关任务、执行步骤和 Patch 记录也会一起删除。";
 
 export function ProjectListPage() {
   const [projects, setProjects] = useState<ProjectRepo[]>([]);
@@ -48,21 +51,24 @@ export function ProjectListPage() {
       setOpen(false);
       await loadProjects();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "添加仓库失败");
+      setError(err instanceof Error ? err.message : CREATE_ERROR);
     } finally {
       setSubmitting(false);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm("确定删除这个仓库吗？")) {
+    if (!window.confirm(DELETE_CONFIRM_MESSAGE)) {
       return;
     }
 
     setDeletingId(id);
+    setError("");
     try {
       await deleteProject(id);
       await loadProjects();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : CREATE_ERROR);
     } finally {
       setDeletingId(null);
     }
@@ -87,7 +93,9 @@ export function ProjectListPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>添加公开仓库</DialogTitle>
-              <DialogDescription>请输入合法的 GitHub 仓库 HTTPS 地址，例如 `https://github.com/octocat/Hello-World.git`。</DialogDescription>
+              <DialogDescription>
+                请输入合法的 GitHub 仓库 HTTPS 地址，例如 https://github.com/octocat/Hello-World.git
+              </DialogDescription>
             </DialogHeader>
 
             <form className="space-y-4" onSubmit={handleCreate}>

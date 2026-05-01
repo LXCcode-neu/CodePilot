@@ -13,6 +13,10 @@ export function getTask(id: string) {
   return request.get<AgentTask>(`/api/tasks/${id}`);
 }
 
+export function deleteTask(id: string) {
+  return request.delete<void>(`/api/tasks/${id}`);
+}
+
 export function runTask(id: string) {
   return request.post<AgentTask>(`/api/tasks/${id}/run`);
 }

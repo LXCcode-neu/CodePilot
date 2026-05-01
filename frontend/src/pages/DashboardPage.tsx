@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Bot, CircleCheckBig, FolderGit2, OctagonAlert } from "lucide-react";
 import { getProjects } from "@/api/project";
-import { getTasks } from "@/api/task";
+import { deleteTask, getTasks } from "@/api/task";
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import { TaskCard } from "@/components/TaskCard";
@@ -12,24 +12,44 @@ import { Separator } from "@/components/ui/separator";
 import type { ProjectRepo } from "@/types/project";
 import type { AgentTask } from "@/types/task";
 
+const DELETE_CONFIRM_MESSAGE = "确定删除这个任务吗？删除后对应的执行步骤和 Patch 记录也会一起删除。";
+const DELETE_TASK_ERROR = "删除任务失败";
+
 export function DashboardPage() {
   const [projects, setProjects] = useState<ProjectRepo[]>([]);
   const [tasks, setTasks] = useState<AgentTask[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  async function loadDashboardData() {
+    const [projectData, taskData] = await Promise.all([getProjects(), getTasks()]);
+    setProjects(projectData);
+    setTasks(taskData);
+  }
 
   useEffect(() => {
-    async function load() {
-      try {
-        const [projectData, taskData] = await Promise.all([getProjects(), getTasks()]);
-        setProjects(projectData);
-        setTasks(taskData);
-      } finally {
-        setLoading(false);
-      }
+    loadDashboardData()
+      .catch(() => undefined)
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleDeleteTask(id: string) {
+    if (!window.confirm(DELETE_CONFIRM_MESSAGE)) {
+      return;
     }
 
-    void load();
-  }, []);
+    setDeletingId(id);
+    setError("");
+    try {
+      await deleteTask(id);
+      await loadDashboardData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : DELETE_TASK_ERROR);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const repoMap = useMemo(() => new Map(projects.map((project) => [project.id, project.repoName])), [projects]);
   const recentTasks = tasks.slice(0, 5);
@@ -48,7 +68,7 @@ export function DashboardPage() {
           <p className="text-sm uppercase tracking-[0.24em] text-slate-300">Dashboard</p>
           <h1 className="text-3xl font-extrabold">CodePilot 控制台</h1>
           <p className="max-w-2xl text-sm leading-7 text-slate-300">
-            统一查看仓库接入、Agent 任务运行情况，以及最近一次 Issue-to-Patch 的执行轨迹。
+            在一个入口里查看仓库接入、Agent 任务状态，以及最近的 Issue-to-Patch 执行轨迹。
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -85,7 +105,7 @@ export function DashboardPage() {
           <CardHeader className="flex-row items-end justify-between gap-4 space-y-0">
             <div>
               <CardTitle className="section-title">最近任务</CardTitle>
-              <p className="section-subtitle mt-1">最近 5 条任务记录，用于快速进入详情页。</p>
+              <p className="section-subtitle mt-1">最近 5 条任务记录，可以直接删除或进入详情页。</p>
             </div>
             <Button asChild variant="ghost" size="sm">
               <Link to="/tasks">
@@ -95,12 +115,34 @@ export function DashboardPage() {
             </Button>
           </CardHeader>
           <CardContent>
+            {error ? (
+              <div className="mb-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+            ) : null}
+
             {loading ? (
               <LoadingBlock lines={5} />
             ) : recentTasks.length ? (
-              <div className="grid gap-4">{recentTasks.map((task) => <TaskCard key={task.id} task={task} repoName={repoMap.get(task.projectId)} />)}</div>
+              <div className="grid gap-4">
+                {recentTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    repoName={repoMap.get(task.projectId)}
+                    onDelete={handleDeleteTask}
+                    deleting={deletingId === task.id}
+                  />
+                ))}
+              </div>
             ) : (
-              <EmptyState title="还没有任务" description="先创建一个仓库，然后发起第一个 Agent 任务。" action={<Button asChild><Link to="/tasks/new">去创建任务</Link></Button>} />
+              <EmptyState
+                title="还没有任务"
+                description="先创建一个仓库，然后发起第一个 Agent 任务。"
+                action={
+                  <Button asChild>
+                    <Link to="/tasks/new">去创建任务</Link>
+                  </Button>
+                }
+              />
             )}
           </CardContent>
         </Card>
@@ -108,7 +150,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="section-title">仓库概览</CardTitle>
-            <p className="section-subtitle mt-1">当前已接入的仓库和本地路径状态。</p>
+            <p className="section-subtitle mt-1">当前已接入的仓库与本地路径状态。</p>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -120,14 +162,22 @@ export function DashboardPage() {
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-slate-900">{project.repoName}</p>
                       <p className="truncate text-xs text-slate-500">{project.repoUrl}</p>
-                      <p className="truncate text-xs text-slate-400">{project.localPath || "尚未 clone"}</p>
+                      <p className="truncate text-xs text-slate-400">{project.localPath || "--"}</p>
                     </div>
                     <Separator className="mt-4" />
                   </div>
                 ))}
               </div>
             ) : (
-              <EmptyState title="暂无仓库" description="添加 GitHub 公开仓库后，这里会显示仓库总览。" action={<Button asChild><Link to="/projects">添加仓库</Link></Button>} />
+              <EmptyState
+                title="暂无仓库"
+                description="添加 GitHub 公开仓库后，这里会显示仓库总览。"
+                action={
+                  <Button asChild>
+                    <Link to="/projects">添加仓库</Link>
+                  </Button>
+                }
+              />
             )}
           </CardContent>
         </Card>

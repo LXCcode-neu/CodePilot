@@ -1,34 +1,31 @@
 package com.codepliot.service.project;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.codepliot.utils.SecurityUtils;
+import com.codepliot.entity.ProjectRepo;
+import com.codepliot.entity.ProjectRepoStatus;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.ErrorCode;
 import com.codepliot.model.ProjectCreateRequest;
-import com.codepliot.entity.ProjectRepo;
-import com.codepliot.entity.ProjectRepoStatus;
-import com.codepliot.repository.ProjectRepoMapper;
 import com.codepliot.model.ProjectRepoVO;
+import com.codepliot.repository.ProjectRepoMapper;
+import com.codepliot.service.task.AgentTaskService;
+import com.codepliot.utils.SecurityUtils;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-/**
- * ProjectRepoService 服务类，负责封装业务流程和领域能力。
- */
+
 @Service
 public class ProjectRepoService {
 
     private final ProjectRepoMapper projectRepoMapper;
-/**
- * 创建 ProjectRepoService 实例。
- */
-public ProjectRepoService(ProjectRepoMapper projectRepoMapper) {
+    private final AgentTaskService agentTaskService;
+
+    public ProjectRepoService(ProjectRepoMapper projectRepoMapper, AgentTaskService agentTaskService) {
         this.projectRepoMapper = projectRepoMapper;
+        this.agentTaskService = agentTaskService;
     }
-    /**
-     * 执行 create 相关逻辑。
-     */
-@Transactional
+
+    @Transactional
     public ProjectRepoVO create(ProjectCreateRequest request) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         String normalizedRepoUrl = normalizeRepoUrl(request.repoUrl());
@@ -44,10 +41,8 @@ public ProjectRepoService(ProjectRepoMapper projectRepoMapper) {
         projectRepoMapper.insert(projectRepo);
         return ProjectRepoVO.from(projectRepo);
     }
-/**
- * 列出Current User Repos相关逻辑。
- */
-public List<ProjectRepoVO> listCurrentUserRepos() {
+
+    public List<ProjectRepoVO> listCurrentUserRepos() {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         return projectRepoMapper.selectList(new LambdaQueryWrapper<ProjectRepo>()
                         .eq(ProjectRepo::getUserId, currentUserId)
@@ -56,24 +51,19 @@ public List<ProjectRepoVO> listCurrentUserRepos() {
                 .map(ProjectRepoVO::from)
                 .toList();
     }
-/**
- * 获取Detail相关逻辑。
- */
-public ProjectRepoVO getDetail(Long id) {
+
+    public ProjectRepoVO getDetail(Long id) {
         return ProjectRepoVO.from(requireOwnedRepo(id));
     }
-    /**
-     * 执行 delete 相关逻辑。
-     */
-@Transactional
+
+    @Transactional
     public void delete(Long id) {
         ProjectRepo projectRepo = requireOwnedRepo(id);
+        agentTaskService.deleteByProjectId(projectRepo.getId());
         projectRepoMapper.deleteById(projectRepo.getId());
     }
-/**
- * 检查并返回Owned Repo相关逻辑。
- */
-private ProjectRepo requireOwnedRepo(Long id) {
+
+    private ProjectRepo requireOwnedRepo(Long id) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         ProjectRepo projectRepo = projectRepoMapper.selectOne(new LambdaQueryWrapper<ProjectRepo>()
                 .eq(ProjectRepo::getId, id)
@@ -84,10 +74,8 @@ private ProjectRepo requireOwnedRepo(Long id) {
         }
         return projectRepo;
     }
-/**
- * 规范化Repo Url相关逻辑。
- */
-private String normalizeRepoUrl(String repoUrl) {
+
+    private String normalizeRepoUrl(String repoUrl) {
         String normalized = repoUrl == null ? "" : repoUrl.trim();
         while (normalized.endsWith("/")) {
             normalized = normalized.substring(0, normalized.length() - 1);
@@ -97,10 +85,8 @@ private String normalizeRepoUrl(String repoUrl) {
         }
         return normalized;
     }
-/**
- * 解析Repo Name相关逻辑。
- */
-private String parseRepoName(String repoUrl) {
+
+    private String parseRepoName(String repoUrl) {
         String repoName = repoUrl.substring(repoUrl.lastIndexOf('/') + 1);
         if (repoName.endsWith(".git")) {
             repoName = repoName.substring(0, repoName.length() - 4);
@@ -111,4 +97,3 @@ private String parseRepoName(String repoUrl) {
         return repoName;
     }
 }
-

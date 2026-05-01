@@ -168,6 +168,7 @@ This repository contains:
 - CodeRanker reranking
 - LLM analysis and patch generation abstraction
 - patch record persistence, safety review, and manual confirmation
+- task deletion and cascading cleanup when deleting a project repository
 - Redis-backed task run lock
 - Spring Async background execution
 - SSE task event subscription
@@ -262,6 +263,13 @@ The current frontend condenses SSE into three stages:
 - Manual confirmation endpoint:
   - `POST /api/tasks/{taskId}/confirm`
 - This MVP still does not auto-apply patches or create PRs
+
+### Deletion Behavior
+
+- Manual task deletion endpoint:
+  - `DELETE /api/tasks/{taskId}`
+- Deleting a project repository now also deletes its related agent tasks, agent steps, and patch records
+- Running tasks cannot be deleted until the current run finishes
 
 ### Async Execution Note
 

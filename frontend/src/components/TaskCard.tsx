@@ -1,12 +1,19 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Clock3 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowRight, Clock3, LoaderCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { formatDateTime } from "@/lib/utils";
 import type { AgentTask } from "@/types/task";
 
-export function TaskCard({ task, repoName }: { task: AgentTask; repoName?: string }) {
+interface TaskCardProps {
+  task: AgentTask;
+  repoName?: string;
+  onDelete?: (id: string) => void;
+  deleting?: boolean;
+}
+
+export function TaskCard({ task, repoName, onDelete, deleting = false }: TaskCardProps) {
   return (
     <Card className="transition hover:-translate-y-0.5">
       <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
@@ -23,12 +30,20 @@ export function TaskCard({ task, repoName }: { task: AgentTask; repoName?: strin
             <Clock3 className="h-3.5 w-3.5" />
             {formatDateTime(task.createdAt)}
           </div>
-          <Button asChild variant="ghost" size="sm">
-            <Link to={`/tasks/${task.id}`}>
-              查看详情
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            {onDelete ? (
+              <Button variant="destructive" size="sm" onClick={() => onDelete(task.id)} disabled={deleting}>
+                {deleting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                删除任务
+              </Button>
+            ) : null}
+            <Button asChild variant="ghost" size="sm">
+              <Link to={`/tasks/${task.id}`}>
+                查看详情
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

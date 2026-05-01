@@ -24,14 +24,13 @@ const RUNNING_STATUSES = new Set([
   "WAITING_CONFIRM",
 ]);
 
-const START_TITLE = "\u5f00\u59cb";
-const RUNNING_TITLE = "\u6267\u884c\u4e2d";
-const COMPLETED_TITLE = "\u5b8c\u6210";
-const FAILED_TITLE = "\u5931\u8d25";
-const PANEL_TITLE = "\u5b9e\u65f6\u8fdb\u5ea6";
-const DETAIL_TITLE = "\u4e8b\u4ef6\u660e\u7ec6";
-const EMPTY_EVENTS_MESSAGE =
-  "SSE \u5efa\u7acb\u540e\uff0c\u8fd9\u91cc\u4f1a\u6301\u7eed\u5c55\u793a\u4efb\u52a1\u4e8b\u4ef6\u3002";
+const START_TITLE = "开始";
+const RUNNING_TITLE = "执行中";
+const COMPLETED_TITLE = "完成";
+const FAILED_TITLE = "失败";
+const PANEL_TITLE = "实时进度";
+const DETAIL_TITLE = "事件明细";
+const EMPTY_EVENTS_MESSAGE = "SSE 建立后，这里会持续展示任务事件。";
 
 function getPhaseLabel(phase?: string) {
   if (phase === "STARTED") {
@@ -48,18 +47,18 @@ function getPhaseLabel(phase?: string) {
 
 function getStatusMessage(taskStatus?: string | null, stepType?: string | null) {
   if (taskStatus === "WAITING_CONFIRM") {
-    return "\u5df2\u751f\u6210 Patch\uff0c\u7b49\u5f85\u4eba\u5de5\u786e\u8ba4\u3002";
+    return "已生成 Patch，等待人工确认。";
   }
   if (taskStatus === "COMPLETED") {
-    return "\u4efb\u52a1\u5df2\u5b8c\u6210\u3002";
+    return "任务已完成。";
   }
   if (taskStatus === "FAILED") {
-    return "\u4efb\u52a1\u6267\u884c\u5931\u8d25\uff0c\u8bf7\u67e5\u770b\u9519\u8bef\u4fe1\u606f\u3002";
+    return "任务执行失败，请查看错误信息。";
   }
   if (stepType) {
-    return `${getStepTypeLabel(stepType)}\u6b63\u5728\u6267\u884c\u3002`;
+    return `${getStepTypeLabel(stepType)}正在执行。`;
   }
-  return "\u540e\u53f0\u6b63\u5728\u6267\u884c\u4efb\u52a1\u3002";
+  return "后台正在执行任务。";
 }
 
 function getEventDisplayMessage(event?: TaskEventMessage) {
@@ -68,14 +67,10 @@ function getEventDisplayMessage(event?: TaskEventMessage) {
   }
 
   if (event.phase === "STARTED") {
-    return "\u5df2\u63d0\u4ea4 Agent \u8fd0\u884c\u8bf7\u6c42\u3002";
+    return "已提交 Agent 运行请求。";
   }
 
-  if (event.phase === "COMPLETED") {
-    return getStatusMessage(event.status, event.stepType);
-  }
-
-  if (event.phase === "RUNNING") {
+  if (event.phase === "COMPLETED" || event.phase === "RUNNING") {
     return getStatusMessage(event.status, event.stepType);
   }
 
@@ -112,9 +107,7 @@ export function RealtimeEventPanel({
       state: isPending ? "pending" : "done",
       message:
         getEventDisplayMessage(startedEvent) ||
-        (isPending
-          ? "\u4efb\u52a1\u5c1a\u672a\u5f00\u59cb\u3002"
-          : "\u4efb\u52a1\u5df2\u5f00\u59cb\uff0c\u5df2\u8fdb\u5165\u672c\u6b21\u6267\u884c\u6d41\u7a0b\u3002"),
+        (isPending ? "任务尚未开始。" : "任务已开始，已进入本次执行流程。"),
       time: startedEvent?.time,
     },
     {
@@ -123,11 +116,7 @@ export function RealtimeEventPanel({
       state: isFailed || isCompleted ? "done" : isRunning || runningEvent ? "active" : "pending",
       message:
         getEventDisplayMessage(runningEvent) ||
-        (isPending
-          ? "\u5f00\u59cb\u540e\u4f1a\u8fdb\u5165\u6267\u884c\u9636\u6bb5\u3002"
-          : isRunning
-            ? getStatusMessage(taskStatus)
-            : "\u7b49\u5f85\u8fdb\u5165\u6267\u884c\u9636\u6bb5\u3002"),
+        (isPending ? "开始后会进入执行阶段。" : isRunning ? getStatusMessage(taskStatus) : "等待进入执行阶段。"),
       time: runningEvent?.time,
     },
     {
@@ -136,11 +125,7 @@ export function RealtimeEventPanel({
       state: isFailed ? "failed" : isCompleted ? "done" : "pending",
       message:
         getEventDisplayMessage(completedEvent) ||
-        (isFailed
-          ? "\u4efb\u52a1\u6267\u884c\u5931\u8d25\uff0c\u8bf7\u67e5\u770b\u9519\u8bef\u4fe1\u606f\u3002"
-          : isCompleted
-            ? getStatusMessage(taskStatus)
-            : "\u6267\u884c\u5b8c\u6210\u540e\u4f1a\u5728\u8fd9\u91cc\u663e\u793a\u7ed3\u679c\u3002"),
+        (isFailed ? "任务执行失败，请查看错误信息。" : isCompleted ? getStatusMessage(taskStatus) : "执行完成后会在这里显示结果。"),
       time: completedEvent?.time,
     },
   ];
@@ -161,10 +146,7 @@ export function RealtimeEventPanel({
                 <StageIcon state={stage.state} />
                 {index < stages.length - 1 ? (
                   <div
-                    className={cn(
-                      "mt-2 h-full min-h-10 w-px",
-                      stage.state === "done" ? "bg-emerald-200" : "bg-slate-200"
-                    )}
+                    className={cn("mt-2 h-full min-h-10 w-px", stage.state === "done" ? "bg-emerald-200" : "bg-slate-200")}
                   />
                 ) : null}
               </div>
@@ -189,18 +171,14 @@ export function RealtimeEventPanel({
                 events.map((event) => (
                   <div key={event.id} className="rounded-2xl bg-slate-50 p-3">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-xs uppercase tracking-wide text-slate-400">
-                        {getEventDisplayTitle(event)}
-                      </p>
+                      <p className="text-xs uppercase tracking-wide text-slate-400">{getEventDisplayTitle(event)}</p>
                       <p className="text-xs text-slate-400">{formatDateTime(event.time)}</p>
                     </div>
                     <p className="mt-2 text-sm text-slate-700">{getEventDisplayMessage(event)}</p>
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">
-                  {EMPTY_EVENTS_MESSAGE}
-                </div>
+                <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">{EMPTY_EVENTS_MESSAGE}</div>
               )}
             </div>
           </ScrollArea>

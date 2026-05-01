@@ -4,14 +4,13 @@ import { EmptyState } from "@/components/EmptyState";
 import { formatDateTime } from "@/lib/utils";
 import type { PatchRecord } from "@/types/patch";
 
-const EMPTY_CONTENT = "\u6682\u65e0\u5185\u5bb9";
-const TITLE = "Patch \u7ed3\u679c";
-const EMPTY_PATCH_TITLE = "\u8fd8\u6ca1\u6709 Patch \u5185\u5bb9";
-const EMPTY_PATCH_DESCRIPTION =
-  "\u4efb\u52a1\u8fdb\u5165 Patch \u9636\u6bb5\u540e\uff0c\u8fd9\u91cc\u4f1a\u5c55\u793a\u5206\u6790\u3001\u89e3\u6cd5\u3001diff \u548c\u98ce\u9669\u8bf4\u660e\u3002";
-const EMPTY_PATCH_BODY = "\u6682\u65e0 patch \u5185\u5bb9";
-const CONFIRMED_LABEL = "\u5df2\u786e\u8ba4";
-const UNCONFIRMED_LABEL = "\u5f85\u786e\u8ba4";
+const EMPTY_CONTENT = "暂无内容";
+const TITLE = "Patch 结果";
+const EMPTY_PATCH_TITLE = "还没有 Patch 内容";
+const EMPTY_PATCH_DESCRIPTION = "任务进入 Patch 阶段后，这里会展示分析、解法、diff 和风险说明。";
+const EMPTY_PATCH_BODY = "暂无 patch 内容";
+const CONFIRMED_LABEL = "已确认";
+const UNCONFIRMED_LABEL = "待确认";
 
 function Section({ value }: { value?: string | null }) {
   if (!value) {
@@ -81,9 +80,7 @@ export function PatchViewer({ patch }: { patch: PatchRecord | null }) {
           </TabsContent>
           <TabsContent value="patch">
             {patch.patch ? (
-              <pre className="overflow-x-auto rounded-2xl bg-slate-950 p-4 text-sm text-slate-100">
-                {patch.patch}
-              </pre>
+              <pre className="overflow-x-auto rounded-2xl bg-slate-950 p-4 text-sm text-slate-100">{patch.patch}</pre>
             ) : (
               <Section value={patch.risk || EMPTY_PATCH_BODY} />
             )}

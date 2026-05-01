@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-import { LoaderCircle, PlayCircle, RefreshCcw } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { LoaderCircle, PlayCircle, RefreshCcw, Trash2 } from "lucide-react";
 import { confirmTaskPatch, getTaskPatch } from "@/api/patch";
 import { getProject } from "@/api/project";
 import { createTaskEventSource, parseTaskEventMessage } from "@/api/sse";
 import { getTaskSteps } from "@/api/step";
-import { getTask, runTask } from "@/api/task";
+import { deleteTask, getTask, runTask } from "@/api/task";
 import { AgentStepTimeline } from "@/components/AgentStepTimeline";
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingBlock } from "@/components/LoadingBlock";
@@ -23,27 +23,32 @@ import type { ProjectRepo } from "@/types/project";
 import type { AgentStep } from "@/types/step";
 import type { AgentTask } from "@/types/task";
 
-const INVALID_TASK_ID = "\u65e0\u6548\u7684\u4efb\u52a1 ID";
-const LOAD_TASK_ERROR = "\u52a0\u8f7d\u4efb\u52a1\u8be6\u60c5\u5931\u8d25";
-const RUN_TASK_ERROR = "\u8fd0\u884c Agent \u5931\u8d25";
-const LOAD_FAILED = "\u52a0\u8f7d\u5931\u8d25";
-const TASK_NOT_FOUND = "\u4efb\u52a1\u4e0d\u5b58\u5728";
-const TASK_NOT_FOUND_DESC = "\u8bf7\u8fd4\u56de\u4efb\u52a1\u5217\u8868\u91cd\u65b0\u9009\u62e9\u4efb\u52a1\u3002";
-const RUN_REQUESTED = "\u5df2\u63d0\u4ea4 Agent \u8fd0\u884c\u8bf7\u6c42\u3002";
-const REFRESH_LABEL = "\u5237\u65b0";
-const CONFIRM_LABEL = "\u786e\u8ba4 Patch";
-const CONFIRMING_LABEL = "\u786e\u8ba4\u4e2d";
-const CONFIRM_REQUESTED = "\u5df2\u786e\u8ba4 Patch\uff0c\u4efb\u52a1\u5df2\u5b8c\u6210\u3002";
-const CONFIRM_ERROR = "\u786e\u8ba4 Patch \u5931\u8d25";
-const TASK_INFO_TITLE = "\u4efb\u52a1\u4fe1\u606f";
-const PROJECT_LABEL = "\u5173\u8054\u4ed3\u5e93";
-const CREATED_AT_LABEL = "\u521b\u5efa\u65f6\u95f4";
-const UPDATED_AT_LABEL = "\u6700\u8fd1\u66f4\u65b0\u65f6\u95f4";
-const SUMMARY_LABEL = "\u7ed3\u679c\u6458\u8981";
-const EMPTY_SUMMARY = "\u4efb\u52a1\u5c1a\u672a\u4ea7\u51fa\u6458\u8981\u3002";
-const TIMELINE_TITLE = "\u6267\u884c\u8f68\u8ff9";
+const INVALID_TASK_ID = "无效的任务 ID";
+const LOAD_TASK_ERROR = "加载任务详情失败";
+const RUN_TASK_ERROR = "运行 Agent 失败";
+const LOAD_FAILED = "加载失败";
+const TASK_NOT_FOUND = "任务不存在";
+const TASK_NOT_FOUND_DESC = "请返回任务列表重新选择任务。";
+const RUN_REQUESTED = "已提交 Agent 运行请求。";
+const REFRESH_LABEL = "刷新";
+const CONFIRM_LABEL = "确认 Patch";
+const CONFIRMING_LABEL = "确认中";
+const CONFIRM_REQUESTED = "已确认 Patch，任务已完成。";
+const CONFIRM_ERROR = "确认 Patch 失败";
+const DELETE_LABEL = "删除任务";
+const DELETING_LABEL = "删除中";
+const DELETE_CONFIRM_MESSAGE = "确定删除这个任务吗？删除后对应的执行步骤和 Patch 记录也会一起删除。";
+const DELETE_ERROR = "删除任务失败";
+const TASK_INFO_TITLE = "任务信息";
+const PROJECT_LABEL = "关联仓库";
+const CREATED_AT_LABEL = "创建时间";
+const UPDATED_AT_LABEL = "最近更新时间";
+const SUMMARY_LABEL = "结果摘要";
+const EMPTY_SUMMARY = "任务尚未产出摘要。";
+const TIMELINE_TITLE = "执行轨迹";
 
 export function TaskDetailPage() {
+  const navigate = useNavigate();
   const params = useParams();
   const taskId = params.id ?? "";
 
@@ -55,6 +60,7 @@ export function TaskDetailPage() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
   async function loadTaskData() {
@@ -91,7 +97,9 @@ export function TaskDetailPage() {
     await loadStepsData();
     if (taskData.status === "COMPLETED" || taskData.status === "WAITING_CONFIRM") {
       await loadPatchData();
+      return;
     }
+    setPatch(null);
   }
 
   useEffect(() => {
@@ -116,7 +124,7 @@ export function TaskDetailPage() {
     }, 3000);
 
     return () => window.clearInterval(timer);
-  }, [task?.status, taskId]);
+  }, [task, taskId]);
 
   useEffect(() => {
     const token = getToken();
@@ -151,6 +159,7 @@ export function TaskDetailPage() {
     () => task?.status === "WAITING_CONFIRM" && Boolean(patch) && !patch?.confirmed,
     [patch, task?.status]
   );
+  const canDelete = useMemo(() => (task ? !isRunningTask(task.status) : false), [task]);
 
   async function handleRun() {
     if (!taskId) {
@@ -206,6 +215,26 @@ export function TaskDetailPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!taskId || !task || !canDelete) {
+      return;
+    }
+    if (!window.confirm(DELETE_CONFIRM_MESSAGE)) {
+      return;
+    }
+
+    setDeleting(true);
+    setError("");
+    try {
+      await deleteTask(taskId);
+      navigate("/tasks");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : DELETE_ERROR);
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   if (loading) {
     return <LoadingBlock lines={8} />;
   }
@@ -228,17 +257,21 @@ export function TaskDetailPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={task.status} />
-          <Button variant="secondary" onClick={() => void loadAll()} disabled={running || confirming}>
+          <Button variant="secondary" onClick={() => void loadAll()} disabled={running || confirming || deleting}>
             <RefreshCcw className="h-4 w-4" />
             {REFRESH_LABEL}
           </Button>
           {canConfirm ? (
-            <Button variant="secondary" onClick={handleConfirmPatch} disabled={confirming || running}>
+            <Button variant="secondary" onClick={handleConfirmPatch} disabled={confirming || running || deleting}>
               {confirming ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
               {confirming ? CONFIRMING_LABEL : CONFIRM_LABEL}
             </Button>
           ) : null}
-          <Button onClick={handleRun} disabled={!canRun || running || confirming}>
+          <Button variant="destructive" onClick={handleDelete} disabled={!canDelete || running || confirming || deleting}>
+            {deleting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            {deleting ? DELETING_LABEL : DELETE_LABEL}
+          </Button>
+          <Button onClick={handleRun} disabled={!canRun || running || confirming || deleting}>
             {running ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
             Run Agent
           </Button>
@@ -276,9 +309,7 @@ export function TaskDetailPage() {
             <Separator />
             <div>
               <p className="text-xs uppercase tracking-wide text-slate-400">{SUMMARY_LABEL}</p>
-              <p className="mt-1 whitespace-pre-wrap leading-7 text-slate-700">
-                {task.resultSummary || EMPTY_SUMMARY}
-              </p>
+              <p className="mt-1 whitespace-pre-wrap leading-7 text-slate-700">{task.resultSummary || EMPTY_SUMMARY}</p>
             </div>
           </CardContent>
         </Card>
