@@ -60,6 +60,21 @@ class LuceneCodeIndexServiceTest {
         }
     }
 
+    @Test
+    void shouldIndexContentEndingWithIdentifierWithoutOffsetErrors() {
+        CodeSymbolMapper codeSymbolMapper = mock(CodeSymbolMapper.class);
+        CodeSymbol symbol = createSymbol(7L, "src/main/java/Demo.java", "JAVA", "METHOD", "parseHTTP2Response", 10, 18);
+        symbol.setContent("parseHTTP2Response");
+        when(codeSymbolMapper.selectList(any())).thenReturn(List.of(symbol));
+
+        WorkspaceProperties workspaceProperties = new WorkspaceProperties();
+        workspaceProperties.setRoot(tempDir.toString());
+        GitWorkspaceService gitWorkspaceService = new GitWorkspaceService(workspaceProperties);
+
+        LuceneCodeIndexService service = new LuceneCodeIndexService(codeSymbolMapper, gitWorkspaceService);
+        assertEquals(1, service.rebuildProjectIndex(7L));
+    }
+
     private CodeSymbol createSymbol(Long projectId,
                                     String filePath,
                                     String language,
