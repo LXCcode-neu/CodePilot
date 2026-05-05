@@ -26,6 +26,10 @@ public class CodeSearchProperties {
 
     private boolean useRipgrep = true;
 
+    private boolean fallbackEnabled = true;
+
+    private String rgPath = "rg";
+
     private List<String> defaultExcludePatterns = new ArrayList<>(List.of(
             ".git/**",
             "target/**",
@@ -33,6 +37,8 @@ public class CodeSearchProperties {
             "dist/**",
             "node_modules/**",
             ".idea/**",
-            ".vscode/**"
+            ".vscode/**",
+            "logs/**",
+            "tmp/**"
     ));
 }
