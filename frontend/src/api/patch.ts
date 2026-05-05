@@ -1,4 +1,5 @@
 import { request } from "@/api/request";
+import { buildPullRequestPreview, parseUnifiedDiff } from "@/lib/patch-diff";
 import type { PatchRecord } from "@/types/patch";
 
 function pickString(record: Record<string, unknown>, key: string) {
@@ -17,12 +18,25 @@ function normalizePatch(data: unknown): PatchRecord {
 
   if (typeof data === "object") {
     const record = data as Record<string, unknown>;
+    const patch = pickString(record, "patch") ?? pickString(record, "content");
+    const fileChanges = Array.isArray(record.fileChanges) ? record.fileChanges : parseUnifiedDiff(patch);
+    const pullRequest =
+      record.pullRequest && typeof record.pullRequest === "object"
+        ? (record.pullRequest as PatchRecord["pullRequest"])
+        : buildPullRequestPreview(
+            patch,
+            pickString(record, "analysis"),
+            pickString(record, "solution"),
+            pickString(record, "risk") ?? pickString(record, "resultSummary"),
+            typeof record.taskId === "string" || typeof record.taskId === "number" ? record.taskId : null
+          );
+
     return {
       id: typeof record.id === "string" || typeof record.id === "number" ? record.id : null,
       taskId: typeof record.taskId === "string" || typeof record.taskId === "number" ? record.taskId : null,
       analysis: pickString(record, "analysis"),
       solution: pickString(record, "solution"),
-      patch: pickString(record, "patch") ?? pickString(record, "content"),
+      patch,
       risk: pickString(record, "risk") ?? pickString(record, "resultSummary"),
       safetyCheckResult: pickString(record, "safetyCheckResult"),
       rawOutput: pickString(record, "rawOutput"),
@@ -30,6 +44,8 @@ function normalizePatch(data: unknown): PatchRecord {
       confirmedAt: pickString(record, "confirmedAt"),
       createdAt: pickString(record, "createdAt"),
       updatedAt: pickString(record, "updatedAt"),
+      fileChanges,
+      pullRequest,
       raw: data,
     };
   }
