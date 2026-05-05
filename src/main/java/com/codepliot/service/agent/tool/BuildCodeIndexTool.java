@@ -5,10 +5,12 @@ import com.codepliot.service.agent.AgentTool;
 import com.codepliot.service.agent.ToolResult;
 import com.codepliot.model.CodeIndexBuildResult;
 import com.codepliot.model.CodeIndexToolResult;
+import com.codepliot.search.config.CodeSearchProperties;
 import com.codepliot.service.index.lucene.LuceneCodeIndexService;
 import com.codepliot.service.index.CodeIndexBuildService;
 import com.codepliot.entity.AgentTaskStatus;
 import com.codepliot.entity.AgentStepType;
+import java.util.Map;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 /**
@@ -20,13 +22,16 @@ public class BuildCodeIndexTool implements AgentTool {
 
     private final CodeIndexBuildService codeIndexBuildService;
     private final LuceneCodeIndexService luceneCodeIndexService;
+    private final CodeSearchProperties codeSearchProperties;
 /**
  * 创建 BuildCodeIndexTool 实例。
  */
 public BuildCodeIndexTool(CodeIndexBuildService codeIndexBuildService,
-                              LuceneCodeIndexService luceneCodeIndexService) {
+                              LuceneCodeIndexService luceneCodeIndexService,
+                              CodeSearchProperties codeSearchProperties) {
         this.codeIndexBuildService = codeIndexBuildService;
         this.luceneCodeIndexService = luceneCodeIndexService;
+        this.codeSearchProperties = codeSearchProperties;
     }
     /**
      * 执行 taskStatus 相关逻辑。
@@ -54,6 +59,14 @@ public BuildCodeIndexTool(CodeIndexBuildService codeIndexBuildService,
      */
 @Override
     public ToolResult execute(AgentContext context) {
+        if ("grep".equalsIgnoreCase(codeSearchProperties.getMode())) {
+            return ToolResult.success("code index build skipped in grep search mode", Map.of(
+                    "mode", codeSearchProperties.getMode(),
+                    "skipped", true,
+                    "reason", "Code search uses on-demand grep mode; Lucene and TreeSitter index build is not required"
+            ));
+        }
+
         CodeIndexBuildResult buildResult = codeIndexBuildService.build(context.projectId());
         int indexDocCount = luceneCodeIndexService.rebuildProjectIndex(context.projectId());
         CodeIndexToolResult result = new CodeIndexToolResult(

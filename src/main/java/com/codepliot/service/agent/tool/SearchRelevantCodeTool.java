@@ -4,14 +4,12 @@ import com.codepliot.entity.AgentStepType;
 import com.codepliot.entity.AgentTaskStatus;
 import com.codepliot.model.AgentContext;
 import com.codepliot.model.RetrievedCodeChunk;
+import com.codepliot.search.CodeSearchFacade;
+import com.codepliot.search.config.CodeSearchProperties;
+import com.codepliot.search.dto.CodeSearchResult;
+import com.codepliot.search.dto.SearchRequest;
 import com.codepliot.service.agent.AgentTool;
 import com.codepliot.service.agent.ToolResult;
-import com.codepliot.service.index.KeywordExtractor;
-import com.codepliot.service.index.RepositoryCodeSearchService;
-import com.codepliot.service.index.lucene.LuceneCodeSearchService;
-import com.codepliot.service.index.rank.CodeRanker;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.core.annotation.Order;
@@ -21,19 +19,15 @@ import org.springframework.stereotype.Component;
 @Order(30)
 public class SearchRelevantCodeTool implements AgentTool {
 
-    private static final int DEFAULT_TOP_K = 10;
-    private static final int SEARCH_CANDIDATE_LIMIT = 40;
+    private static final String SEARCH_MODE_GREP = "grep";
 
-    private final LuceneCodeSearchService luceneCodeSearchService;
-    private final RepositoryCodeSearchService repositoryCodeSearchService;
-    private final CodeRanker codeRanker;
+    private final CodeSearchFacade codeSearchFacade;
+    private final CodeSearchProperties codeSearchProperties;
 
-    public SearchRelevantCodeTool(LuceneCodeSearchService luceneCodeSearchService,
-                                  RepositoryCodeSearchService repositoryCodeSearchService,
-                                  CodeRanker codeRanker) {
-        this.luceneCodeSearchService = luceneCodeSearchService;
-        this.repositoryCodeSearchService = repositoryCodeSearchService;
-        this.codeRanker = codeRanker;
+    public SearchRelevantCodeTool(CodeSearchFacade codeSearchFacade,
+                                  CodeSearchProperties codeSearchProperties) {
+        this.codeSearchFacade = codeSearchFacade;
+        this.codeSearchProperties = codeSearchProperties;
     }
 
     @Override
@@ -53,20 +47,39 @@ public class SearchRelevantCodeTool implements AgentTool {
 
     @Override
     public ToolResult execute(AgentContext context) {
-        String query = buildQuery(context.issueTitle(), context.issueDescription());
-        List<RetrievedCodeChunk> luceneHits = repositoryCodeSearchService.hydrate(
-                context.localPath(),
-                query,
-                luceneCodeSearchService.search(context.projectId(), query, SEARCH_CANDIDATE_LIMIT)
-        );
-        List<RetrievedCodeChunk> fallbackHits = shouldUseRepositoryFallback(luceneHits)
-                ? repositoryCodeSearchService.search(context.localPath(), query, SEARCH_CANDIDATE_LIMIT)
-                : List.of();
-        List<RetrievedCodeChunk> mergedCandidates = mergeCandidates(luceneHits, fallbackHits);
-        List<RetrievedCodeChunk> rerankedHits = codeRanker.rerank(query, mergedCandidates, DEFAULT_TOP_K);
-        context.updateRetrievedChunks(rerankedHits);
+        SearchRequest request = buildSearchRequest(context);
+        List<CodeSearchResult> searchResults;
+        try {
+            searchResults = codeSearchFacade.search(request);
+        } catch (RuntimeException exception) {
+            return ToolResult.failure("code search failed: " + buildErrorMessage(exception), Map.of(
+                    "mode", codeSearchProperties.getMode(),
+                    "query", request.getQuery(),
+                    "error", buildErrorMessage(exception)
+            ));
+        }
 
-        List<Map<String, Object>> chunkSummaries = rerankedHits.stream()
+        List<RetrievedCodeChunk> retrievedChunks = searchResults.stream()
+                .filter(result -> result.getFilePath() != null && !result.getFilePath().isBlank())
+                .map(this::toRetrievedCodeChunk)
+                .toList();
+        context.updateRetrievedChunks(retrievedChunks);
+
+        List<String> warnings = searchResults.stream()
+                .filter(result -> result.getFilePath() == null || result.getFilePath().isBlank())
+                .map(CodeSearchResult::getReason)
+                .filter(reason -> reason != null && !reason.isBlank())
+                .toList();
+
+        if (retrievedChunks.isEmpty() && !warnings.isEmpty()) {
+            return ToolResult.failure("code search failed: " + String.join("; ", warnings), Map.of(
+                    "mode", normalizeMode(codeSearchProperties.getMode()),
+                    "query", request.getQuery(),
+                    "warnings", warnings
+            ));
+        }
+
+        List<Map<String, Object>> chunkSummaries = retrievedChunks.stream()
                 .map(chunk -> Map.<String, Object>of(
                         "filePath", chunk.filePath() == null ? "" : chunk.filePath(),
                         "language", chunk.language() == null ? "" : chunk.language(),
@@ -79,54 +92,86 @@ public class SearchRelevantCodeTool implements AgentTool {
                 .toList();
 
         return ToolResult.success("relevant code search completed", Map.of(
-                "query", query,
-                "topK", DEFAULT_TOP_K,
-                "candidateCount", mergedCandidates.size(),
-                "luceneCandidateCount", luceneHits.size(),
-                "fallbackCandidateCount", fallbackHits.size(),
-                "hitCount", rerankedHits.size(),
+                "mode", normalizeMode(codeSearchProperties.getMode()),
+                "query", request.getQuery(),
+                "maxResults", request.getMaxResults(),
+                "hitCount", retrievedChunks.size(),
+                "warnings", warnings,
                 "chunks", chunkSummaries
         ));
     }
 
-    private String buildQuery(String issueTitle, String issueDescription) {
-        String query = KeywordExtractor.buildQuery(issueTitle, issueDescription);
-        if (!query.isBlank()) {
-            return query;
-        }
-        String title = issueTitle == null ? "" : issueTitle.trim();
-        String description = issueDescription == null ? "" : issueDescription.trim();
-        return (title + " " + description).trim();
+    private SearchRequest buildSearchRequest(AgentContext context) {
+        String title = context.issueTitle() == null ? "" : context.issueTitle().trim();
+        String description = context.issueDescription() == null ? "" : context.issueDescription().trim();
+        String issueText = (title + "\n" + description).trim();
+
+        SearchRequest request = new SearchRequest();
+        request.setRepoPath(context.localPath());
+        request.setIssueText(issueText);
+        request.setQuery(issueText);
+        request.setMaxResults(codeSearchProperties.getMaxResults());
+        request.setContextBeforeLines(codeSearchProperties.getContextBeforeLines());
+        request.setContextAfterLines(codeSearchProperties.getContextAfterLines());
+        request.setRegexEnabled(false);
+        return request;
     }
 
-    private boolean shouldUseRepositoryFallback(List<RetrievedCodeChunk> luceneHits) {
-        return luceneHits == null || luceneHits.size() < 3;
+    private RetrievedCodeChunk toRetrievedCodeChunk(CodeSearchResult result) {
+        double score = result.getScore() == null ? 0.0d : result.getScore();
+        return new RetrievedCodeChunk(
+                result.getFilePath(),
+                detectLanguage(result.getFilePath()),
+                "FILE",
+                extractFileName(result.getFilePath()),
+                null,
+                null,
+                result.getStartLine(),
+                result.getEndLine(),
+                result.getContentWithLineNumbers(),
+                score,
+                score
+        );
     }
 
-    private List<RetrievedCodeChunk> mergeCandidates(List<RetrievedCodeChunk> luceneHits, List<RetrievedCodeChunk> fallbackHits) {
-        LinkedHashMap<String, RetrievedCodeChunk> merged = new LinkedHashMap<>();
-        addCandidates(merged, luceneHits);
-        addCandidates(merged, fallbackHits);
-        return merged.values().stream()
-                .sorted(Comparator.comparingDouble(RetrievedCodeChunk::score).reversed()
-                        .thenComparing(RetrievedCodeChunk::filePath, Comparator.nullsLast(String::compareTo)))
-                .limit(SEARCH_CANDIDATE_LIMIT)
-                .toList();
+    private String detectLanguage(String filePath) {
+        if (filePath == null) {
+            return "";
+        }
+        String normalized = filePath.toLowerCase();
+        if (normalized.endsWith(".java")) {
+            return "JAVA";
+        }
+        if (normalized.endsWith(".ts") || normalized.endsWith(".tsx")) {
+            return "TYPESCRIPT";
+        }
+        if (normalized.endsWith(".js") || normalized.endsWith(".jsx")) {
+            return "JAVASCRIPT";
+        }
+        if (normalized.endsWith(".py")) {
+            return "PYTHON";
+        }
+        if (normalized.endsWith(".go")) {
+            return "GO";
+        }
+        return "UNKNOWN";
     }
 
-    private void addCandidates(Map<String, RetrievedCodeChunk> merged, List<RetrievedCodeChunk> candidates) {
-        if (candidates == null) {
-            return;
+    private String extractFileName(String filePath) {
+        if (filePath == null || filePath.isBlank()) {
+            return "";
         }
-        for (RetrievedCodeChunk chunk : candidates) {
-            if (chunk == null) {
-                continue;
-            }
-            String key = chunk.filePath() == null ? "" : chunk.filePath();
-            RetrievedCodeChunk existing = merged.get(key);
-            if (existing == null || chunk.score() > existing.score()) {
-                merged.put(key, chunk);
-            }
-        }
+        String normalized = filePath.replace('\\', '/');
+        int index = normalized.lastIndexOf('/');
+        return index >= 0 ? normalized.substring(index + 1) : normalized;
+    }
+
+    private String normalizeMode(String mode) {
+        return mode == null || mode.isBlank() ? SEARCH_MODE_GREP : mode.trim();
+    }
+
+    private String buildErrorMessage(Exception exception) {
+        String message = exception.getMessage();
+        return message == null || message.isBlank() ? exception.getClass().getSimpleName() : message;
     }
 }
