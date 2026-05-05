@@ -70,9 +70,50 @@ class GrepCodeSearchFacadeTest {
                 }
                 """);
 
-        List<CodeSearchResult> results = facade().search(request("login UserController", 1, false));
+        List<CodeSearchResult> results = facade().search(request("login UserController", 10, false));
 
         assertEquals(1, results.size());
+    }
+
+    @Test
+    void shouldPreferVerificationCodeBusinessCodeOverControllerFallback() throws IOException {
+        write("src/main/java/com/example/controller/UserController.java", """
+                package com.example.controller;
+                import org.springframework.web.bind.annotation.RestController;
+
+                @RestController
+                public class UserController {
+                    public String login() {
+                        return "ok";
+                    }
+                }
+                """);
+        write("src/main/java/com/example/service/UserService.java", """
+                package com.example.service;
+
+                public class UserService {
+                    public String sendCode(String phone) {
+                        String code = RandomUtil.randomNumbers(5);
+                        return code;
+                    }
+                }
+                """);
+        write("src/main/java/com/example/util/RandomUtil.java", """
+                package com.example.util;
+
+                public class RandomUtil {
+                    public static String randomNumbers(int length) {
+                        return "0".repeat(length);
+                    }
+                }
+                """);
+
+        List<CodeSearchResult> results = facade().search(request("修复验证码不为6位的问题，生成的验证码当前为5位，我希望修复为6位", 10, false));
+
+        assertFalse(results.isEmpty());
+        assertEquals("src/main/java/com/example/service/UserService.java", results.get(0).getFilePath());
+        assertTrue(results.get(0).getContentWithLineNumbers().contains("randomNumbers(5)"));
+        assertTrue(results.stream().noneMatch(result -> result.getFilePath().contains("controller/UserController.java")));
     }
 
     @Test

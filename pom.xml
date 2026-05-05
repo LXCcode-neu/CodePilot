@@ -22,7 +22,6 @@
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <jjwt.version>0.12.6</jjwt.version>
         <jgit.version>6.10.0.202406032230-r</jgit.version>
-        <lucene.version>9.12.1</lucene.version>
     </properties>
 
     <dependencies>
@@ -73,26 +72,6 @@
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
             <version>${jgit.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.usi.si.seart</groupId>
-            <artifactId>java-tree-sitter</artifactId>
-            <version>1.12.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>${lucene.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-analysis-common</artifactId>
-            <version>${lucene.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-queryparser</artifactId>
-            <version>${lucene.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -1,6 +1,7 @@
 package com.codepliot.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -32,5 +33,18 @@ class SearchQueryPlannerTest {
         assertTrue(mappedTerms.contains("login"));
         assertTrue(mappedTerms.contains("user"));
         assertEquals(5, limitedTerms.size());
+    }
+
+    @Test
+    void shouldExtractVerificationCodeTermsAndNumbers() {
+        List<String> terms = planner.plan("修复验证码不为6位的问题，生成的验证码当前为5位，我希望修复为6位", 20);
+
+        assertTrue(terms.contains("code"));
+        assertTrue(terms.contains("verify"));
+        assertTrue(terms.contains("captcha"));
+        assertTrue(terms.contains("random"));
+        assertTrue(terms.contains("5"));
+        assertTrue(terms.contains("6"));
+        assertFalse(terms.contains("@RestController"));
     }
 }

@@ -87,7 +87,7 @@ public class GrepCodeSearchFacade implements CodeSearchFacade {
             collectMatches(request, query, accumulated, warnings);
         }
 
-        if (accumulated.size() < Math.min(3, maxResults)) {
+        if (accumulated.isEmpty()) {
             for (String fallbackQuery : SPRING_BOOT_FALLBACK_QUERIES) {
                 collectMatches(request, fallbackQuery, accumulated, warnings);
                 if (accumulated.size() >= maxResults) {
@@ -138,7 +138,8 @@ public class GrepCodeSearchFacade implements CodeSearchFacade {
                 if (existing == null) {
                     accumulated.put(key, new MatchAccumulator(match, query, 1, 0.0d));
                 } else {
-                    accumulated.put(key, existing.incrementHitCount());
+                    boolean useCandidate = candidateScore(match, query) > candidateScore(existing.match(), existing.query());
+                    accumulated.put(key, existing.incrementHitCount(match, query, useCandidate));
                 }
             }
         } catch (RuntimeException exception) {
@@ -176,7 +177,7 @@ public class GrepCodeSearchFacade implements CodeSearchFacade {
         LinkedHashSet<String> queries = new LinkedHashSet<>();
         String text = joinNonBlank(request.getIssueText(), request.getQuery());
         queries.addAll(searchQueryPlanner.plan(text, Math.max(10, resolveMaxResults(request))));
-        if (request.getQuery() != null && !request.getQuery().isBlank()) {
+        if (isFocusedQuery(request.getQuery())) {
             queries.add(request.getQuery().trim());
         }
         return queries.stream()
@@ -212,14 +213,26 @@ public class GrepCodeSearchFacade implements CodeSearchFacade {
         if (!query.isBlank() && lineText.contains(query)) {
             score += 5.0d;
         }
+        if (isNumericQuery(query) && lineText.contains(query)) {
+            score += 15.0d;
+        }
         if (filePath.contains("src/main/java/")) {
             score += 4.0d;
         }
         if (filePath.contains("src/test/java/")) {
             score -= 2.0d;
         }
-        if (containsAny(fileName, Set.of("controller", "service", "mapper", "repository"))) {
+        if (containsAny(filePath, Set.of("/service/", "/mapper/", "/repository/", "/util/", "/utils/"))) {
+            score += 4.0d;
+        }
+        if (containsAny(filePath, Set.of("/controller/"))) {
+            score += isApiLikeQuery(query) ? 2.0d : 0.5d;
+        }
+        if (containsAny(fileName, Set.of("service", "mapper", "repository", "util", "utils"))) {
             score += 3.0d;
+        }
+        if (fileName.contains("controller")) {
+            score += isApiLikeQuery(query) ? 2.0d : 0.5d;
         }
         if (match.getLineNumber() != null && match.getLineNumber() > 0) {
             score += 1.0d / Math.max(1, match.getLineNumber());
@@ -261,7 +274,7 @@ public class GrepCodeSearchFacade implements CodeSearchFacade {
     }
 
     private String key(GrepMatch match) {
-        return normalize(match.getFilePath()) + ":" + nullToEmpty(match.getLineNumber()) + ":" + nullToEmpty(match.getColumn());
+        return normalize(match.getFilePath());
     }
 
     private String extractFileName(String filePath) {
@@ -294,10 +307,59 @@ public class GrepCodeSearchFacade implements CodeSearchFacade {
         return builder.toString();
     }
 
+    private boolean isFocusedQuery(String query) {
+        if (query == null || query.isBlank()) {
+            return false;
+        }
+        String trimmed = query.trim();
+        return trimmed.length() <= 80 && !trimmed.contains("\n") && !trimmed.matches(".*\\s+.*");
+    }
+
+    private boolean isApiLikeQuery(String query) {
+        if (query == null) {
+            return false;
+        }
+        String normalized = normalize(query);
+        return normalized.startsWith("/")
+                || normalized.contains("controller")
+                || normalized.contains("requestmapping")
+                || normalized.contains("getmapping")
+                || normalized.contains("postmapping")
+                || normalized.contains("api");
+    }
+
+    private double candidateScore(GrepMatch match, String query) {
+        String filePath = normalize(match.getFilePath());
+        String fileName = extractFileName(filePath);
+        String lineText = normalize(match.getLineText());
+        String normalizedQuery = normalize(query);
+        double score = 0.0d;
+        if (!normalizedQuery.isBlank() && lineText.contains(normalizedQuery)) {
+            score += 10.0d;
+        }
+        if (isNumericQuery(normalizedQuery) && lineText.contains(normalizedQuery)) {
+            score += 20.0d;
+        }
+        if (!normalizedQuery.isBlank() && fileName.contains(normalizedQuery)) {
+            score += 5.0d;
+        }
+        if (containsAny(filePath, Set.of("/service/", "/mapper/", "/repository/", "/util/", "/utils/"))) {
+            score += 3.0d;
+        }
+        if (match.getLineNumber() != null && match.getLineNumber() > 0) {
+            score += 1.0d / Math.max(1, match.getLineNumber());
+        }
+        return score;
+    }
+
     private int resolveMaxResults(SearchRequest request) {
         return request.getMaxResults() == null || request.getMaxResults() <= 0
                 ? properties.getMaxResults()
                 : request.getMaxResults();
+    }
+
+    private boolean isNumericQuery(String query) {
+        return query != null && query.matches("\\d+");
     }
 
     private int resolveContextBeforeLines(SearchRequest request) {
@@ -319,7 +381,10 @@ public class GrepCodeSearchFacade implements CodeSearchFacade {
 
     private record MatchAccumulator(GrepMatch match, String query, int hitCount, double score) {
 
-        private MatchAccumulator incrementHitCount() {
+        private MatchAccumulator incrementHitCount(GrepMatch candidate, String candidateQuery, boolean useCandidate) {
+            if (useCandidate) {
+                return new MatchAccumulator(candidate, candidateQuery, hitCount + 1, score);
+            }
             return new MatchAccumulator(match, query, hitCount + 1, score);
         }
 
