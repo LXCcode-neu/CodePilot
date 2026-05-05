@@ -47,4 +47,12 @@ class SearchQueryPlannerTest {
         assertTrue(terms.contains("6"));
         assertFalse(terms.contains("@RestController"));
     }
+
+    @Test
+    void shouldKeepSearchingPossibleForUnknownChineseIssue() {
+        List<String> terms = planner.plan("修复会员等级展示错乱的问题", 20);
+
+        assertFalse(terms.isEmpty());
+        assertTrue(terms.stream().anyMatch(term -> term.contains("会员") || term.contains("等级")));
+    }
 }

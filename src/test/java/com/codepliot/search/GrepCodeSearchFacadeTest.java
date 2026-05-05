@@ -7,10 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.codepliot.search.config.CodeSearchProperties;
 import com.codepliot.search.dto.CodeSearchResult;
 import com.codepliot.search.dto.SearchRequest;
+import com.codepliot.search.glob.FileGlobService;
 import com.codepliot.search.grep.GrepSearchService;
 import com.codepliot.search.grep.RipgrepCommandBuilder;
 import com.codepliot.search.grep.RipgrepResultParser;
 import com.codepliot.search.read.CodeReadService;
+import com.codepliot.service.llm.LlmService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -129,6 +132,44 @@ class GrepCodeSearchFacadeTest {
         assertFalse(results.isEmpty());
     }
 
+    @Test
+    void shouldUseLlmPlannedGrepBeforeBroadFallback() throws IOException {
+        write("src/main/java/com/example/controller/UserController.java", """
+                package com.example.controller;
+                import org.springframework.web.bind.annotation.RestController;
+
+                @RestController
+                public class UserController {
+                    public String login() {
+                        return "ok";
+                    }
+                }
+                """);
+        write("src/main/java/com/example/service/UserServiceImpl.java", """
+                package com.example.service;
+
+                public class UserServiceImpl {
+                    public String sendCode(String phone) {
+                        String code = RandomUtil.randomNumbers(5);
+                        return code;
+                    }
+                }
+                """);
+
+        List<CodeSearchResult> results = llmFacade("""
+                {
+                  "queries": [
+                    {"pattern": "RandomUtil.randomNumbers", "regexEnabled": false, "globPatterns": ["**/*.java"], "reason": "generator call"}
+                  ],
+                  "fileGlobs": ["**/*Service*.java"]
+                }
+                """).search(request("修复验证码不为6位的问题，生成的验证码当前为5位", 10, false));
+
+        assertFalse(results.isEmpty());
+        assertEquals("src/main/java/com/example/service/UserServiceImpl.java", results.get(0).getFilePath());
+        assertTrue(results.get(0).getContentWithLineNumbers().contains("randomNumbers(5)"));
+    }
+
     private GrepCodeSearchFacade facade() {
         CodeSearchProperties properties = new CodeSearchProperties();
         properties.setUseRipgrep(false);
@@ -139,6 +180,28 @@ class GrepCodeSearchFacadeTest {
         );
         return new GrepCodeSearchFacade(
                 new SearchQueryPlanner(),
+                grepSearchService,
+                new CodeReadService(),
+                properties
+        );
+    }
+
+    private GrepCodeSearchFacade llmFacade(String llmJson) {
+        CodeSearchProperties properties = new CodeSearchProperties();
+        properties.setUseRipgrep(false);
+        GrepSearchService grepSearchService = new GrepSearchService(
+                properties,
+                new RipgrepCommandBuilder(),
+                new RipgrepResultParser()
+        );
+        LlmSearchQueryPlanner llmSearchQueryPlanner = new LlmSearchQueryPlanner(
+                new LlmService((systemPrompt, userPrompt) -> llmJson),
+                new ObjectMapper()
+        );
+        return new GrepCodeSearchFacade(
+                new SearchQueryPlanner(),
+                llmSearchQueryPlanner,
+                new FileGlobService(properties),
                 grepSearchService,
                 new CodeReadService(),
                 properties
