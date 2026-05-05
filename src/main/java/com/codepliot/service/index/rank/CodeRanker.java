@@ -1,9 +1,9 @@
 package com.codepliot.service.index.rank;
 
 import com.codepliot.model.RetrievedCodeChunk;
+import com.codepliot.service.index.KeywordExtractor;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class CodeRanker {
             return List.of();
         }
 
-        Set<String> keywords = extractKeywords(query);
+        Set<String> keywords = KeywordExtractor.extractKeywordSet(query);
         boolean frontendIssue = containsAny(keywords, FRONTEND_HINTS);
 
         Map<String, RetrievedCodeChunk> bestByFile = chunks.stream()
@@ -202,21 +202,6 @@ public class CodeRanker {
             }
         }
         return false;
-    }
-
-    private Set<String> extractKeywords(String query) {
-        if (query == null || query.isBlank()) {
-            return Set.of();
-        }
-        String[] tokens = query.toLowerCase(Locale.ROOT).split("[^a-z0-9_./-]+");
-        Set<String> keywords = new LinkedHashSet<>();
-        for (String token : tokens) {
-            if (token == null || token.isBlank() || token.length() <= 1) {
-                continue;
-            }
-            keywords.add(token);
-        }
-        return keywords;
     }
 
     private String normalize(String value) {

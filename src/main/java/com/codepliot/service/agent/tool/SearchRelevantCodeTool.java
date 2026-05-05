@@ -6,13 +6,14 @@ import com.codepliot.model.AgentContext;
 import com.codepliot.model.RetrievedCodeChunk;
 import com.codepliot.service.agent.AgentTool;
 import com.codepliot.service.agent.ToolResult;
+import com.codepliot.service.index.KeywordExtractor;
+import com.codepliot.service.index.RepositoryCodeSearchService;
 import com.codepliot.service.index.lucene.LuceneCodeSearchService;
 import com.codepliot.service.index.rank.CodeRanker;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -23,18 +24,15 @@ public class SearchRelevantCodeTool implements AgentTool {
     private static final int DEFAULT_TOP_K = 10;
     private static final int SEARCH_CANDIDATE_LIMIT = 40;
 
-    private static final Set<String> STOPWORDS = Set.of(
-            "the", "and", "for", "with", "from", "into", "that", "this", "when", "then", "than",
-            "does", "doesnt", "cant", "cannot", "will", "should", "need", "after", "before",
-            "have", "has", "had", "there", "their", "them", "they", "user", "users", "please",
-            "check", "ensure", "keep", "show", "move", "issue"
-    );
-
     private final LuceneCodeSearchService luceneCodeSearchService;
+    private final RepositoryCodeSearchService repositoryCodeSearchService;
     private final CodeRanker codeRanker;
 
-    public SearchRelevantCodeTool(LuceneCodeSearchService luceneCodeSearchService, CodeRanker codeRanker) {
+    public SearchRelevantCodeTool(LuceneCodeSearchService luceneCodeSearchService,
+                                  RepositoryCodeSearchService repositoryCodeSearchService,
+                                  CodeRanker codeRanker) {
         this.luceneCodeSearchService = luceneCodeSearchService;
+        this.repositoryCodeSearchService = repositoryCodeSearchService;
         this.codeRanker = codeRanker;
     }
 
@@ -56,12 +54,16 @@ public class SearchRelevantCodeTool implements AgentTool {
     @Override
     public ToolResult execute(AgentContext context) {
         String query = buildQuery(context.issueTitle(), context.issueDescription());
-        List<RetrievedCodeChunk> luceneHits = luceneCodeSearchService.search(
-                context.projectId(),
+        List<RetrievedCodeChunk> luceneHits = repositoryCodeSearchService.hydrate(
+                context.localPath(),
                 query,
-                SEARCH_CANDIDATE_LIMIT
+                luceneCodeSearchService.search(context.projectId(), query, SEARCH_CANDIDATE_LIMIT)
         );
-        List<RetrievedCodeChunk> rerankedHits = codeRanker.rerank(query, luceneHits, DEFAULT_TOP_K);
+        List<RetrievedCodeChunk> fallbackHits = shouldUseRepositoryFallback(luceneHits)
+                ? repositoryCodeSearchService.search(context.localPath(), query, SEARCH_CANDIDATE_LIMIT)
+                : List.of();
+        List<RetrievedCodeChunk> mergedCandidates = mergeCandidates(luceneHits, fallbackHits);
+        List<RetrievedCodeChunk> rerankedHits = codeRanker.rerank(query, mergedCandidates, DEFAULT_TOP_K);
         context.updateRetrievedChunks(rerankedHits);
 
         List<Map<String, Object>> chunkSummaries = rerankedHits.stream()
@@ -70,55 +72,61 @@ public class SearchRelevantCodeTool implements AgentTool {
                         "language", chunk.language() == null ? "" : chunk.language(),
                         "symbolName", chunk.symbolName() == null ? "" : chunk.symbolName(),
                         "score", chunk.score(),
-                        "finalScore", chunk.finalScore()
+                        "finalScore", chunk.finalScore(),
+                        "startLine", chunk.startLine() == null ? "" : chunk.startLine(),
+                        "endLine", chunk.endLine() == null ? "" : chunk.endLine()
                 ))
                 .toList();
 
         return ToolResult.success("relevant code search completed", Map.of(
                 "query", query,
                 "topK", DEFAULT_TOP_K,
-                "candidateCount", luceneHits.size(),
+                "candidateCount", mergedCandidates.size(),
+                "luceneCandidateCount", luceneHits.size(),
+                "fallbackCandidateCount", fallbackHits.size(),
                 "hitCount", rerankedHits.size(),
                 "chunks", chunkSummaries
         ));
     }
 
     private String buildQuery(String issueTitle, String issueDescription) {
-        List<String> titleKeywords = extractKeywords(issueTitle);
-        List<String> descriptionKeywords = extractKeywords(issueDescription);
-
-        LinkedHashSet<String> merged = new LinkedHashSet<>();
-        merged.addAll(titleKeywords);
-        merged.addAll(descriptionKeywords);
-
-        if (merged.isEmpty()) {
-            String title = issueTitle == null ? "" : issueTitle.trim();
-            String description = issueDescription == null ? "" : issueDescription.trim();
-            return (title + " " + description).trim();
+        String query = KeywordExtractor.buildQuery(issueTitle, issueDescription);
+        if (!query.isBlank()) {
+            return query;
         }
-
-        return merged.stream()
-                .limit(12)
-                .reduce((left, right) -> left + " " + right)
-                .orElse("");
+        String title = issueTitle == null ? "" : issueTitle.trim();
+        String description = issueDescription == null ? "" : issueDescription.trim();
+        return (title + " " + description).trim();
     }
 
-    private List<String> extractKeywords(String value) {
-        if (value == null || value.isBlank()) {
-            return List.of();
-        }
+    private boolean shouldUseRepositoryFallback(List<RetrievedCodeChunk> luceneHits) {
+        return luceneHits == null || luceneHits.size() < 3;
+    }
 
-        String[] tokens = value.toLowerCase().split("[^a-z0-9_./-]+");
-        LinkedHashSet<String> ordered = new LinkedHashSet<>();
-        for (String token : tokens) {
-            if (token == null || token.isBlank()) {
-                continue;
-            }
-            if (token.length() <= 1 || STOPWORDS.contains(token)) {
-                continue;
-            }
-            ordered.add(token);
+    private List<RetrievedCodeChunk> mergeCandidates(List<RetrievedCodeChunk> luceneHits, List<RetrievedCodeChunk> fallbackHits) {
+        LinkedHashMap<String, RetrievedCodeChunk> merged = new LinkedHashMap<>();
+        addCandidates(merged, luceneHits);
+        addCandidates(merged, fallbackHits);
+        return merged.values().stream()
+                .sorted(Comparator.comparingDouble(RetrievedCodeChunk::score).reversed()
+                        .thenComparing(RetrievedCodeChunk::filePath, Comparator.nullsLast(String::compareTo)))
+                .limit(SEARCH_CANDIDATE_LIMIT)
+                .toList();
+    }
+
+    private void addCandidates(Map<String, RetrievedCodeChunk> merged, List<RetrievedCodeChunk> candidates) {
+        if (candidates == null) {
+            return;
         }
-        return new ArrayList<>(ordered);
+        for (RetrievedCodeChunk chunk : candidates) {
+            if (chunk == null) {
+                continue;
+            }
+            String key = chunk.filePath() == null ? "" : chunk.filePath();
+            RetrievedCodeChunk existing = merged.get(key);
+            if (existing == null || chunk.score() > existing.score()) {
+                merged.put(key, chunk);
+            }
+        }
     }
 }

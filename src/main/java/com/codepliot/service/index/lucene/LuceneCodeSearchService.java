@@ -2,12 +2,12 @@ package com.codepliot.service.index.lucene;
 
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.ErrorCode;
-import com.codepliot.service.git.GitWorkspaceService;
 import com.codepliot.model.RetrievedCodeChunk;
+import com.codepliot.service.git.GitWorkspaceService;
+import com.codepliot.service.index.KeywordExtractor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -23,9 +23,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-/**
- * LuceneCodeSearchService 服务类，负责封装业务流程和领域能力。
- */
+
 @Service
 public class LuceneCodeSearchService {
 
@@ -48,16 +46,12 @@ public class LuceneCodeSearchService {
     );
 
     private final GitWorkspaceService gitWorkspaceService;
-/**
- * 创建 LuceneCodeSearchService 实例。
- */
-public LuceneCodeSearchService(GitWorkspaceService gitWorkspaceService) {
+
+    public LuceneCodeSearchService(GitWorkspaceService gitWorkspaceService) {
         this.gitWorkspaceService = gitWorkspaceService;
     }
-/**
- * 执行 search 相关逻辑。
- */
-public List<RetrievedCodeChunk> search(Long projectId, String query, int topK) {
+
+    public List<RetrievedCodeChunk> search(Long projectId, String query, int topK) {
         validateProjectId(projectId);
         if (topK <= 0 || query == null || query.isBlank()) {
             return List.of();
@@ -93,20 +87,16 @@ public List<RetrievedCodeChunk> search(Long projectId, String query, int topK) {
             );
         }
     }
-/**
- * 构建Query相关逻辑。
- */
-private Query buildQuery(String queryText) throws Exception {
+
+    private Query buildQuery(String queryText) throws Exception {
         MultiFieldQueryParser parser = new MultiFieldQueryParser(SEARCH_FIELDS, new StandardAnalyzer(), FIELD_BOOSTS);
         parser.setDefaultOperator(QueryParser.Operator.OR);
         parser.setAllowLeadingWildcard(false);
         return parser.parse(buildEscapedKeywordQuery(queryText));
     }
-/**
- * 构建Escaped Keyword Query相关逻辑。
- */
-private String buildEscapedKeywordQuery(String queryText) {
-        List<String> keywords = extractKeywords(queryText);
+
+    private String buildEscapedKeywordQuery(String queryText) {
+        List<String> keywords = KeywordExtractor.extractKeywords(queryText);
         if (keywords.isEmpty()) {
             return QueryParser.escape(queryText.trim());
         }
@@ -115,25 +105,8 @@ private String buildEscapedKeywordQuery(String queryText) {
                 .reduce((left, right) -> left + " " + right)
                 .orElse(QueryParser.escape(queryText.trim()));
     }
-/**
- * 提取Keywords相关逻辑。
- */
-private List<String> extractKeywords(String queryText) {
-        String normalized = queryText == null ? "" : queryText.toLowerCase();
-        String[] tokens = normalized.split("[^a-z0-9_./-]+");
-        Map<String, Boolean> ordered = new LinkedHashMap<>();
-        for (String token : tokens) {
-            if (token == null || token.isBlank() || token.length() <= 1) {
-                continue;
-            }
-            ordered.put(token, Boolean.TRUE);
-        }
-        return new ArrayList<>(ordered.keySet());
-    }
-/**
- * 转换为Retrieved Code Chunk相关逻辑。
- */
-private RetrievedCodeChunk toRetrievedCodeChunk(Document document, float score) {
+
+    private RetrievedCodeChunk toRetrievedCodeChunk(Document document, float score) {
         double rawScore = score;
         return new RetrievedCodeChunk(
                 document.get("filePath"),
@@ -149,10 +122,8 @@ private RetrievedCodeChunk toRetrievedCodeChunk(Document document, float score) 
                 rawScore
         );
     }
-/**
- * 解析Integer相关逻辑。
- */
-private Integer parseInteger(String value) {
+
+    private Integer parseInteger(String value) {
         if (value == null || value.isBlank()) {
             return null;
         }
@@ -162,18 +133,14 @@ private Integer parseInteger(String value) {
             return null;
         }
     }
-/**
- * 校验Project Id相关逻辑。
- */
-private void validateProjectId(Long projectId) {
+
+    private void validateProjectId(Long projectId) {
         if (projectId == null || projectId <= 0) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "projectId must be greater than 0");
         }
     }
-/**
- * 构建Error Message相关逻辑。
- */
-private String buildErrorMessage(Exception exception) {
+
+    private String buildErrorMessage(Exception exception) {
         String message = exception.getMessage();
         if (message == null || message.isBlank()) {
             return exception.getClass().getSimpleName();
