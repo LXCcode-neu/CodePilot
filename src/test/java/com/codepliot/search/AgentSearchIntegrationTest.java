@@ -6,14 +6,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.codepliot.entity.PatchRecord;
+import com.codepliot.client.LlmClient;
 import com.codepliot.model.AgentContext;
 import com.codepliot.model.AgentTaskVO;
+import com.codepliot.model.LlmMessage;
 import com.codepliot.model.PatchGenerateResult;
 import com.codepliot.model.PatchRecordVO;
 import com.codepliot.model.PatchSafetyCheckResult;
+import com.codepliot.model.LlmToolCall;
+import com.codepliot.model.LlmToolChatResponse;
+import com.codepliot.model.LlmToolDefinition;
 import com.codepliot.policy.PatchSafetyPolicy;
 import com.codepliot.search.config.CodeSearchProperties;
-import com.codepliot.search.dto.CodeSearchResult;
 import com.codepliot.search.grep.RipgrepCommandBuilder;
 import com.codepliot.search.grep.RipgrepResultParser;
 import com.codepliot.service.agent.AgentExecutor;
@@ -34,6 +38,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -44,25 +49,24 @@ class AgentSearchIntegrationTest {
     Path tempDir;
 
     @Test
-    void searchRelevantCodeToolShouldUseCodeSearchFacadeAndPopulateAgentContext() {
-        CodeSearchFacade facade = request -> {
-            CodeSearchResult result = new CodeSearchResult();
-            result.setFilePath("src/main/java/com/example/UserController.java");
-            result.setStartLine(10);
-            result.setEndLine(12);
-            result.setScore(9.0d);
-            result.setReason("test");
-            result.setContentWithLineNumbers("    10 | public class UserController {}");
-            return List.of(result);
-        };
-        SearchRelevantCodeTool tool = new SearchRelevantCodeTool(facade, new CodeSearchProperties());
+    void searchRelevantCodeToolShouldUseAgenticSearchAndPopulateAgentContext() throws IOException {
+        Path file = tempDir.resolve("src/main/java/com/example/UserController.java");
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, "public class UserController {}\n");
+
+        CodeSearchProperties properties = new CodeSearchProperties();
+        properties.setUseRipgrep(false);
+        properties.setMaxResults(5);
+        SearchRelevantCodeTool tool = new SearchRelevantCodeTool(agenticSearchService(properties, """
+                {"tool":"grep","query":"UserController","globPatterns":["**/*.java"],"maxResults":5}
+                """), properties);
         AgentContext context = new AgentContext(
                 1L,
                 2L,
                 3L,
                 "https://example.com/repo.git",
                 "repo",
-                ".",
+                tempDir.toString(),
                 "UserController bug",
                 "Fix controller"
         );
@@ -113,18 +117,9 @@ class AgentSearchIntegrationTest {
         properties.setMaxResults(5);
         properties.setContextBeforeLines(2);
         properties.setContextAfterLines(2);
-        GrepSearchService grepSearchService = new GrepSearchService(
-                properties,
-                new RipgrepCommandBuilder(),
-                new RipgrepResultParser()
-        );
-        GrepCodeSearchFacade facade = new GrepCodeSearchFacade(
-                new SearchQueryPlanner(),
-                grepSearchService,
-                new CodeReadService(),
-                properties
-        );
-        SearchRelevantCodeTool searchTool = new SearchRelevantCodeTool(facade, properties);
+        SearchRelevantCodeTool searchTool = new SearchRelevantCodeTool(agenticSearchService(properties, """
+                {"tool":"grep","query":"UserController","globPatterns":["**/*.java"],"maxResults":5}
+                """), properties);
         LlmService llmService = new LlmService((systemPrompt, userPrompt) -> {
             if (userPrompt.contains("\"patch\"") && userPrompt.contains("\"risk\"")) {
                 return """
@@ -172,6 +167,41 @@ class AgentSearchIntegrationTest {
         assertNotNull(context.patchSafetyCheckResult());
         assertNotNull(patchService.savedPatch.get());
         assertEquals(10L, patchService.savedPatch.get().getTaskId());
+    }
+
+    private AgenticCodeSearchService agenticSearchService(CodeSearchProperties properties, String firstActionJson) {
+        AtomicInteger calls = new AtomicInteger();
+        LlmService llmService = new LlmService(new LlmClient() {
+            @Override
+            public String generate(String systemPrompt, String userPrompt) {
+                return "";
+            }
+
+            @Override
+            public LlmToolChatResponse chatWithTools(List<LlmMessage> messages, List<LlmToolDefinition> tools) {
+                if (calls.getAndIncrement() > 0) {
+                    return new LlmToolChatResponse("", "stop", List.of());
+                }
+                return new LlmToolChatResponse("", "tool_calls", List.of(
+                        new LlmToolCall("test_call_1", "grep", firstActionJson)
+                ));
+            }
+        });
+        ObjectMapper objectMapper = new ObjectMapper();
+        GrepSearchService grepSearchService = new GrepSearchService(
+                properties,
+                new RipgrepCommandBuilder(),
+                new RipgrepResultParser()
+        );
+        CodeReadService codeReadService = new CodeReadService();
+        return new AgenticCodeSearchService(
+                llmService,
+                objectMapper,
+                new GrepTool(grepSearchService),
+                new GlobTool(new FileGlobService(properties)),
+                new ReadTool(codeReadService),
+                properties
+        );
     }
 
     private static class RecordingPatchService implements PatchService {

@@ -4,10 +4,9 @@ import com.codepliot.entity.AgentStepType;
 import com.codepliot.entity.AgentTaskStatus;
 import com.codepliot.model.AgentContext;
 import com.codepliot.model.RetrievedCodeChunk;
-import com.codepliot.search.CodeSearchFacade;
+import com.codepliot.search.AgenticCodeSearchService;
 import com.codepliot.search.config.CodeSearchProperties;
 import com.codepliot.search.dto.CodeSearchResult;
-import com.codepliot.search.dto.SearchRequest;
 import com.codepliot.service.agent.AgentTool;
 import com.codepliot.service.agent.ToolResult;
 import java.util.List;
@@ -21,12 +20,12 @@ public class SearchRelevantCodeTool implements AgentTool {
 
     private static final String SEARCH_MODE_GREP = "grep";
 
-    private final CodeSearchFacade codeSearchFacade;
+    private final AgenticCodeSearchService agenticCodeSearchService;
     private final CodeSearchProperties codeSearchProperties;
 
-    public SearchRelevantCodeTool(CodeSearchFacade codeSearchFacade,
+    public SearchRelevantCodeTool(AgenticCodeSearchService agenticCodeSearchService,
                                   CodeSearchProperties codeSearchProperties) {
-        this.codeSearchFacade = codeSearchFacade;
+        this.agenticCodeSearchService = agenticCodeSearchService;
         this.codeSearchProperties = codeSearchProperties;
     }
 
@@ -47,14 +46,14 @@ public class SearchRelevantCodeTool implements AgentTool {
 
     @Override
     public ToolResult execute(AgentContext context) {
-        SearchRequest request = buildSearchRequest(context);
+        String issueText = buildIssueText(context);
         List<CodeSearchResult> searchResults;
         try {
-            searchResults = codeSearchFacade.search(request);
+            searchResults = agenticCodeSearchService.search(context.localPath(), issueText);
         } catch (RuntimeException exception) {
             return ToolResult.failure("code search failed: " + buildErrorMessage(exception), Map.of(
                     "mode", codeSearchProperties.getMode(),
-                    "query", request.getQuery(),
+                    "query", issueText,
                     "error", buildErrorMessage(exception)
             ));
         }
@@ -74,7 +73,7 @@ public class SearchRelevantCodeTool implements AgentTool {
         if (retrievedChunks.isEmpty() && !warnings.isEmpty()) {
             return ToolResult.failure("code search failed: " + String.join("; ", warnings), Map.of(
                     "mode", normalizeMode(codeSearchProperties.getMode()),
-                    "query", request.getQuery(),
+                    "query", issueText,
                     "warnings", warnings
             ));
         }
@@ -93,28 +92,18 @@ public class SearchRelevantCodeTool implements AgentTool {
 
         return ToolResult.success("relevant code search completed", Map.of(
                 "mode", normalizeMode(codeSearchProperties.getMode()),
-                "query", request.getQuery(),
-                "maxResults", request.getMaxResults(),
+                "query", issueText,
+                "maxResults", codeSearchProperties.getMaxResults(),
                 "hitCount", retrievedChunks.size(),
                 "warnings", warnings,
                 "chunks", chunkSummaries
         ));
     }
 
-    private SearchRequest buildSearchRequest(AgentContext context) {
+    private String buildIssueText(AgentContext context) {
         String title = context.issueTitle() == null ? "" : context.issueTitle().trim();
         String description = context.issueDescription() == null ? "" : context.issueDescription().trim();
-        String issueText = (title + "\n" + description).trim();
-
-        SearchRequest request = new SearchRequest();
-        request.setRepoPath(context.localPath());
-        request.setIssueText(issueText);
-        request.setQuery(issueText);
-        request.setMaxResults(codeSearchProperties.getMaxResults());
-        request.setContextBeforeLines(codeSearchProperties.getContextBeforeLines());
-        request.setContextAfterLines(codeSearchProperties.getContextAfterLines());
-        request.setRegexEnabled(false);
-        return request;
+        return (title + "\n" + description).trim();
     }
 
     private RetrievedCodeChunk toRetrievedCodeChunk(CodeSearchResult result) {

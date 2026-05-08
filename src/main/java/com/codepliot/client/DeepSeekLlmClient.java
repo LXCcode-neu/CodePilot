@@ -3,6 +3,10 @@ package com.codepliot.client;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.ErrorCode;
 import com.codepliot.config.LlmProperties;
+import com.codepliot.model.LlmMessage;
+import com.codepliot.model.LlmToolCall;
+import com.codepliot.model.LlmToolChatResponse;
+import com.codepliot.model.LlmToolDefinition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -12,6 +16,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 /**
@@ -39,20 +45,7 @@ public DeepSeekLlmClient(LlmProperties llmProperties, ObjectMapper objectMapper)
     public String generate(String systemPrompt, String userPrompt) {
         validateConfiguration();
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(normalizeBaseUrl(llmProperties.getBaseUrl()) + "/chat/completions"))
-                    .header("Authorization", "Bearer " + llmProperties.getApiKey().trim())
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(buildRequestBody(systemPrompt, userPrompt)))
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                throw new BusinessException(
-                        ErrorCode.INTERNAL_ERROR,
-                        "DeepSeek request failed with status " + response.statusCode() + ": " + truncate(response.body())
-                );
-            }
+            HttpResponse<String> response = sendChatCompletion(buildRequestBody(systemPrompt, userPrompt));
             return extractContent(response.body());
         } catch (IOException | InterruptedException exception) {
             if (exception instanceof InterruptedException) {
@@ -63,6 +56,41 @@ public DeepSeekLlmClient(LlmProperties llmProperties, ObjectMapper objectMapper)
                     "Failed to call DeepSeek API: " + buildErrorMessage(exception)
             );
         }
+    }
+
+@Override
+    public LlmToolChatResponse chatWithTools(List<LlmMessage> messages, List<LlmToolDefinition> tools) {
+        validateConfiguration();
+        try {
+            HttpResponse<String> response = sendChatCompletion(buildToolRequestBody(messages, tools));
+            return extractToolChatResponse(response.body());
+        } catch (IOException | InterruptedException exception) {
+            if (exception instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            throw new BusinessException(
+                    ErrorCode.INTERNAL_ERROR,
+                    "Failed to call DeepSeek API with tools: " + buildErrorMessage(exception)
+            );
+        }
+    }
+
+private HttpResponse<String> sendChatCompletion(String requestBody) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(normalizeBaseUrl(llmProperties.getBaseUrl()) + "/chat/completions"))
+                .header("Authorization", "Bearer " + llmProperties.getApiKey().trim())
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new BusinessException(
+                    ErrorCode.INTERNAL_ERROR,
+                    "DeepSeek request failed with status " + response.statusCode() + ": " + truncate(response.body())
+            );
+        }
+        return response;
     }
 /**
  * 构建Request Body相关逻辑。
@@ -82,6 +110,55 @@ private String buildRequestBody(String systemPrompt, String userPrompt) throws I
                 .put("content", userPrompt == null ? "" : userPrompt);
         return objectMapper.writeValueAsString(body);
     }
+
+private String buildToolRequestBody(List<LlmMessage> messages, List<LlmToolDefinition> tools) throws IOException {
+        ObjectNode body = objectMapper.createObjectNode();
+        body.put("model", llmProperties.getModel().trim());
+        body.put("temperature", 0.2d);
+        body.put("stream", false);
+        body.put("tool_choice", "auto");
+
+        ArrayNode messageNodes = body.putArray("messages");
+        for (LlmMessage message : messages == null ? List.<LlmMessage>of() : messages) {
+            ObjectNode messageNode = messageNodes.addObject();
+            messageNode.put("role", message.role());
+            if (message.content() == null) {
+                messageNode.putNull("content");
+            } else {
+                messageNode.put("content", message.content());
+            }
+            if ("tool".equals(message.role())) {
+                messageNode.put("tool_call_id", message.toolCallId());
+            }
+            if (message.toolCalls() != null && !message.toolCalls().isEmpty()) {
+                ArrayNode toolCalls = messageNode.putArray("tool_calls");
+                for (LlmToolCall toolCall : message.toolCalls()) {
+                    toolCalls.add(toToolCallNode(toolCall));
+                }
+            }
+        }
+
+        ArrayNode toolNodes = body.putArray("tools");
+        for (LlmToolDefinition tool : tools == null ? List.<LlmToolDefinition>of() : tools) {
+            ObjectNode toolNode = toolNodes.addObject();
+            toolNode.put("type", "function");
+            ObjectNode functionNode = toolNode.putObject("function");
+            functionNode.put("name", tool.name());
+            functionNode.put("description", tool.description() == null ? "" : tool.description());
+            functionNode.set("parameters", tool.parameters());
+        }
+        return objectMapper.writeValueAsString(body);
+    }
+
+private ObjectNode toToolCallNode(LlmToolCall toolCall) {
+        ObjectNode toolCallNode = objectMapper.createObjectNode();
+        toolCallNode.put("id", toolCall.id());
+        toolCallNode.put("type", "function");
+        ObjectNode functionNode = toolCallNode.putObject("function");
+        functionNode.put("name", toolCall.name());
+        functionNode.put("arguments", toolCall.arguments() == null ? "{}" : toolCall.arguments());
+        return toolCallNode;
+    }
 /**
  * 提取Content相关逻辑。
  */
@@ -93,6 +170,30 @@ private String extractContent(String responseBody) throws IOException {
             throw new BusinessException(ErrorCode.INTERNAL_ERROR, "DeepSeek response did not contain message content");
         }
         return content.trim();
+    }
+
+private LlmToolChatResponse extractToolChatResponse(String responseBody) throws IOException {
+        JsonNode root = objectMapper.readTree(responseBody);
+        JsonNode choice = root.path("choices").path(0);
+        JsonNode message = choice.path("message");
+        String content = message.path("content").isMissingNode() || message.path("content").isNull()
+                ? ""
+                : message.path("content").asText("");
+        String finishReason = choice.path("finish_reason").asText("");
+        List<LlmToolCall> toolCalls = new ArrayList<>();
+        JsonNode toolCallNodes = message.path("tool_calls");
+        if (toolCallNodes.isArray()) {
+            for (JsonNode toolCallNode : toolCallNodes) {
+                JsonNode functionNode = toolCallNode.path("function");
+                String id = toolCallNode.path("id").asText("");
+                String name = functionNode.path("name").asText("");
+                String arguments = functionNode.path("arguments").asText("{}");
+                if (!id.isBlank() && !name.isBlank()) {
+                    toolCalls.add(new LlmToolCall(id, name, arguments));
+                }
+            }
+        }
+        return new LlmToolChatResponse(content, finishReason, toolCalls);
     }
 /**
  * 校验Configuration相关逻辑。

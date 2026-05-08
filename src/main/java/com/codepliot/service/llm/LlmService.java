@@ -1,6 +1,10 @@
 package com.codepliot.service.llm;
 
 import com.codepliot.client.LlmClient;
+import com.codepliot.model.LlmMessage;
+import com.codepliot.model.LlmToolChatResponse;
+import com.codepliot.model.LlmToolDefinition;
+import java.util.List;
 import org.springframework.stereotype.Service;
 /**
  * LlmService 服务类，负责封装业务流程和领域能力。
@@ -20,5 +24,9 @@ public LlmService(LlmClient llmClient) {
  */
 public String generate(String systemPrompt, String userPrompt) {
         return llmClient.generate(systemPrompt, userPrompt);
+    }
+
+public LlmToolChatResponse chatWithTools(List<LlmMessage> messages, List<LlmToolDefinition> tools) {
+        return llmClient.chatWithTools(messages, tools);
     }
 }
