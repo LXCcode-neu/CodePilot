@@ -49,6 +49,25 @@ codepilot:
   lock:
     task-run:
       ttl: 30m
+  search:
+    mode: grep
+    max-results: 30
+    context-before-lines: 40
+    context-after-lines: 40
+    command-timeout-seconds: 10
+    use-ripgrep: true
+    fallback-enabled: true
+    rg-path: rg
+    default-exclude-patterns:
+      - .git/**
+      - target/**
+      - build/**
+      - dist/**
+      - node_modules/**
+      - .idea/**
+      - .vscode/**
+      - logs/**
+      - tmp/**
   llm:
     provider: deepseek
     api-key: sk-c0e745f3ec65481786dbf13c4f17ad01

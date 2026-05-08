@@ -46,7 +46,6 @@
    - Lombok
    - JGit
    - Tree-sitter
-   - Apache Lucene
    - React
    - Vite
    - TypeScript
@@ -72,7 +71,7 @@
    - `client`
    - `utils`
    - `frontend`
-9. 允许通过类名前缀或完整类名表达业务归属，例如 `AuthController`、`ProjectRepoService`、`LuceneCodeSearchService`、`PatchGenerateResult`。
+9. 允许通过类名前缀或完整类名表达业务归属，例如 `AuthController`、`ProjectRepoService`、`AgenticCodeSearchService`、`PatchGenerateResult`。
 10. 在用户没有明确要求前，不要额外实现与当前项目范围无关的新业务闭环。
 11. 如果项目结构、技术选型、开发边界或启动方式发生变化，要同步更新 `README.md` 与本文件。
 12. 数据库操作放 `repository` 层，业务逻辑放 `service` 层。
@@ -126,7 +125,6 @@ Those rules should live in a separate document, for example:
    - Lombok
    - JGit
    - Tree-sitter
-   - Apache Lucene
    - React
    - Vite
    - TypeScript
@@ -152,7 +150,7 @@ Those rules should live in a separate document, for example:
    - `client`
    - `utils`
    - `frontend`
-9. Express business meaning through class names such as `AuthController`, `ProjectRepoService`, `LuceneCodeSearchService`, or `PatchGenerateResult`.
+9. Express business meaning through class names such as `AuthController`, `ProjectRepoService`, `AgenticCodeSearchService`, or `PatchGenerateResult`.
 10. Unless explicitly requested, do not introduce unrelated new business flows beyond the current project scope.
 11. If project structure, tech choices, development boundaries, or startup instructions change, update both `README.md` and this file.
 12. Keep database access in `repository` and business orchestration in `service`.
