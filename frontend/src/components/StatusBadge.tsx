@@ -8,6 +8,7 @@ const statusStyles: Record<string, string> = {
   RETRIEVING: "border-cyan-200 bg-cyan-50 text-cyan-700",
   ANALYZING: "border-violet-200 bg-violet-50 text-violet-700",
   GENERATING_PATCH: "border-orange-200 bg-orange-50 text-orange-700",
+  VERIFYING: "border-sky-200 bg-sky-50 text-sky-700",
   WAITING_CONFIRM: "border-amber-200 bg-amber-50 text-amber-700",
   COMPLETED: "border-emerald-200 bg-emerald-50 text-emerald-700",
   FAILED: "border-red-200 bg-red-50 text-red-700",

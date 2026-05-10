@@ -5,6 +5,7 @@ export type AgentTaskStatus =
   | "RETRIEVING"
   | "ANALYZING"
   | "GENERATING_PATCH"
+  | "VERIFYING"
   | "WAITING_CONFIRM"
   | "COMPLETED"
   | "FAILED";

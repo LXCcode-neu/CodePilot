@@ -19,6 +19,7 @@ public final class AgentContext {
     private final String issueDescription;
     private List<RetrievedCodeChunk> retrievedChunks;
     private String analysis;
+    private PatchGenerateResult patchGenerateResult;
     private PatchSafetyCheckResult patchSafetyCheckResult;
 
     /**
@@ -42,6 +43,7 @@ public final class AgentContext {
         this.issueDescription = issueDescription;
         this.retrievedChunks = List.of();
         this.analysis = null;
+        this.patchGenerateResult = null;
         this.patchSafetyCheckResult = null;
     }
 
@@ -123,6 +125,13 @@ public final class AgentContext {
     }
 
     /**
+     * 返回本次运行生成的 patch 结果。
+     */
+    public PatchGenerateResult patchGenerateResult() {
+        return patchGenerateResult;
+    }
+
+    /**
      * 更新本地工作目录。
      */
     public void updateLocalPath(String localPath) {
@@ -141,6 +150,13 @@ public final class AgentContext {
      */
     public void updateAnalysis(String analysis) {
         this.analysis = analysis == null || analysis.isBlank() ? null : analysis.trim();
+    }
+
+    /**
+     * 更新本次运行生成的 patch 结果。
+     */
+    public void updatePatchGenerateResult(PatchGenerateResult patchGenerateResult) {
+        this.patchGenerateResult = patchGenerateResult;
     }
 
     /**

@@ -205,7 +205,8 @@ public class AgentTaskService {
                 || AgentTaskStatus.INDEXING.name().equals(status)
                 || AgentTaskStatus.RETRIEVING.name().equals(status)
                 || AgentTaskStatus.ANALYZING.name().equals(status)
-                || AgentTaskStatus.GENERATING_PATCH.name().equals(status);
+                || AgentTaskStatus.GENERATING_PATCH.name().equals(status)
+                || AgentTaskStatus.VERIFYING.name().equals(status);
     }
 
     private record TaskLock(Long taskId, String lockValue) {

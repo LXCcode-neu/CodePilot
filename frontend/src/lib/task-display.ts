@@ -6,6 +6,7 @@ const STEP_TYPE_LABELS: Record<AgentStepType, string> = {
   SEARCH_RELEVANT_CODE: "检索相关代码",
   ANALYZE_ISSUE: "分析 Issue",
   GENERATE_PATCH: "生成 Patch",
+  VERIFY_PATCH: "验证 Patch",
   COMPLETE_RUN: "流程完成",
 };
 

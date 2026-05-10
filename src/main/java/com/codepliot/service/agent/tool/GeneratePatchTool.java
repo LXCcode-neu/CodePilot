@@ -97,6 +97,7 @@ public class GeneratePatchTool implements AgentTool {
                     rawOutput,
                     safetyCheckResult
             );
+            context.updatePatchGenerateResult(result);
             context.updatePatchSafetyCheckResult(safetyCheckResult);
             return ToolResult.success("patch generation completed", PatchRecordVO.from(patchRecord));
         } catch (IllegalArgumentException exception) {
