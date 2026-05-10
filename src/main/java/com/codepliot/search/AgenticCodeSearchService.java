@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,7 +37,6 @@ import org.w3c.dom.Document;
 @Service
 public class AgenticCodeSearchService {
 
-    private static final int MAX_SEARCH_ROUNDS = 3;
     private static final int DEFAULT_TOOL_MAX_RESULTS = 20;
     private static final int OBSERVATION_ITEM_LIMIT = 12;
 
@@ -68,11 +69,12 @@ public class AgenticCodeSearchService {
         int maxResults = Math.max(1, properties.getMaxResults());
         Map<String, CodeSearchResult> collected = new LinkedHashMap<>();
         String projectOverview = buildProjectOverview(repoPath);
+        Instant deadline = Instant.now().plus(resolveMaxDuration());
         List<LlmMessage> messages = new ArrayList<>();
         messages.add(LlmMessage.system(buildSystemPrompt(projectOverview)));
         messages.add(LlmMessage.user(buildUserPrompt(issueText)));
 
-        for (int round = 1; round <= MAX_SEARCH_ROUNDS && collected.size() < maxResults; round++) {
+        while (collected.size() < maxResults && Instant.now().isBefore(deadline)) {
             LlmToolChatResponse response;
             try {
                 response = llmService.chatWithTools(messages, toolDefinitions());
@@ -258,8 +260,9 @@ public class AgenticCodeSearchService {
                 - Use glob when a keyword is too broad or a file type/name pattern is more useful.
                 - Use read after finding a suspicious file to inspect context.
                 - Do not assume the answer in the first round.
-                - You have at most 3 tool-call rounds.
-                - Stop calling tools once enough relevant files have been found.
+                - Continue using tools until you have enough evidence to identify the relevant files.
+                - Stop calling tools when further search is unlikely to improve the result.
+                - Prefer fewer, high-signal tool calls, but do not stop early if important context is missing.
 
                 Project context:
                 %s
@@ -505,6 +508,14 @@ public class AgenticCodeSearchService {
 
     private int resolveToolMaxResults(Integer requestedMaxResults) {
         return requestedMaxResults == null || requestedMaxResults <= 0 ? DEFAULT_TOOL_MAX_RESULTS : requestedMaxResults;
+    }
+
+    private Duration resolveMaxDuration() {
+        Duration maxDuration = properties.getMaxDuration();
+        if (maxDuration == null || maxDuration.isZero() || maxDuration.isNegative()) {
+            return Duration.ofMinutes(2);
+        }
+        return maxDuration;
     }
 
     private String buildErrorMessage(Exception exception) {

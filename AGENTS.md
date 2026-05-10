@@ -155,6 +155,7 @@ Those rules should live in a separate document, for example:
 11. If project structure, tech choices, development boundaries, or startup instructions change, update both `README.md` and this file.
 12. Keep database access in `repository` and business orchestration in `service`.
 13. New backend tables should preferably provide a repeatable startup initialization path, such as Spring Boot SQL init scripts, instead of relying only on manual execution.
+14. GitHub Issue fetching is implemented through the existing Spring Web backend stack. Keep GitHub tokens server-side via configuration such as `GITHUB_TOKEN`; do not expose them to the frontend.
 
 ### Default Interpretation
 
