@@ -25,4 +25,19 @@ public class ReadTool {
                 : endLine - safeStartLine;
         return codeReadService.readSnippet(repoPath, filePath, safeStartLine, 0, contextAfterLines);
     }
+
+    public CodeSnippet executeAround(String repoPath,
+                                     String filePath,
+                                     Integer lineNumber,
+                                     int contextBeforeLines,
+                                     int contextAfterLines) {
+        int safeLineNumber = lineNumber == null || lineNumber <= 0 ? 1 : lineNumber;
+        return codeReadService.readSnippet(
+                repoPath,
+                filePath,
+                safeLineNumber,
+                Math.max(0, contextBeforeLines),
+                Math.max(0, contextAfterLines)
+        );
+    }
 }

@@ -18,6 +18,7 @@ import com.codepliot.model.LlmToolChatResponse;
 import com.codepliot.model.LlmToolDefinition;
 import com.codepliot.policy.PatchSafetyPolicy;
 import com.codepliot.search.config.CodeSearchProperties;
+import com.codepliot.search.dto.CodeSearchResult;
 import com.codepliot.search.grep.RipgrepCommandBuilder;
 import com.codepliot.search.grep.RipgrepResultParser;
 import com.codepliot.service.agent.AgentExecutor;
@@ -91,6 +92,33 @@ class AgentSearchIntegrationTest {
             assertFalse(field.getType().getName().contains("Lucene"), "Forbidden Lucene dependency: " + field.getType());
             assertFalse(field.getType().getName().contains("TreeSitter"), "Forbidden TreeSitter dependency: " + field.getType());
         }
+    }
+
+    @Test
+    void agenticSearchShouldKeepMultipleSnippetsFromSameFile() throws IOException {
+        Path file = tempDir.resolve("src/main/java/com/example/OrderService.java");
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, """
+                public class OrderService {
+                    void createOrder() {}
+                    void cancelOrder() {}
+                    void refundOrder() {}
+                }
+                """);
+
+        CodeSearchProperties properties = new CodeSearchProperties();
+        properties.setUseRipgrep(false);
+        properties.setMaxResults(5);
+        properties.setContextBeforeLines(0);
+        properties.setContextAfterLines(0);
+        AgenticCodeSearchService searchService = agenticSearchService(properties, """
+                {"tool":"grep","query":"Order","globPatterns":["**/*.java"],"maxResults":5}
+                """);
+
+        List<CodeSearchResult> results = searchService.search(tempDir.toString(), "Order workflow bug");
+
+        assertTrue(results.size() >= 2);
+        assertTrue(results.stream().allMatch(result -> result.getFilePath().equals("src/main/java/com/example/OrderService.java")));
     }
 
     @Test

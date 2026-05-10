@@ -212,11 +212,12 @@ public class AgenticCodeSearchService {
             return;
         }
         try {
-            CodeSnippet snippet = readTool.execute(
+            CodeSnippet snippet = readTool.executeAround(
                     repoPath,
                     match.getFilePath(),
                     match.getLineNumber(),
-                    match.getLineNumber() == null ? null : match.getLineNumber() + properties.getContextAfterLines()
+                    properties.getContextBeforeLines(),
+                    properties.getContextAfterLines()
             );
             addSnippet(snippet, "grep matched '" + nullToEmpty(match.getQuery()) + "' at line " + nullToEmpty(match.getLineNumber()), collected);
         } catch (RuntimeException ignored) {
@@ -228,7 +229,11 @@ public class AgenticCodeSearchService {
         if (snippet == null || snippet.getFilePath() == null || snippet.getFilePath().isBlank()) {
             return;
         }
-        collected.putIfAbsent(snippet.getFilePath(), toResult(snippet, reason));
+        collected.putIfAbsent(snippetKey(snippet), toResult(snippet, reason));
+    }
+
+    private String snippetKey(CodeSnippet snippet) {
+        return snippet.getFilePath() + ":" + snippet.getStartLine() + ":" + snippet.getEndLine();
     }
 
     private CodeSearchResult toResult(CodeSnippet snippet, String reason) {
