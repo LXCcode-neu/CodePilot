@@ -1,7 +1,7 @@
 import { AlertCircle, CheckCircle2, CircleDot, LoaderCircle, Radio } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getStepTypeLabel } from "@/lib/task-display";
+import { getStepTypeLabel, isVisibleStepType } from "@/lib/task-display";
 import { cn, formatDateTime } from "@/lib/utils";
 import type { TaskEventMessage } from "@/types/common";
 
@@ -17,7 +17,6 @@ interface StageViewModel {
 
 const RUNNING_STATUSES = new Set([
   "CLONING",
-  "INDEXING",
   "RETRIEVING",
   "ANALYZING",
   "GENERATING_PATCH",
@@ -92,9 +91,10 @@ export function RealtimeEventPanel({
   events: TaskEventMessage[];
   taskStatus?: string | null;
 }) {
-  const startedEvent = events.find((event) => event.phase === "STARTED");
-  const runningEvent = events.find((event) => event.phase === "RUNNING");
-  const completedEvent = events.find((event) => event.phase === "COMPLETED");
+  const visibleEvents = events.filter((event) => !event.stepType || isVisibleStepType(event.stepType));
+  const startedEvent = visibleEvents.find((event) => event.phase === "STARTED");
+  const runningEvent = [...visibleEvents].reverse().find((event) => event.phase === "RUNNING");
+  const completedEvent = visibleEvents.find((event) => event.phase === "COMPLETED");
 
   const isPending = (taskStatus ?? "PENDING") === "PENDING";
   const isFailed = taskStatus === "FAILED";
@@ -168,8 +168,8 @@ export function RealtimeEventPanel({
           </div>
           <ScrollArea className="h-[180px] px-4 py-3">
             <div className="space-y-3">
-              {events.length ? (
-                events.map((event) => (
+              {visibleEvents.length ? (
+                visibleEvents.map((event) => (
                   <div key={event.id} className="rounded-2xl bg-slate-50 p-3">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-xs uppercase tracking-wide text-slate-400">{getEventDisplayTitle(event)}</p>

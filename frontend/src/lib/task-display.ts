@@ -2,7 +2,6 @@ import type { AgentStepType } from "@/types/step";
 
 const STEP_TYPE_LABELS: Record<AgentStepType, string> = {
   CLONE_REPOSITORY: "克隆仓库",
-  BUILD_CODE_INDEX: "构建代码索引",
   SEARCH_RELEVANT_CODE: "检索相关代码",
   ANALYZE_ISSUE: "分析 Issue",
   GENERATE_PATCH: "生成 Patch",
@@ -16,6 +15,10 @@ function normalizeStepType(stepType?: string | null) {
     .replace(/\s+/g, "")
     .trim()
     .toUpperCase();
+}
+
+export function isVisibleStepType(stepType?: string | null) {
+  return Boolean(normalizeStepType(stepType));
 }
 
 export function getStepTypeLabel(stepType?: string | null) {

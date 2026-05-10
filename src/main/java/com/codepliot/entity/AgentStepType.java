@@ -4,7 +4,6 @@ package com.codepliot.entity;
  */
 public enum AgentStepType {
 CLONE_REPOSITORY,
-BUILD_CODE_INDEX,
 SEARCH_RELEVANT_CODE,
 ANALYZE_ISSUE,
 GENERATE_PATCH,

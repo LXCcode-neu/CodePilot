@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
  * <p>负责调用 LLM 生成结构化 patch 结果，并在落库前执行安全检查。
  */
 @Component
-@Order(50)
+@Order(40)
 public class GeneratePatchTool implements AgentTool {
 
     private final LlmService llmService;

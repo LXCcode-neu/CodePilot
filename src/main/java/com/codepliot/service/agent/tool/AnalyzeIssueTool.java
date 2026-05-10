@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * AnalyzeIssueTool 服务类，负责封装业务流程和领域能力。
  */
 @Component
-@Order(40)
+@Order(30)
 public class AnalyzeIssueTool implements AgentTool {
 
     private final LlmService llmService;

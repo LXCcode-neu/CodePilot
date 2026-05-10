@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { buildPullRequestPreview, parseUnifiedDiff } from "@/lib/patch-diff";
-import { getStepDisplayName, getStepTypeLabel } from "@/lib/task-display";
+import { getStepDisplayName, getStepTypeLabel, isVisibleStepType } from "@/lib/task-display";
 import { formatDateTime, parseJsonString, stringifyPretty } from "@/lib/utils";
 import type { PatchFileChange, PullRequestPreview } from "@/types/patch";
 import type { AgentStep } from "@/types/step";
@@ -31,6 +31,7 @@ type StepOutput = {
 
 export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
   const [activeStep, setActiveStep] = useState<AgentStep | null>(null);
+  const visibleSteps = useMemo(() => steps.filter((step) => isVisibleStepType(step.stepType)), [steps]);
 
   const details = useMemo(() => {
     if (!activeStep) {
@@ -45,14 +46,14 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
     };
   }, [activeStep]);
 
-  if (!steps.length) {
+  if (!visibleSteps.length) {
     return <EmptyState title="还没有执行轨迹" description="运行 Agent 后，这里会按时间顺序展示步骤明细。" />;
   }
 
   return (
     <>
       <div className="space-y-4">
-        {steps.map((step, index) => (
+        {visibleSteps.map((step, index) => (
           <Card key={step.id} className="shadow-none">
             <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
               <div className="space-y-2">

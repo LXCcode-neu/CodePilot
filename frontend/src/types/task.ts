@@ -1,7 +1,6 @@
 export type AgentTaskStatus =
   | "PENDING"
   | "CLONING"
-  | "INDEXING"
   | "RETRIEVING"
   | "ANALYZING"
   | "GENERATING_PATCH"

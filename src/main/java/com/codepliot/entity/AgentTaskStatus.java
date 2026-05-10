@@ -5,7 +5,6 @@ package com.codepliot.entity;
 public enum AgentTaskStatus {
 PENDING,
 CLONING,
-INDEXING,
 RETRIEVING,
 ANALYZING,
 GENERATING_PATCH,

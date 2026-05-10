@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 const statusStyles: Record<string, string> = {
   PENDING: "border-slate-200 bg-slate-100 text-slate-700",
   CLONING: "border-blue-200 bg-blue-50 text-blue-700",
-  INDEXING: "border-blue-200 bg-blue-50 text-blue-700",
   RETRIEVING: "border-cyan-200 bg-cyan-50 text-cyan-700",
   ANALYZING: "border-violet-200 bg-violet-50 text-violet-700",
   GENERATING_PATCH: "border-orange-200 bg-orange-50 text-orange-700",

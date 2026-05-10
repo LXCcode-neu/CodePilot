@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * Patch 自动验证工具。
  */
 @Component
-@Order(60)
+@Order(50)
 public class VerifyPatchTool implements AgentTool {
 
     private final PatchVerificationService patchVerificationService;
