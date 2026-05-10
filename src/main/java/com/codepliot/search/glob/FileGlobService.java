@@ -17,7 +17,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 /**
- * Finds repository files by glob patterns while keeping all paths inside the repository root.
+ * 通过 glob 模式查找仓库文件，并确保所有路径都位于仓库根目录内。
  */
 @Service
 public class FileGlobService {

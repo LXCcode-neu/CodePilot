@@ -1,6 +1,6 @@
 import { request } from "@/api/request";
 import { buildPullRequestPreview, parseUnifiedDiff } from "@/lib/patch-diff";
-import type { PatchRecord } from "@/types/patch";
+import type { PatchRecord, PullRequestSubmitResult } from "@/types/patch";
 
 function pickString(record: Record<string, unknown>, key: string) {
   const value = record[key];
@@ -42,6 +42,11 @@ function normalizePatch(data: unknown): PatchRecord {
       rawOutput: pickString(record, "rawOutput"),
       confirmed: typeof record.confirmed === "boolean" ? record.confirmed : null,
       confirmedAt: pickString(record, "confirmedAt"),
+      prSubmitted: typeof record.prSubmitted === "boolean" ? record.prSubmitted : null,
+      prSubmittedAt: pickString(record, "prSubmittedAt"),
+      prUrl: pickString(record, "prUrl"),
+      prNumber: typeof record.prNumber === "number" ? record.prNumber : null,
+      prBranch: pickString(record, "prBranch"),
       createdAt: pickString(record, "createdAt"),
       updatedAt: pickString(record, "updatedAt"),
       fileChanges,
@@ -60,4 +65,8 @@ export async function getTaskPatch(taskId: string) {
 
 export function confirmTaskPatch(taskId: string) {
   return request.post(`/api/tasks/${taskId}/confirm`);
+}
+
+export function submitTaskPullRequest(taskId: string) {
+  return request.post<PullRequestSubmitResult>(`/api/tasks/${taskId}/patch/pull-request`);
 }

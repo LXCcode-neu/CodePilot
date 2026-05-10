@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import type { ProjectRepo } from "@/types/project";
 import type { AgentTask } from "@/types/task";
 
-const DELETE_CONFIRM_MESSAGE = "确定删除这个任务吗？删除后对应的执行步骤和 Patch 记录也会一起删除。";
+const DELETE_CONFIRM_MESSAGE = "确定删除这个任务吗？关联的执行步骤和 Patch 记录也会一起删除。";
 const DELETE_TASK_ERROR = "删除任务失败";
 
 export function DashboardPage() {
@@ -65,10 +65,10 @@ export function DashboardPage() {
     <div className="space-y-8">
       <section className="flex flex-col gap-5 rounded-[28px] bg-slate-900 px-8 py-8 text-white lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-3">
-          <p className="text-sm uppercase tracking-[0.24em] text-slate-300">Dashboard</p>
+          <p className="text-sm uppercase tracking-[0.24em] text-slate-300">DASHBOARD</p>
           <h1 className="text-3xl font-extrabold">CodePilot 控制台</h1>
           <p className="max-w-2xl text-sm leading-7 text-slate-300">
-            在一个入口里查看仓库接入、Agent 任务状态，以及最近的 Issue-to-Patch 执行轨迹。
+            在一个入口查看仓库接入、Agent 任务状态，以及最近的 Issue-to-Patch 执行记录。
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -136,10 +136,10 @@ export function DashboardPage() {
             ) : (
               <EmptyState
                 title="还没有任务"
-                description="先创建一个仓库，然后发起第一个 Agent 任务。"
+                description="先创建一个仓库，或者从 GitHub Issue 页面导入一个任务。"
                 action={
                   <Button asChild>
-                    <Link to="/tasks/new">去创建任务</Link>
+                    <Link to="/tasks/new">创建任务</Link>
                   </Button>
                 }
               />
@@ -171,7 +171,7 @@ export function DashboardPage() {
             ) : (
               <EmptyState
                 title="暂无仓库"
-                description="添加 GitHub 公开仓库后，这里会显示仓库总览。"
+                description="添加 GitHub 仓库后，这里会显示仓库概览。"
                 action={
                   <Button asChild>
                     <Link to="/projects">添加仓库</Link>

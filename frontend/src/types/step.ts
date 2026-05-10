@@ -2,10 +2,10 @@ export type AgentStepStatus = "RUNNING" | "SUCCESS" | "FAILED";
 
 export type AgentStepType =
   | "CLONE_REPOSITORY"
-  | "BUILD_CODE_INDEX"
   | "SEARCH_RELEVANT_CODE"
   | "ANALYZE_ISSUE"
   | "GENERATE_PATCH"
+  | "VERIFY_PATCH"
   | "COMPLETE_RUN";
 
 export interface AgentStep {

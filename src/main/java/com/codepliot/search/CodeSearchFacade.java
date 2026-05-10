@@ -5,12 +5,12 @@ import com.codepliot.search.dto.SearchRequest;
 import java.util.List;
 
 /**
- * Facade for repository code search implementations.
+ * 仓库代码检索实现的统一门面。
  */
 public interface CodeSearchFacade {
 
     /**
-     * Search repository code and return snippets suitable for Agent context.
+     * 检索仓库代码，并返回适合放入 Agent 上下文的代码片段。
      */
     List<CodeSearchResult> search(SearchRequest request);
 }

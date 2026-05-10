@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
- * Parses ripgrep output lines in file:line:column:text format.
+ * 解析 file:line:column:text 格式的 ripgrep 输出行。
  */
 @Component
 public class RipgrepResultParser {

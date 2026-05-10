@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import org.springframework.stereotype.Service;
 
 /**
- * Reads line-numbered snippets from repository files with path traversal protection.
+ * 从仓库文件中读取带行号的片段，并提供路径穿越保护。
  */
 @Service
 public class CodeReadService {

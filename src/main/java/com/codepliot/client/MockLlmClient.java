@@ -29,7 +29,7 @@ public MockLlmClient(LlmProperties llmProperties) {
 public String generate(String systemPrompt, String userPrompt) {
         String normalizedPrompt = userPrompt == null ? "" : userPrompt.toLowerCase();
 
-        // Patch prompt: return strict JSON so downstream parsing can proceed.
+        // Patch 提示词：返回严格 JSON，便于下游继续解析。
         if (normalizedPrompt.contains("\"patch\"") && normalizedPrompt.contains("\"risk\"")) {
             return """
                     {

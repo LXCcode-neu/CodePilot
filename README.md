@@ -198,6 +198,7 @@ Prepare before startup:
 - writable `codepilot.workspace.root`
 - valid JWT secret
 - working LLM configuration
+- optional `GITHUB_TOKEN` for reading private repositories or increasing GitHub API rate limits
 
 ### Run Backend
 
@@ -238,6 +239,23 @@ npm run build:static
 
 Then start the backend and open `http://localhost:8080`.
 
+### GitHub Issues
+
+The dashboard can load GitHub issues for repositories added to CodePilot.
+
+- Backend endpoint:
+  - `GET /api/projects/{projectId}/github/issues?state=open&page=1&pageSize=20`
+- Import endpoint:
+  - `POST /api/projects/{projectId}/github/issues/{issueNumber}/import-task`
+- Public repositories can be read without a token, but GitHub rate limits are lower.
+- Private repositories require `GITHUB_TOKEN` with repository and Issues read access.
+- Configure the token before starting the backend:
+
+```powershell
+$env:GITHUB_TOKEN="github_pat_xxx"
+java -jar target/codepilot-0.0.1-SNAPSHOT.jar
+```
+
 ### SSE Note
 
 Task event subscription endpoint:
@@ -249,6 +267,16 @@ The current frontend condenses SSE into three stages:
 - started
 - running
 - completed / failed
+
+### Agentic Code Search
+
+Code search uses an agentic tool loop:
+
+- the LLM chooses `grep`, `glob`, and `read` tool calls
+- the backend executes tools and returns observations
+- search stops when the LLM stops requesting tools
+- there is no fixed search-round limit
+- `codepilot.search.max-duration` is a runtime safety guard, not a search strategy limit
 
 ### Patch Confirmation
 

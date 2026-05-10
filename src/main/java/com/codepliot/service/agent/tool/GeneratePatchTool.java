@@ -11,6 +11,7 @@ import com.codepliot.model.PatchRecordVO;
 import com.codepliot.model.PatchSafetyCheckResult;
 import com.codepliot.policy.PatchSafetyPolicy;
 import com.codepliot.service.agent.AgentTool;
+import com.codepliot.service.agent.PatchTextNormalizer;
 import com.codepliot.service.agent.ToolResult;
 import com.codepliot.service.llm.LlmService;
 import com.codepliot.service.llm.PatchPromptBuilder;
@@ -25,13 +26,14 @@ import org.springframework.stereotype.Component;
  * <p>负责调用 LLM 生成结构化 patch 结果，并在落库前执行安全检查。
  */
 @Component
-@Order(50)
+@Order(40)
 public class GeneratePatchTool implements AgentTool {
 
     private final LlmService llmService;
     private final PatchPromptBuilder promptBuilder;
     private final PatchService patchService;
     private final PatchSafetyPolicy patchSafetyPolicy;
+    private final PatchTextNormalizer patchTextNormalizer;
     private final ObjectMapper objectMapper;
 
     /**
@@ -41,11 +43,13 @@ public class GeneratePatchTool implements AgentTool {
                              PatchPromptBuilder promptBuilder,
                              PatchService patchService,
                              PatchSafetyPolicy patchSafetyPolicy,
+                             PatchTextNormalizer patchTextNormalizer,
                              ObjectMapper objectMapper) {
         this.llmService = llmService;
         this.promptBuilder = promptBuilder;
         this.patchService = patchService;
         this.patchSafetyPolicy = patchSafetyPolicy;
+        this.patchTextNormalizer = patchTextNormalizer;
         this.objectMapper = objectMapper;
     }
 
@@ -90,6 +94,12 @@ public class GeneratePatchTool implements AgentTool {
 
         try {
             PatchGenerateResult result = PatchGenerateResult.fromRawOutput(objectMapper, rawOutput);
+            result = new PatchGenerateResult(
+                    result.analysis(),
+                    result.solution(),
+                    patchTextNormalizer.normalize(result.patch()),
+                    result.risk()
+            );
             PatchSafetyCheckResult safetyCheckResult = patchSafetyPolicy.evaluate(result.patch());
             PatchRecord patchRecord = patchService.saveGeneratedPatch(
                     context.taskId(),
@@ -97,6 +107,7 @@ public class GeneratePatchTool implements AgentTool {
                     rawOutput,
                     safetyCheckResult
             );
+            context.updatePatchGenerateResult(result);
             context.updatePatchSafetyCheckResult(safetyCheckResult);
             return ToolResult.success("patch generation completed", PatchRecordVO.from(patchRecord));
         } catch (IllegalArgumentException exception) {

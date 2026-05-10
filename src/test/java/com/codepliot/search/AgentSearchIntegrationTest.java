@@ -18,9 +18,11 @@ import com.codepliot.model.LlmToolChatResponse;
 import com.codepliot.model.LlmToolDefinition;
 import com.codepliot.policy.PatchSafetyPolicy;
 import com.codepliot.search.config.CodeSearchProperties;
+import com.codepliot.search.dto.CodeSearchResult;
 import com.codepliot.search.grep.RipgrepCommandBuilder;
 import com.codepliot.search.grep.RipgrepResultParser;
 import com.codepliot.service.agent.AgentExecutor;
+import com.codepliot.service.agent.PatchTextNormalizer;
 import com.codepliot.service.agent.ToolResult;
 import com.codepliot.search.grep.GrepSearchService;
 import com.codepliot.search.glob.FileGlobService;
@@ -94,6 +96,33 @@ class AgentSearchIntegrationTest {
     }
 
     @Test
+    void agenticSearchShouldKeepMultipleSnippetsFromSameFile() throws IOException {
+        Path file = tempDir.resolve("src/main/java/com/example/OrderService.java");
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, """
+                public class OrderService {
+                    void createOrder() {}
+                    void cancelOrder() {}
+                    void refundOrder() {}
+                }
+                """);
+
+        CodeSearchProperties properties = new CodeSearchProperties();
+        properties.setUseRipgrep(false);
+        properties.setMaxResults(5);
+        properties.setContextBeforeLines(0);
+        properties.setContextAfterLines(0);
+        AgenticCodeSearchService searchService = agenticSearchService(properties, """
+                {"tool":"grep","query":"Order","globPatterns":["**/*.java"],"maxResults":5}
+                """);
+
+        List<CodeSearchResult> results = searchService.search(tempDir.toString(), "Order workflow bug");
+
+        assertTrue(results.size() >= 2);
+        assertTrue(results.stream().allMatch(result -> result.getFilePath().equals("src/main/java/com/example/OrderService.java")));
+    }
+
+    @Test
     void grepSearchContextShouldContinueThroughAnalysisAndPatchGeneration() throws IOException {
         Path controller = tempDir.resolve("src/main/java/com/example/UserController.java");
         Files.createDirectories(controller.getParent());
@@ -141,6 +170,7 @@ class AgentSearchIntegrationTest {
                 new PatchPromptBuilder(),
                 patchService,
                 new PatchSafetyPolicy(),
+                new PatchTextNormalizer(),
                 new ObjectMapper()
         );
         AgentContext context = new AgentContext(

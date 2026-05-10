@@ -23,6 +23,7 @@ public enum ErrorCode {
     AGENT_STEP_NOT_FOUND(3002, "Agent step not found"),
     AGENT_TASK_RUNNING(3003, "Agent task is already running"),
     PATCH_CONFIRM_NOT_ALLOWED(4002, "Patch confirmation is not allowed in current status"),
+    PATCH_PR_NOT_ALLOWED(4003, "Patch pull request submission is not allowed"),
     PATCH_RECORD_NOT_FOUND(4001, "Patch record not found"),
     INTERNAL_ERROR(500, "Internal server error");
 

@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,15 +29,14 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 
 /**
- * Claude Code style code search loop.
+ * Claude Code 风格的代码检索循环。
  *
- * <p>The LLM decides which grep/glob/read action to run. The Java side only
- * validates parameters, executes tools, and feeds observations back.
+ * <p>LLM 决定下一步执行 grep、glob 还是 read 操作。Java 侧只负责校验参数、
+ * 执行工具，并把观察结果回传给 LLM。
  */
 @Service
 public class AgenticCodeSearchService {
 
-    private static final int MAX_SEARCH_ROUNDS = 3;
     private static final int DEFAULT_TOOL_MAX_RESULTS = 20;
     private static final int OBSERVATION_ITEM_LIMIT = 12;
 
@@ -68,11 +69,12 @@ public class AgenticCodeSearchService {
         int maxResults = Math.max(1, properties.getMaxResults());
         Map<String, CodeSearchResult> collected = new LinkedHashMap<>();
         String projectOverview = buildProjectOverview(repoPath);
+        Instant deadline = Instant.now().plus(resolveMaxDuration());
         List<LlmMessage> messages = new ArrayList<>();
         messages.add(LlmMessage.system(buildSystemPrompt(projectOverview)));
         messages.add(LlmMessage.user(buildUserPrompt(issueText)));
 
-        for (int round = 1; round <= MAX_SEARCH_ROUNDS && collected.size() < maxResults; round++) {
+        while (collected.size() < maxResults && Instant.now().isBefore(deadline)) {
             LlmToolChatResponse response;
             try {
                 response = llmService.chatWithTools(messages, toolDefinitions());
@@ -210,15 +212,16 @@ public class AgenticCodeSearchService {
             return;
         }
         try {
-            CodeSnippet snippet = readTool.execute(
+            CodeSnippet snippet = readTool.executeAround(
                     repoPath,
                     match.getFilePath(),
                     match.getLineNumber(),
-                    match.getLineNumber() == null ? null : match.getLineNumber() + properties.getContextAfterLines()
+                    properties.getContextBeforeLines(),
+                    properties.getContextAfterLines()
             );
             addSnippet(snippet, "grep matched '" + nullToEmpty(match.getQuery()) + "' at line " + nullToEmpty(match.getLineNumber()), collected);
         } catch (RuntimeException ignored) {
-            // A stale or unreadable grep match should not abort the search loop.
+            // 过期或不可读的 grep 匹配不应中断检索循环。
         }
     }
 
@@ -226,7 +229,11 @@ public class AgenticCodeSearchService {
         if (snippet == null || snippet.getFilePath() == null || snippet.getFilePath().isBlank()) {
             return;
         }
-        collected.putIfAbsent(snippet.getFilePath(), toResult(snippet, reason));
+        collected.putIfAbsent(snippetKey(snippet), toResult(snippet, reason));
+    }
+
+    private String snippetKey(CodeSnippet snippet) {
+        return snippet.getFilePath() + ":" + snippet.getStartLine() + ":" + snippet.getEndLine();
     }
 
     private CodeSearchResult toResult(CodeSnippet snippet, String reason) {
@@ -258,8 +265,9 @@ public class AgenticCodeSearchService {
                 - Use glob when a keyword is too broad or a file type/name pattern is more useful.
                 - Use read after finding a suspicious file to inspect context.
                 - Do not assume the answer in the first round.
-                - You have at most 3 tool-call rounds.
-                - Stop calling tools once enough relevant files have been found.
+                - Continue using tools until you have enough evidence to identify the relevant files.
+                - Stop calling tools when further search is unlikely to improve the result.
+                - Prefer fewer, high-signal tool calls, but do not stop early if important context is missing.
 
                 Project context:
                 %s
@@ -505,6 +513,14 @@ public class AgenticCodeSearchService {
 
     private int resolveToolMaxResults(Integer requestedMaxResults) {
         return requestedMaxResults == null || requestedMaxResults <= 0 ? DEFAULT_TOOL_MAX_RESULTS : requestedMaxResults;
+    }
+
+    private Duration resolveMaxDuration() {
+        Duration maxDuration = properties.getMaxDuration();
+        if (maxDuration == null || maxDuration.isZero() || maxDuration.isNegative()) {
+            return Duration.ofMinutes(2);
+        }
+        return maxDuration;
     }
 
     private String buildErrorMessage(Exception exception) {

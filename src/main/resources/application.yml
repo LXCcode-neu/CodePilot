@@ -46,12 +46,15 @@ codepilot:
     root: ./data/workspace
   github:
     base-url: https://github.com
+    api-base-url: https://api.github.com
+    token: ${GITHUB_TOKEN:}
   lock:
     task-run:
       ttl: 30m
   search:
     mode: grep
     max-results: 30
+    max-duration: 2m
     context-before-lines: 40
     context-after-lines: 40
     command-timeout-seconds: 10
@@ -70,6 +73,6 @@ codepilot:
       - tmp/**
   llm:
     provider: deepseek
-    api-key: sk-c0e745f3ec65481786dbf13c4f17ad01
+    api-key: ${DEEPSEEK_API_KEY:}
     base-url: https://api.deepseek.com
     model: deepseek-v4-flash

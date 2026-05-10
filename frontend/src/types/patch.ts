@@ -9,11 +9,24 @@ export interface PatchRecord {
   rawOutput?: string | null;
   confirmed?: boolean | null;
   confirmedAt?: string | null;
+  prSubmitted?: boolean | null;
+  prSubmittedAt?: string | null;
+  prUrl?: string | null;
+  prNumber?: number | null;
+  prBranch?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
   fileChanges?: PatchFileChange[];
   pullRequest?: PullRequestPreview | null;
   raw?: unknown;
+}
+
+export interface PullRequestSubmitResult {
+  taskId: string | number;
+  number?: number | null;
+  url?: string | null;
+  branch: string;
+  submittedAt: string;
 }
 
 export type PatchLineType = "added" | "removed" | "context";

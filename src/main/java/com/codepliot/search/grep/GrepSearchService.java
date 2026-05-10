@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Searches repository content with ripgrep and falls back to Java scanning when configured.
+ * 使用 ripgrep 检索仓库内容，并在配置允许时回退到 Java 扫描。
  */
 @Service
 public class GrepSearchService {

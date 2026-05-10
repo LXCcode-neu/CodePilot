@@ -10,7 +10,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
- * Formats code snippets into stable LLM-readable search context.
+ * 将代码片段格式化为稳定、便于 LLM 阅读的检索上下文。
  */
 @Component
 public class ContextBuilder {

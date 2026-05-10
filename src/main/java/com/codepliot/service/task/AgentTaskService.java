@@ -202,10 +202,10 @@ public class AgentTaskService {
 
     private boolean isRunningStatus(String status) {
         return AgentTaskStatus.CLONING.name().equals(status)
-                || AgentTaskStatus.INDEXING.name().equals(status)
                 || AgentTaskStatus.RETRIEVING.name().equals(status)
                 || AgentTaskStatus.ANALYZING.name().equals(status)
-                || AgentTaskStatus.GENERATING_PATCH.name().equals(status);
+                || AgentTaskStatus.GENERATING_PATCH.name().equals(status)
+                || AgentTaskStatus.VERIFYING.name().equals(status);
     }
 
     private record TaskLock(Long taskId, String lockValue) {

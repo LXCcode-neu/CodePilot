@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Patch record view object.
+ * Patch 记录视图对象。
  */
 public record PatchRecordVO(
         Long id,
@@ -21,6 +21,11 @@ public record PatchRecordVO(
         String rawOutput,
         Boolean confirmed,
         LocalDateTime confirmedAt,
+        Boolean prSubmitted,
+        LocalDateTime prSubmittedAt,
+        String prUrl,
+        Integer prNumber,
+        String prBranch,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<PatchFileChange> fileChanges,
@@ -45,6 +50,11 @@ public record PatchRecordVO(
                 patchRecord.getRawOutput(),
                 patchRecord.getConfirmed(),
                 patchRecord.getConfirmedAt(),
+                patchRecord.getPrSubmitted(),
+                patchRecord.getPrSubmittedAt(),
+                patchRecord.getPrUrl(),
+                patchRecord.getPrNumber(),
+                patchRecord.getPrBranch(),
                 patchRecord.getCreatedAt(),
                 patchRecord.getUpdatedAt(),
                 fileChanges,

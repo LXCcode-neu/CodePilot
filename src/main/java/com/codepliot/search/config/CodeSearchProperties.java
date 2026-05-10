@@ -1,5 +1,6 @@
 package com.codepliot.search.config;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
@@ -7,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * Configuration for on-demand code search.
+ * 按需代码检索配置。
  */
 @Component
 @ConfigurationProperties(prefix = "codepilot.search")
@@ -17,6 +18,8 @@ public class CodeSearchProperties {
     private String mode = "grep";
 
     private int maxResults = 30;
+
+    private Duration maxDuration = Duration.ofMinutes(2);
 
     private int contextBeforeLines = 40;
 

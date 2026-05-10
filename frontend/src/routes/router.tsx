@@ -5,6 +5,7 @@ import { DashboardPage } from "@/pages/DashboardPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { ProjectListPage } from "@/pages/ProjectListPage";
+import { GitHubIssuePage } from "@/pages/GitHubIssuePage";
 import { TaskListPage } from "@/pages/TaskListPage";
 import { CreateTaskPage } from "@/pages/CreateTaskPage";
 import { TaskDetailPage } from "@/pages/TaskDetailPage";
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: "/", element: <DashboardPage /> },
+          { path: "/github-issues", element: <GitHubIssuePage /> },
           { path: "/projects", element: <ProjectListPage /> },
           { path: "/tasks", element: <TaskListPage /> },
           { path: "/tasks/new", element: <CreateTaskPage /> },

@@ -11,11 +11,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 /**
- * Simple one-shot grep facade.
+ * 简单的单次 grep 检索门面。
  *
- * <p>Multi-round search decisions now live in AgenticCodeSearchService. This
- * facade only executes the provided request and turns raw grep matches into
- * readable snippets.
+ * <p>多轮检索决策现在由 AgenticCodeSearchService 负责。这个门面只执行传入的请求，
+ * 并将原始 grep 匹配结果转换为可读代码片段。
  */
 @Service
 public class GrepCodeSearchFacade implements CodeSearchFacade {

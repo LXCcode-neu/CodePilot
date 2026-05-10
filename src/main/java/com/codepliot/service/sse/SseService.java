@@ -77,7 +77,7 @@ public void complete(Long taskId) {
             try {
                 emitter.complete();
             } catch (IllegalStateException ignored) {
-                // Ignore already completed emitters.
+                // 忽略已经完成的 emitter。
             }
         }
     }
