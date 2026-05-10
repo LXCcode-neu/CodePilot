@@ -1,5 +1,6 @@
-import { CheckCircle2, Clock3 } from "lucide-react";
+import { CheckCircle2, Clock3, ExternalLink, GitPullRequest, LoaderCircle } from "lucide-react";
 import { PatchDiffView, PullRequestPreviewCard } from "@/components/PatchDiffView";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/EmptyState";
@@ -15,7 +16,15 @@ function Section({ value }: { value?: string | null }) {
   return <p className="whitespace-pre-wrap text-sm leading-7 text-slate-700">{value}</p>;
 }
 
-export function PatchViewer({ patch }: { patch: PatchRecord | null }) {
+export function PatchViewer({
+  patch,
+  submittingPullRequest = false,
+  onSubmitPullRequest,
+}: {
+  patch: PatchRecord | null;
+  submittingPullRequest?: boolean;
+  onSubmitPullRequest?: () => void;
+}) {
   if (!patch || (!patch.analysis && !patch.solution && !patch.patch && !patch.risk)) {
     return (
       <Card>
@@ -44,7 +53,7 @@ export function PatchViewer({ patch }: { patch: PatchRecord | null }) {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-5">
         <Tabs defaultValue="diff">
           <TabsList className="flex w-full flex-wrap gap-1 bg-transparent p-0">
             {["diff", "pr", "analysis", "solution", "risk", "raw"].map((tab) => (
@@ -78,6 +87,35 @@ export function PatchViewer({ patch }: { patch: PatchRecord | null }) {
             </pre>
           </TabsContent>
         </Tabs>
+        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">提交 Pull Request</p>
+            <p className="mt-1 text-sm text-slate-500">
+              {patch.prSubmitted
+                ? `PR 已提交${patch.prNumber ? ` #${patch.prNumber}` : ""}${patch.prSubmittedAt ? ` · ${formatDateTime(patch.prSubmittedAt)}` : ""}`
+                : patch.confirmed
+                  ? "Patch 已确认，可以提交 PR。"
+                  : "确认 Patch 后可提交 PR。"}
+            </p>
+          </div>
+          {patch.prSubmitted && patch.prUrl ? (
+            <Button asChild variant="outline">
+              <a href={patch.prUrl} target="_blank" rel="noreferrer">
+                <ExternalLink className="h-4 w-4" />
+                查看 PR
+              </a>
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={onSubmitPullRequest}
+              disabled={!patch.confirmed || submittingPullRequest || !pullRequest.ready}
+            >
+              {submittingPullRequest ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <GitPullRequest className="h-4 w-4" />}
+              {patch.confirmed ? "提交 PR" : "确认后可提交 PR"}
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

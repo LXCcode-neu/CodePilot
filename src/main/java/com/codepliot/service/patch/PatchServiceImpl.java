@@ -71,6 +71,11 @@ public class PatchServiceImpl implements PatchService {
         patchRecord.setRawOutput(rawOutput);
         patchRecord.setConfirmed(Boolean.FALSE);
         patchRecord.setConfirmedAt(null);
+        patchRecord.setPrSubmitted(Boolean.FALSE);
+        patchRecord.setPrSubmittedAt(null);
+        patchRecord.setPrUrl(null);
+        patchRecord.setPrNumber(null);
+        patchRecord.setPrBranch(null);
         persist(patchRecord);
         return patchRecord;
     }
@@ -91,6 +96,11 @@ public class PatchServiceImpl implements PatchService {
         patchRecord.setRawOutput(rawOutput);
         patchRecord.setConfirmed(Boolean.FALSE);
         patchRecord.setConfirmedAt(null);
+        patchRecord.setPrSubmitted(Boolean.FALSE);
+        patchRecord.setPrSubmittedAt(null);
+        patchRecord.setPrUrl(null);
+        patchRecord.setPrNumber(null);
+        patchRecord.setPrBranch(null);
         persist(patchRecord);
         return patchRecord;
     }

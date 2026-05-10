@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoaderCircle, PlayCircle, RefreshCcw, Trash2 } from "lucide-react";
-import { confirmTaskPatch, getTaskPatch } from "@/api/patch";
+import { confirmTaskPatch, getTaskPatch, submitTaskPullRequest } from "@/api/patch";
 import { getProject } from "@/api/project";
 import { createTaskEventSource, parseTaskEventMessage } from "@/api/sse";
 import { getTaskSteps } from "@/api/step";
@@ -35,6 +35,8 @@ const CONFIRM_LABEL = "确认 Patch";
 const CONFIRMING_LABEL = "确认中";
 const CONFIRM_REQUESTED = "已确认 Patch，任务已完成。";
 const CONFIRM_ERROR = "确认 Patch 失败";
+const PR_SUBMIT_REQUESTED = "Pull Request 已提交。";
+const PR_SUBMIT_ERROR = "提交 Pull Request 失败";
 const DELETE_LABEL = "删除任务";
 const DELETING_LABEL = "删除中";
 const DELETE_CONFIRM_MESSAGE = "确定删除这个任务吗？删除后对应的执行步骤和 Patch 记录也会一起删除。";
@@ -60,6 +62,7 @@ export function TaskDetailPage() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [submittingPullRequest, setSubmittingPullRequest] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
@@ -215,6 +218,33 @@ export function TaskDetailPage() {
     }
   }
 
+  async function handleSubmitPullRequest() {
+    if (!taskId || !patch?.confirmed || patch.prSubmitted) {
+      return;
+    }
+
+    setSubmittingPullRequest(true);
+    setError("");
+    try {
+      await submitTaskPullRequest(taskId);
+      setEvents((prev) => [
+        {
+          id: crypto.randomUUID(),
+          time: new Date().toISOString(),
+          status: task?.status ?? "COMPLETED",
+          phase: "COMPLETED",
+          message: PR_SUBMIT_REQUESTED,
+        },
+        ...prev,
+      ]);
+      await loadPatchData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : PR_SUBMIT_ERROR);
+    } finally {
+      setSubmittingPullRequest(false);
+    }
+  }
+
   async function handleDelete() {
     if (!taskId || !task || !canDelete) {
       return;
@@ -257,21 +287,21 @@ export function TaskDetailPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={task.status} />
-          <Button variant="secondary" onClick={() => void loadAll()} disabled={running || confirming || deleting}>
+          <Button variant="secondary" onClick={() => void loadAll()} disabled={running || confirming || submittingPullRequest || deleting}>
             <RefreshCcw className="h-4 w-4" />
             {REFRESH_LABEL}
           </Button>
           {canConfirm ? (
-            <Button variant="secondary" onClick={handleConfirmPatch} disabled={confirming || running || deleting}>
+            <Button variant="secondary" onClick={handleConfirmPatch} disabled={confirming || running || submittingPullRequest || deleting}>
               {confirming ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
               {confirming ? CONFIRMING_LABEL : CONFIRM_LABEL}
             </Button>
           ) : null}
-          <Button variant="destructive" onClick={handleDelete} disabled={!canDelete || running || confirming || deleting}>
+          <Button variant="destructive" onClick={handleDelete} disabled={!canDelete || running || confirming || submittingPullRequest || deleting}>
             {deleting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
             {deleting ? DELETING_LABEL : DELETE_LABEL}
           </Button>
-          <Button onClick={handleRun} disabled={!canRun || running || confirming || deleting}>
+          <Button onClick={handleRun} disabled={!canRun || running || confirming || submittingPullRequest || deleting}>
             {running ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
             Run Agent
           </Button>
@@ -329,7 +359,7 @@ export function TaskDetailPage() {
           </Card>
         </div>
 
-        <PatchViewer patch={patch} />
+        <PatchViewer patch={patch} submittingPullRequest={submittingPullRequest} onSubmitPullRequest={handleSubmitPullRequest} />
       </section>
     </div>
   );

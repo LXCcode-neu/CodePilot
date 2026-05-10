@@ -73,6 +73,6 @@ codepilot:
       - tmp/**
   llm:
     provider: deepseek
-    api-key: sk-c0e745f3ec65481786dbf13c4f17ad01
+    api-key: ${DEEPSEEK_API_KEY:}
     base-url: https://api.deepseek.com
     model: deepseek-v4-flash

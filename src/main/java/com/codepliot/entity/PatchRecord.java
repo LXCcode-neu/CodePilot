@@ -42,4 +42,19 @@ public class PatchRecord extends BaseEntity {
 
     @TableField("confirmed_at")
     private LocalDateTime confirmedAt;
+
+    @TableField("pr_submitted")
+    private Boolean prSubmitted;
+
+    @TableField("pr_submitted_at")
+    private LocalDateTime prSubmittedAt;
+
+    @TableField("pr_url")
+    private String prUrl;
+
+    @TableField("pr_number")
+    private Integer prNumber;
+
+    @TableField("pr_branch")
+    private String prBranch;
 }
