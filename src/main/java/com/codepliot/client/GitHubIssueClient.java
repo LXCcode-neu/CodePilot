@@ -35,12 +35,38 @@ public class GitHubIssueClient {
     public GitHubIssuePageVO listIssues(String owner, String repo, String state, int page, int pageSize) {
         int safePage = Math.max(page, 1);
         int safePageSize = Math.min(Math.max(pageSize, 1), 100);
-        ResponseEntity<String> response = restClient.get()
+        List<GitHubIssueVO> issues = fetchAllRepositoryIssues(owner, repo, state);
+        int totalCount = issues.size();
+        int totalPages = totalCount == 0 ? 0 : (int) Math.ceil((double) totalCount / safePageSize);
+        int effectivePage = totalPages == 0 ? 1 : Math.min(safePage, totalPages);
+        int fromIndex = totalCount == 0 ? 0 : (effectivePage - 1) * safePageSize;
+        int toIndex = Math.min(fromIndex + safePageSize, totalCount);
+
+        return new GitHubIssuePageVO(
+                issues.subList(fromIndex, toIndex),
+                effectivePage,
+                safePageSize,
+                totalCount,
+                totalPages,
+                effectivePage > 1,
+                totalPages > 0 && effectivePage < totalPages
+        );
+    }
+
+    private List<GitHubIssueVO> fetchAllRepositoryIssues(String owner, String repo, String state) {
+        List<GitHubIssueVO> issues = new ArrayList<>();
+        int githubPage = 1;
+        boolean hasNext;
+        do {
+            int currentPage = githubPage;
+            ResponseEntity<String> response = restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/repos/{owner}/{repo}/issues")
                         .queryParam("state", normalizeState(state))
-                        .queryParam("page", safePage)
-                        .queryParam("per_page", safePageSize)
+                        .queryParam("sort", "updated")
+                        .queryParam("direction", "desc")
+                        .queryParam("page", currentPage)
+                        .queryParam("per_page", 100)
                         .build(owner, repo))
                 .headers(this::applyHeaders)
                 .retrieve()
@@ -49,7 +75,11 @@ public class GitHubIssueClient {
                 })
                 .toEntity(String.class);
 
-        return new GitHubIssuePageVO(parseIssueList(response.getBody()), safePage, safePageSize, hasNextPage(response));
+            issues.addAll(parseIssueList(response.getBody()));
+            hasNext = hasNextPage(response);
+            githubPage++;
+        } while (hasNext);
+        return issues;
     }
 
     public GitHubIssueVO getIssue(String owner, String repo, int issueNumber) {

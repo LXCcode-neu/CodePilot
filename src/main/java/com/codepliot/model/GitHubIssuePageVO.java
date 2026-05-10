@@ -6,6 +6,9 @@ public record GitHubIssuePageVO(
         List<GitHubIssueVO> items,
         Integer page,
         Integer pageSize,
+        Integer totalCount,
+        Integer totalPages,
+        Boolean hasPrevious,
         Boolean hasNext
 ) {
 }

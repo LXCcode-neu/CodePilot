@@ -8,6 +8,7 @@ import { LoadingBlock } from "@/components/LoadingBlock";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { GitHubIssue, GitHubIssuePage as GitHubIssuePageData, GitHubIssueState } from "@/types/github-issue";
 import type { ProjectRepo } from "@/types/project";
@@ -27,8 +28,9 @@ export function GitHubIssuePage() {
   const [projects, setProjects] = useState<ProjectRepo[]>([]);
   const [projectLoading, setProjectLoading] = useState(true);
   const [selectedProjectId, setSelectedProjectId] = useState("");
-  const [issueState, setIssueState] = useState<GitHubIssueState>("open");
+  const [issueState, setIssueState] = useState<GitHubIssueState>("all");
   const [issuePage, setIssuePage] = useState(1);
+  const [pageInput, setPageInput] = useState("1");
   const [issueData, setIssueData] = useState<GitHubIssuePageData | null>(null);
   const [issueLoading, setIssueLoading] = useState(false);
   const [issueError, setIssueError] = useState("");
@@ -55,6 +57,10 @@ export function GitHubIssuePage() {
     }
   }, [selectedProjectId, issueState, issuePage]);
 
+  useEffect(() => {
+    setPageInput(String(issuePage));
+  }, [issuePage]);
+
   async function loadIssues(projectId: string, state: GitHubIssueState, page: number) {
     setIssueLoading(true);
     setIssueError("");
@@ -77,6 +83,17 @@ export function GitHubIssuePage() {
   function handleIssueStateChange(state: GitHubIssueState) {
     setIssueState(state);
     setIssuePage(1);
+  }
+
+  function handlePageJump() {
+    const parsedPage = Number.parseInt(pageInput, 10);
+    if (!Number.isFinite(parsedPage)) {
+      setPageInput(String(issuePage));
+      return;
+    }
+    const totalPages = issueData?.totalPages ?? 1;
+    const nextPage = Math.min(Math.max(parsedPage, 1), Math.max(totalPages, 1));
+    setIssuePage(nextPage);
   }
 
   async function handleImportIssue(issue: GitHubIssue) {
@@ -234,18 +251,37 @@ export function GitHubIssuePage() {
               ) : null}
 
               {issueData ? (
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm text-slate-500">第 {issueData.page} 页</p>
-                  <div className="flex gap-2">
+                <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between">
+                  <p className="text-sm text-slate-500">
+                    每页 {issueData.pageSize} 条，共 {issueData.totalCount} 条，第 {issueData.page} / {Math.max(issueData.totalPages, 1)} 页
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      disabled={issuePage <= 1 || issueLoading}
+                      disabled={!issueData.hasPrevious || issueLoading}
                       onClick={() => setIssuePage((current) => Math.max(current - 1, 1))}
                     >
                       上一页
                     </Button>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        className="h-9 w-20"
+                        inputMode="numeric"
+                        value={pageInput}
+                        onChange={(event) => setPageInput(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            handlePageJump();
+                          }
+                        }}
+                        disabled={issueLoading}
+                      />
+                      <Button type="button" variant="outline" size="sm" onClick={handlePageJump} disabled={issueLoading}>
+                        跳转
+                      </Button>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"

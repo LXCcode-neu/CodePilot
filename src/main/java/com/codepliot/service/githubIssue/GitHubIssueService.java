@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.githubIssue;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.codepliot.client.GitHubIssueClient;
@@ -37,7 +37,7 @@ public class GitHubIssueService {
                 repoRef.repo(),
                 state,
                 page == null ? 1 : page,
-                pageSize == null ? 20 : pageSize
+                pageSize == null ? 10 : pageSize
         );
     }
 

@@ -22,6 +22,7 @@ import com.codepliot.search.dto.CodeSearchResult;
 import com.codepliot.search.grep.RipgrepCommandBuilder;
 import com.codepliot.search.grep.RipgrepResultParser;
 import com.codepliot.service.agent.AgentExecutor;
+import com.codepliot.service.agent.PatchTextNormalizer;
 import com.codepliot.service.agent.ToolResult;
 import com.codepliot.search.grep.GrepSearchService;
 import com.codepliot.search.glob.FileGlobService;
@@ -169,6 +170,7 @@ class AgentSearchIntegrationTest {
                 new PatchPromptBuilder(),
                 patchService,
                 new PatchSafetyPolicy(),
+                new PatchTextNormalizer(),
                 new ObjectMapper()
         );
         AgentContext context = new AgentContext(

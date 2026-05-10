@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where java *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" --connect-timeout 5 https://api.deepseek.com)"
+    ]
+  }
+}
