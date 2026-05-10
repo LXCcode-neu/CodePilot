@@ -123,7 +123,7 @@ export function buildPullRequestPreview(
     touchedFiles,
     ready,
     status: ready
-      ? "Draft PR preview generated. Remote PR creation is not configured yet."
+      ? "Patch is ready to submit as a GitHub pull request."
       : "Patch is empty or not a valid unified diff; PR preview is not ready.",
   };
 }

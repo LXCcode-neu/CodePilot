@@ -147,7 +147,7 @@ public record PatchRecordVO(
         String branchName = "codepilot/task-" + taskId;
         String commitMessage = firstSentence(patchRecord.getSolution(), "Apply CodePilot patch for task " + taskId);
         String status = ready
-                ? "Draft PR preview generated. Remote PR creation is not configured yet."
+                ? "Patch is ready to submit as a GitHub pull request."
                 : "Patch is empty or not a valid unified diff; PR preview is not ready.";
 
         StringBuilder body = new StringBuilder();

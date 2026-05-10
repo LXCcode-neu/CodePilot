@@ -136,6 +136,10 @@ public class PullRequestSubmitService {
                                  String commitMessage) {
         try (Git git = Git.open(Path.of(repositoryPath).toFile())) {
             Repository repository = git.getRepository();
+            git.fetch()
+                    .setRemote("origin")
+                    .setCredentialsProvider(credentialsProvider())
+                    .call();
             checkoutBaseBranch(git, repository, baseBranch);
             if (repository.findRef(branchName) != null) {
                 git.branchDelete().setBranchNames(branchName).setForce(true).call();
@@ -152,6 +156,7 @@ public class PullRequestSubmitService {
             git.push()
                     .setRemote(pushRemoteUrl)
                     .setCredentialsProvider(credentialsProvider())
+                    .setForce(true)
                     .add(branchName)
                     .call();
         } catch (BusinessException exception) {

@@ -3,11 +3,14 @@ package com.codepliot.service.git;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.ErrorCode;
 import com.codepliot.entity.ProjectRepo;
+import com.codepliot.config.GitHubProperties;
 import com.codepliot.repository.ProjectRepoMapper;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.stereotype.Service;
 /**
  * GitService 服务类，负责封装业务流程和领域能力。
@@ -17,12 +20,24 @@ public class GitService {
 
     private final ProjectRepoMapper projectRepoMapper;
     private final GitWorkspaceService gitWorkspaceService;
+    private final GitHubProperties gitHubProperties;
 /**
  * 创建 GitService 实例。
  */
-public GitService(ProjectRepoMapper projectRepoMapper, GitWorkspaceService gitWorkspaceService) {
+public GitService(ProjectRepoMapper projectRepoMapper,
+                  GitWorkspaceService gitWorkspaceService,
+                  GitHubProperties gitHubProperties) {
         this.projectRepoMapper = projectRepoMapper;
         this.gitWorkspaceService = gitWorkspaceService;
+        this.gitHubProperties = gitHubProperties;
+    }
+
+    private UsernamePasswordCredentialsProvider credentialsProvider() {
+        String token = gitHubProperties.getToken();
+        if (token == null || token.isBlank()) {
+            return null;
+        }
+        return new UsernamePasswordCredentialsProvider("x-access-token", token.trim());
     }
 /**
  * 克隆Repository相关逻辑。
@@ -41,14 +56,18 @@ public String cloneRepository(Long projectId) {
         }
 
         gitWorkspaceService.ensureProjectWorkspace(projectId);
-        try (Git ignored = Git.cloneRepository()
+        CloneCommand cloneCommand = Git.cloneRepository()
                 .setURI(projectRepo.getRepoUrl())
-                .setDirectory(repositoryPath.toFile())
-                .call()) {
+                .setDirectory(repositoryPath.toFile());
+        UsernamePasswordCredentialsProvider credentialsProvider = credentialsProvider();
+        if (credentialsProvider != null) {
+            cloneCommand.setCredentialsProvider(credentialsProvider);
+        }
+        try (Git ignored = cloneCommand.call()) {
             return updateLocalPath(projectRepo, repositoryPath);
         } catch (GitAPIException | RuntimeException ex) {
             throw new BusinessException(ErrorCode.INTERNAL_ERROR,
-                    "Failed to clone public GitHub repository: " + buildErrorMessage(ex));
+                    "Failed to clone GitHub repository: " + buildErrorMessage(ex));
         }
     }
 /**
