@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * Configuration for on-demand code search.
+ * 按需代码检索配置。
  */
 @Component
 @ConfigurationProperties(prefix = "codepilot.search")

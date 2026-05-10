@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
- * Builds ripgrep commands as argument lists for ProcessBuilder.
+ * 为 ProcessBuilder 构建 ripgrep 命令参数列表。
  */
 @Component
 public class RipgrepCommandBuilder {

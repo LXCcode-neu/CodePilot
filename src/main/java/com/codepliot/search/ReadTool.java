@@ -5,7 +5,7 @@ import com.codepliot.search.read.CodeReadService;
 import org.springframework.stereotype.Component;
 
 /**
- * Reads line-numbered code from a repository file.
+ * 从仓库文件中读取带行号的代码。
  */
 @Component
 public class ReadTool {

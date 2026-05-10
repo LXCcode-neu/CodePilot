@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
- * Executes raw text search against a repository.
+ * 对仓库执行原始文本检索。
  */
 @Component
 public class GrepTool {

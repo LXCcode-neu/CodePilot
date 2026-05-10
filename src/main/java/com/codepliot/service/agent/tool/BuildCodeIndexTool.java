@@ -10,10 +10,10 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * Compatibility step for the old index build phase.
+ * 旧索引构建阶段的兼容步骤。
  *
- * <p>Code search now uses on-demand grep, so this tool keeps the existing Agent
- * step/status sequence without invoking the removed prebuilt index pipeline.
+ * <p>代码检索现在使用按需 grep，因此该工具只保留现有 Agent 步骤和状态顺序，
+ * 不再调用已移除的预构建索引流程。
  */
 @Component
 @Order(20)

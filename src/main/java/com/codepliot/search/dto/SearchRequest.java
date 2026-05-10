@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.Data;
 
 /**
- * Request object for on-demand repository code search.
+ * 按需仓库代码检索请求对象。
  */
 @Data
 public class SearchRequest {

@@ -3,7 +3,7 @@ package com.codepliot.search.dto;
 import lombok.Data;
 
 /**
- * File snippet with line numbers around a search match.
+ * 检索匹配附近带行号的文件片段。
  */
 @Data
 public class CodeSnippet {

@@ -29,10 +29,10 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 
 /**
- * Claude Code style code search loop.
+ * Claude Code 风格的代码检索循环。
  *
- * <p>The LLM decides which grep/glob/read action to run. The Java side only
- * validates parameters, executes tools, and feeds observations back.
+ * <p>LLM 决定下一步执行 grep、glob 还是 read 操作。Java 侧只负责校验参数、
+ * 执行工具，并把观察结果回传给 LLM。
  */
 @Service
 public class AgenticCodeSearchService {
@@ -221,7 +221,7 @@ public class AgenticCodeSearchService {
             );
             addSnippet(snippet, "grep matched '" + nullToEmpty(match.getQuery()) + "' at line " + nullToEmpty(match.getLineNumber()), collected);
         } catch (RuntimeException ignored) {
-            // A stale or unreadable grep match should not abort the search loop.
+            // 过期或不可读的 grep 匹配不应中断检索循环。
         }
     }
 

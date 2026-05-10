@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
- * Finds repository files by glob patterns.
+ * 通过 glob 模式查找仓库文件。
  */
 @Component
 public class GlobTool {

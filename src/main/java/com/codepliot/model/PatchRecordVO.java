@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Patch record view object.
+ * Patch 记录视图对象。
  */
 public record PatchRecordVO(
         Long id,
