@@ -11,6 +11,8 @@ public class FrontendRouteController {
             "/login",
             "/register",
             "/projects",
+            "/github-auth",
+            "/github/callback",
             "/tasks",
             "/tasks/new",
             "/tasks/{id:[0-9]+}"

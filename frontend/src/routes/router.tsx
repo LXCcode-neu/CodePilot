@@ -1,15 +1,17 @@
 import { Navigate, Outlet, createBrowserRouter } from "react-router-dom";
 import { AppLayout } from "@/layouts/AppLayout";
 import { AuthLayout } from "@/layouts/AuthLayout";
-import { DashboardPage } from "@/pages/DashboardPage";
-import { LoginPage } from "@/pages/LoginPage";
-import { RegisterPage } from "@/pages/RegisterPage";
-import { ProjectListPage } from "@/pages/ProjectListPage";
-import { GitHubIssuePage } from "@/pages/GitHubIssuePage";
-import { TaskListPage } from "@/pages/TaskListPage";
 import { CreateTaskPage } from "@/pages/CreateTaskPage";
-import { TaskDetailPage } from "@/pages/TaskDetailPage";
+import { DashboardPage } from "@/pages/DashboardPage";
+import { GitHubAuthPage } from "@/pages/GitHubAuthPage";
+import { GitHubCallbackPage } from "@/pages/GitHubCallbackPage";
+import { GitHubIssuePage } from "@/pages/GitHubIssuePage";
 import { LlmConfigPage } from "@/pages/LlmConfigPage";
+import { LoginPage } from "@/pages/LoginPage";
+import { ProjectListPage } from "@/pages/ProjectListPage";
+import { RegisterPage } from "@/pages/RegisterPage";
+import { TaskDetailPage } from "@/pages/TaskDetailPage";
+import { TaskListPage } from "@/pages/TaskListPage";
 import { hasToken } from "@/lib/token";
 
 function RequireAuth() {
@@ -40,6 +42,8 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: "/", element: <DashboardPage /> },
+          { path: "/github-auth", element: <GitHubAuthPage /> },
+          { path: "/github/callback", element: <GitHubCallbackPage /> },
           { path: "/github-issues", element: <GitHubIssuePage /> },
           { path: "/projects", element: <ProjectListPage /> },
           { path: "/llm-config", element: <LlmConfigPage /> },

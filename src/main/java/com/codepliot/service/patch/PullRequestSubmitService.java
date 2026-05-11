@@ -2,7 +2,6 @@ package com.codepliot.service.patch;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.codepliot.client.GitHubPullRequestClient;
-import com.codepliot.config.GitHubProperties;
 import com.codepliot.entity.AgentTask;
 import com.codepliot.entity.PatchRecord;
 import com.codepliot.entity.ProjectRepo;
@@ -16,6 +15,7 @@ import com.codepliot.model.PullRequestSubmitResult;
 import com.codepliot.repository.AgentTaskMapper;
 import com.codepliot.repository.PatchRecordMapper;
 import com.codepliot.repository.ProjectRepoMapper;
+import com.codepliot.service.GitHubAuthService;
 import com.codepliot.service.git.GitService;
 import com.codepliot.utils.SecurityUtils;
 import java.io.ByteArrayInputStream;
@@ -37,21 +37,21 @@ public class PullRequestSubmitService {
     private final ProjectRepoMapper projectRepoMapper;
     private final PatchRecordMapper patchRecordMapper;
     private final GitService gitService;
-    private final GitHubProperties gitHubProperties;
     private final GitHubPullRequestClient gitHubPullRequestClient;
+    private final GitHubAuthService gitHubAuthService;
 
     public PullRequestSubmitService(AgentTaskMapper agentTaskMapper,
                                     ProjectRepoMapper projectRepoMapper,
                                     PatchRecordMapper patchRecordMapper,
                                     GitService gitService,
-                                    GitHubProperties gitHubProperties,
-                                    GitHubPullRequestClient gitHubPullRequestClient) {
+                                    GitHubPullRequestClient gitHubPullRequestClient,
+                                    GitHubAuthService gitHubAuthService) {
         this.agentTaskMapper = agentTaskMapper;
         this.projectRepoMapper = projectRepoMapper;
         this.patchRecordMapper = patchRecordMapper;
         this.gitService = gitService;
-        this.gitHubProperties = gitHubProperties;
         this.gitHubPullRequestClient = gitHubPullRequestClient;
+        this.gitHubAuthService = gitHubAuthService;
     }
 
     @Transactional
@@ -59,7 +59,11 @@ public class PullRequestSubmitService {
         AgentTask task = requireOwnedTask(taskId);
         ProjectRepo projectRepo = requireOwnedProject(task.getProjectId(), task.getUserId());
         PatchRecord patchRecord = requirePatchRecord(taskId);
-        validateSubmittable(patchRecord);
+        validateSubmittable(task.getUserId(), patchRecord);
+        String accessToken = gitHubAuthService.requireAccessTokenForUser(
+                task.getUserId(),
+                "Connect GitHub before submitting a pull request"
+        );
 
         String repositoryPath = projectRepo.getLocalPath();
         if (repositoryPath == null || repositoryPath.isBlank() || !Files.isDirectory(Path.of(repositoryPath))) {
@@ -69,8 +73,8 @@ public class PullRequestSubmitService {
 
         PullRequestPreview preview = PatchRecordVO.from(patchRecord).pullRequest();
         GitHubRepoRef repoRef = parseRepoRef(projectRepo.getRepoUrl());
-        String tokenUser = gitHubPullRequestClient.getAuthenticatedUsername();
-        GitHubRepositoryRef pushRepository = resolvePushRepository(repoRef, tokenUser);
+        String tokenUser = gitHubPullRequestClient.getAuthenticatedUsername(accessToken);
+        GitHubRepositoryRef pushRepository = resolvePushRepository(accessToken, repoRef, tokenUser);
         String baseBranch = resolveBaseBranch(projectRepo, repositoryPath);
         String branchName = preview.branchName();
         String pullRequestHead = tokenUser.equalsIgnoreCase(repoRef.owner())
@@ -83,9 +87,11 @@ public class PullRequestSubmitService {
                 branchName,
                 pushRepository.cloneUrl(),
                 patchRecord.getPatch(),
-                preview.commitMessage()
+                preview.commitMessage(),
+                accessToken
         );
         GitHubPullRequestCreateResult pullRequest = gitHubPullRequestClient.createPullRequest(
+                accessToken,
                 repoRef.owner(),
                 repoRef.repo(),
                 preview.title(),
@@ -105,14 +111,14 @@ public class PullRequestSubmitService {
         return new PullRequestSubmitResult(taskId, pullRequest.number(), pullRequest.htmlUrl(), branchName, submittedAt);
     }
 
-    private GitHubRepositoryRef resolvePushRepository(GitHubRepoRef upstream, String tokenUser) {
+    private GitHubRepositoryRef resolvePushRepository(String accessToken, GitHubRepoRef upstream, String tokenUser) {
         if (tokenUser.equalsIgnoreCase(upstream.owner())) {
-            return gitHubPullRequestClient.getRepository(upstream.owner(), upstream.repo());
+            return gitHubPullRequestClient.getRepository(accessToken, upstream.owner(), upstream.repo());
         }
-        return gitHubPullRequestClient.ensureFork(upstream.owner(), upstream.repo(), tokenUser);
+        return gitHubPullRequestClient.ensureFork(accessToken, upstream.owner(), upstream.repo(), tokenUser);
     }
 
-    private void validateSubmittable(PatchRecord patchRecord) {
+    private void validateSubmittable(Long userId, PatchRecord patchRecord) {
         if (!Boolean.TRUE.equals(patchRecord.getConfirmed())) {
             throw new BusinessException(ErrorCode.PATCH_PR_NOT_ALLOWED, "Patch must be confirmed before submitting a pull request");
         }
@@ -122,9 +128,9 @@ public class PullRequestSubmitService {
         if (patchRecord.getPatch() == null || patchRecord.getPatch().isBlank()) {
             throw new BusinessException(ErrorCode.PATCH_PR_NOT_ALLOWED, "Patch content is empty");
         }
-        String token = gitHubProperties.getToken();
+        String token = gitHubAuthService.resolveAccessTokenForUser(userId);
         if (token == null || token.isBlank()) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "GITHUB_TOKEN is required to submit pull requests");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "Connect GitHub before submitting a pull request");
         }
     }
 
@@ -133,7 +139,8 @@ public class PullRequestSubmitService {
                                  String branchName,
                                  String pushRemoteUrl,
                                  String patch,
-                                 String commitMessage) {
+                                 String commitMessage,
+                                 String accessToken) {
         try (Git git = Git.open(Path.of(repositoryPath).toFile())) {
             Repository repository = git.getRepository();
             checkoutBaseBranch(git, repository, baseBranch);
@@ -151,7 +158,7 @@ public class PullRequestSubmitService {
             git.commit().setMessage(commitMessage).call();
             git.push()
                     .setRemote(pushRemoteUrl)
-                    .setCredentialsProvider(credentialsProvider())
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(accessToken.trim(), "x-oauth-basic"))
                     .add(branchName)
                     .call();
         } catch (BusinessException exception) {
@@ -172,10 +179,6 @@ public class PullRequestSubmitService {
             git.checkout().setName(baseBranch).call();
         }
         git.reset().setMode(ResetCommand.ResetType.HARD).setRef("origin/" + baseBranch).call();
-    }
-
-    private UsernamePasswordCredentialsProvider credentialsProvider() {
-        return new UsernamePasswordCredentialsProvider("x-access-token", gitHubProperties.getToken().trim());
     }
 
     private String resolveBaseBranch(ProjectRepo projectRepo, String repositoryPath) {

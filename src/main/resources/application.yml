@@ -50,6 +50,10 @@ codepilot:
     base-url: https://github.com
     api-base-url: https://api.github.com
     token: ${GITHUB_TOKEN:}
+    client-id: ${GITHUB_CLIENT_ID:}
+    client-secret: ${GITHUB_CLIENT_SECRET:}
+    oauth-redirect-uri: ${GITHUB_OAUTH_REDIRECT_URI:}
+    oauth-scope: ${GITHUB_OAUTH_SCOPE:repo read:user}
   secret:
     api-key-encryption-key: ${CODEPILOT_API_KEY_ENCRYPTION_KEY:please-change-this-api-key-encryption-key}
   lock:

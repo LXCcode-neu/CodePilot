@@ -1,4 +1,4 @@
-import { FolderGit2, Trash2 } from "lucide-react";
+import { FolderGit2, Lock, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,8 +22,11 @@ export function ProjectCard({
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
               <FolderGit2 className="h-4 w-4" />
             </div>
-            <div>
-              <CardTitle>{project.repoName}</CardTitle>
+            <div className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                {project.repoName}
+                {project.githubPrivate ? <Lock className="h-4 w-4 text-slate-400" /> : null}
+              </CardTitle>
               <p className="text-sm text-slate-500">{project.repoUrl}</p>
             </div>
           </div>
@@ -33,6 +36,12 @@ export function ProjectCard({
       <CardContent className="space-y-4">
         <Separator />
         <div className="grid gap-3 text-sm text-slate-600">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-slate-400">GitHub</p>
+            <p className="mt-1 break-all text-slate-700">
+              {project.githubOwner && project.githubRepoName ? `${project.githubOwner}/${project.githubRepoName}` : "--"}
+            </p>
+          </div>
           <div>
             <p className="text-xs uppercase tracking-wide text-slate-400">Local Path</p>
             <p className="mt-1 break-all text-slate-700">{project.localPath || "--"}</p>

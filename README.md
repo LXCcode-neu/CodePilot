@@ -201,6 +201,9 @@ Prepare before startup:
 - working LLM configuration
 - `CODEPILOT_API_KEY_ENCRYPTION_KEY` for encrypting project-level LLM API keys in the database
 - optional `GITHUB_TOKEN` for reading private repositories or increasing GitHub API rate limits
+- `GITHUB_CLIENT_ID` for GitHub OAuth authorization
+- `GITHUB_CLIENT_SECRET` for GitHub OAuth authorization
+- `GITHUB_OAUTH_REDIRECT_URI` for the frontend callback page, for example `http://localhost:5173/github/callback`
 
 LLM configuration:
 
@@ -265,6 +268,32 @@ The dashboard can load GitHub issues for repositories added to CodePilot.
 ```powershell
 $env:GITHUB_TOKEN="your_github_token_here"
 java -jar target/codepilot-0.0.1-SNAPSHOT.jar
+```
+
+### GitHub Account Authorization
+
+CodePilot now supports GitHub OAuth account authorization for importing repositories into the project list and for submitting pull requests with the connected GitHub identity.
+
+- Frontend route:
+  - `GET /github-auth`
+  - `GET /github/callback`
+- Backend endpoints:
+  - `GET /api/github/auth-url`
+  - `POST /api/github/callback`
+  - `GET /api/github/account`
+  - `DELETE /api/github/account`
+  - `GET /api/github/repositories`
+  - `POST /api/projects/import-github-repo`
+- OAuth access tokens are encrypted before being stored in `user_github_account`.
+- Imported repositories are persisted in `project_repo` and keep GitHub owner/name/id metadata for later Issue and PR operations.
+
+Local setup example:
+
+```powershell
+$env:GITHUB_CLIENT_ID="your_github_oauth_client_id"
+$env:GITHUB_CLIENT_SECRET="your_github_oauth_client_secret"
+$env:GITHUB_OAUTH_REDIRECT_URI="http://localhost:5173/github/callback"
+mvn spring-boot:run
 ```
 
 ### SSE Note

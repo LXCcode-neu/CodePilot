@@ -10,6 +10,7 @@ import com.codepliot.model.ErrorCode;
 import com.codepliot.model.GitHubIssuePageVO;
 import com.codepliot.model.GitHubIssueVO;
 import com.codepliot.repository.ProjectRepoMapper;
+import com.codepliot.service.GitHubAuthService;
 import com.codepliot.service.task.AgentTaskService;
 import com.codepliot.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
@@ -20,19 +21,23 @@ public class GitHubIssueService {
     private final ProjectRepoMapper projectRepoMapper;
     private final GitHubIssueClient gitHubIssueClient;
     private final AgentTaskService agentTaskService;
+    private final GitHubAuthService gitHubAuthService;
 
     public GitHubIssueService(ProjectRepoMapper projectRepoMapper,
                               GitHubIssueClient gitHubIssueClient,
-                              AgentTaskService agentTaskService) {
+                              AgentTaskService agentTaskService,
+                              GitHubAuthService gitHubAuthService) {
         this.projectRepoMapper = projectRepoMapper;
         this.gitHubIssueClient = gitHubIssueClient;
         this.agentTaskService = agentTaskService;
+        this.gitHubAuthService = gitHubAuthService;
     }
 
     public GitHubIssuePageVO listIssues(Long projectId, String state, Integer page, Integer pageSize) {
         ProjectRepo projectRepo = requireOwnedRepo(projectId);
         GitHubRepoRef repoRef = parseRepoRef(projectRepo.getRepoUrl());
         return gitHubIssueClient.listIssues(
+                gitHubAuthService.resolveAccessTokenForCurrentUser(),
                 repoRef.owner(),
                 repoRef.repo(),
                 state,
@@ -48,7 +53,12 @@ public class GitHubIssueService {
 
         ProjectRepo projectRepo = requireOwnedRepo(projectId);
         GitHubRepoRef repoRef = parseRepoRef(projectRepo.getRepoUrl());
-        GitHubIssueVO issue = gitHubIssueClient.getIssue(repoRef.owner(), repoRef.repo(), issueNumber);
+        GitHubIssueVO issue = gitHubIssueClient.getIssue(
+                gitHubAuthService.resolveAccessTokenForCurrentUser(),
+                repoRef.owner(),
+                repoRef.repo(),
+                issueNumber
+        );
         String description = buildIssueDescription(issue);
         return agentTaskService.create(new AgentTaskCreateRequest(projectRepo.getId(), issue.title(), description));
     }

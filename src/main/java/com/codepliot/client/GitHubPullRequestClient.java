@@ -39,11 +39,21 @@ public class GitHubPullRequestClient {
                                                            String body,
                                                            String head,
                                                            String base) {
+        return createPullRequest(null, owner, repo, title, body, head, base);
+    }
+
+    public GitHubPullRequestCreateResult createPullRequest(String accessToken,
+                                                           String owner,
+                                                           String repo,
+                                                           String title,
+                                                           String body,
+                                                           String head,
+                                                           String base) {
         ResponseEntity<String> response = restClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/repos/{owner}/{repo}/pulls")
                         .build(owner, repo))
-                .headers(this::applyHeaders)
+                .headers(headers -> applyHeaders(headers, accessToken))
                 .body(Map.of(
                         "title", title,
                         "body", body,
@@ -64,9 +74,13 @@ public class GitHubPullRequestClient {
     }
 
     public String getAuthenticatedUsername() {
+        return getAuthenticatedUsername(null);
+    }
+
+    public String getAuthenticatedUsername(String accessToken) {
         ResponseEntity<String> response = restClient.get()
                 .uri("/user")
-                .headers(this::applyHeaders)
+                .headers(headers -> applyHeaders(headers, accessToken))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {
                     throwGitHubException(errorResponse.getStatusCode());
@@ -81,7 +95,11 @@ public class GitHubPullRequestClient {
     }
 
     public GitHubRepositoryRef ensureFork(String owner, String repo, String forkOwner) {
-        GitHubRepositoryRef existingFork = findRepository(forkOwner, repo);
+        return ensureFork(null, owner, repo, forkOwner);
+    }
+
+    public GitHubRepositoryRef ensureFork(String accessToken, String owner, String repo, String forkOwner) {
+        GitHubRepositoryRef existingFork = findRepository(accessToken, forkOwner, repo);
         if (existingFork != null) {
             return existingFork;
         }
@@ -90,27 +108,31 @@ public class GitHubPullRequestClient {
                 .uri(uriBuilder -> uriBuilder
                         .path("/repos/{owner}/{repo}/forks")
                         .build(owner, repo))
-                .headers(this::applyHeaders)
+                .headers(headers -> applyHeaders(headers, accessToken))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {
                     throwGitHubException(errorResponse.getStatusCode());
                 })
                 .toBodilessEntity();
 
-        return waitForFork(forkOwner, repo);
+        return waitForFork(accessToken, forkOwner, repo);
     }
 
     public GitHubRepositoryRef getRepository(String owner, String repo) {
-        GitHubRepositoryRef repository = findRepository(owner, repo);
+        return getRepository(null, owner, repo);
+    }
+
+    public GitHubRepositoryRef getRepository(String accessToken, String owner, String repo) {
+        GitHubRepositoryRef repository = findRepository(accessToken, owner, repo);
         if (repository == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "GitHub repository not found");
         }
         return repository;
     }
 
-    private GitHubRepositoryRef waitForFork(String forkOwner, String repo) {
+    private GitHubRepositoryRef waitForFork(String accessToken, String forkOwner, String repo) {
         for (int attempt = 0; attempt < 10; attempt++) {
-            GitHubRepositoryRef fork = findRepository(forkOwner, repo);
+            GitHubRepositoryRef fork = findRepository(accessToken, forkOwner, repo);
             if (fork != null) {
                 return fork;
             }
@@ -124,12 +146,12 @@ public class GitHubPullRequestClient {
         throw new BusinessException(ErrorCode.INTERNAL_ERROR, "GitHub fork was created but is not ready yet");
     }
 
-    private GitHubRepositoryRef findRepository(String owner, String repo) {
+    private GitHubRepositoryRef findRepository(String accessToken, String owner, String repo) {
         ResponseEntity<String> response = restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/repos/{owner}/{repo}")
                         .build(owner, repo))
-                .headers(this::applyHeaders)
+                .headers(headers -> applyHeaders(headers, accessToken))
                 .retrieve()
                 .onStatus(status -> status.value() == 404, (request, errorResponse) -> {
                 })
@@ -149,12 +171,12 @@ public class GitHubPullRequestClient {
         );
     }
 
-    private void applyHeaders(HttpHeaders headers) {
+    private void applyHeaders(HttpHeaders headers, String accessToken) {
         headers.setAccept(List.of(MediaType.valueOf("application/vnd.github+json")));
         headers.set("X-GitHub-Api-Version", GITHUB_API_VERSION);
-        String token = properties.getToken();
+        String token = accessToken == null || accessToken.isBlank() ? properties.getToken() : accessToken;
         if (token == null || token.isBlank()) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "GITHUB_TOKEN is required to submit pull requests");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "GitHub authorization is required");
         }
         headers.setBearerAuth(token.trim());
     }

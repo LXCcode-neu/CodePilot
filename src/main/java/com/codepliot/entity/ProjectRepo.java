@@ -22,6 +22,18 @@ public class ProjectRepo extends BaseEntity {
     @TableField("repo_name")
     private String repoName;
 
+    @TableField("github_owner")
+    private String githubOwner;
+
+    @TableField("github_repo_name")
+    private String githubRepoName;
+
+    @TableField("github_repo_id")
+    private Long githubRepoId;
+
+    @TableField("github_private")
+    private Boolean githubPrivate;
+
     @TableField("local_path")
     private String localPath;
 

@@ -36,9 +36,13 @@ public class GitHubIssueClient {
     }
 
     public GitHubIssuePageVO listIssues(String owner, String repo, String state, int page, int pageSize) {
+        return listIssues(null, owner, repo, state, page, pageSize);
+    }
+
+    public GitHubIssuePageVO listIssues(String accessToken, String owner, String repo, String state, int page, int pageSize) {
         int safePage = Math.max(page, 1);
         int safePageSize = Math.min(Math.max(pageSize, 1), 100);
-        ResponseEntity<String> response = fetchRepositoryIssuesPage(owner, repo, state, safePage, safePageSize);
+        ResponseEntity<String> response = fetchRepositoryIssuesPage(accessToken, owner, repo, state, safePage, safePageSize);
         List<GitHubIssueVO> issues = parseIssueList(response.getBody());
         int totalPages = resolveTotalPages(response, safePage, issues);
         int totalCount = estimateTotalCount(totalPages, safePageSize, safePage, issues.size());
@@ -54,7 +58,7 @@ public class GitHubIssueClient {
         );
     }
 
-    private ResponseEntity<String> fetchRepositoryIssuesPage(String owner, String repo, String state, int page, int pageSize) {
+    private ResponseEntity<String> fetchRepositoryIssuesPage(String accessToken, String owner, String repo, String state, int page, int pageSize) {
         return restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/repos/{owner}/{repo}/issues")
@@ -64,7 +68,7 @@ public class GitHubIssueClient {
                         .queryParam("page", page)
                         .queryParam("per_page", pageSize)
                         .build(owner, repo))
-                .headers(this::applyHeaders)
+                .headers(headers -> applyHeaders(headers, accessToken))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {
                     throwGitHubException(errorResponse.getStatusCode());
@@ -73,11 +77,15 @@ public class GitHubIssueClient {
     }
 
     public GitHubIssueVO getIssue(String owner, String repo, int issueNumber) {
+        return getIssue(null, owner, repo, issueNumber);
+    }
+
+    public GitHubIssueVO getIssue(String accessToken, String owner, String repo, int issueNumber) {
         ResponseEntity<String> response = restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/repos/{owner}/{repo}/issues/{issueNumber}")
                         .build(owner, repo, issueNumber))
-                .headers(this::applyHeaders)
+                .headers(headers -> applyHeaders(headers, accessToken))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {
                     throwGitHubException(errorResponse.getStatusCode());
@@ -91,10 +99,10 @@ public class GitHubIssueClient {
         return toIssueVO(issue);
     }
 
-    private void applyHeaders(HttpHeaders headers) {
+    private void applyHeaders(HttpHeaders headers, String accessToken) {
         headers.setAccept(List.of(MediaType.valueOf("application/vnd.github+json")));
         headers.set("X-GitHub-Api-Version", GITHUB_API_VERSION);
-        String token = properties.getToken();
+        String token = accessToken == null || accessToken.isBlank() ? properties.getToken() : accessToken;
         if (token != null && !token.isBlank()) {
             headers.setBearerAuth(token.trim());
         }

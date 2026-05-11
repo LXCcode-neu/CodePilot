@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { Bot, FolderGit2, Github, LayoutDashboard, LogOut, PlusSquare, Settings, UserRound } from "lucide-react";
+import { Bot, FolderGit2, Github, LayoutDashboard, LogOut, PlusSquare, Settings, ShieldCheck, UserRound } from "lucide-react";
 import { getCurrentUser } from "@/api/auth";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { clearToken } from "@/lib/token";
 import type { User } from "@/types/auth";
-import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", label: "首页概览", icon: LayoutDashboard, end: true },
+  { to: "/github-auth", label: "GitHub 授权", icon: ShieldCheck, end: true },
   { to: "/github-issues", label: "GitHub Issue", icon: Github, end: true },
   { to: "/projects", label: "仓库管理", icon: FolderGit2, end: true },
   { to: "/llm-config", label: "模型配置", icon: Settings, end: true },

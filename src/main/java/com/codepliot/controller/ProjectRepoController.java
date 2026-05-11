@@ -1,6 +1,7 @@
 package com.codepliot.controller;
 
 import com.codepliot.model.Result;
+import com.codepliot.model.GitHubRepoImportRequest;
 import com.codepliot.model.ProjectCreateRequest;
 import com.codepliot.service.project.ProjectRepoService;
 import com.codepliot.model.ProjectRepoVO;
@@ -33,6 +34,11 @@ public ProjectRepoController(ProjectRepoService projectRepoService) {
 @PostMapping
     public Result<ProjectRepoVO> create(@Valid @RequestBody ProjectCreateRequest request) {
         return Result.success("Project repository created", projectRepoService.create(request));
+    }
+
+    @PostMapping("/import-github-repo")
+    public Result<ProjectRepoVO> importGitHubRepo(@Valid @RequestBody GitHubRepoImportRequest request) {
+        return Result.success("GitHub repository imported", projectRepoService.importFromGitHub(request));
     }
     /**
      * 执行 list 相关逻辑。
