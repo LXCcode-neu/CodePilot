@@ -1,9 +1,10 @@
 package com.codepliot.client;
 
+import com.codepliot.config.LlmProperties;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.ErrorCode;
-import com.codepliot.config.LlmProperties;
 import com.codepliot.model.LlmMessage;
+import com.codepliot.model.LlmRuntimeConfig;
 import com.codepliot.model.LlmToolCall;
 import com.codepliot.model.LlmToolChatResponse;
 import com.codepliot.model.LlmToolDefinition;
@@ -18,34 +19,35 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-/**
- * DeepSeekLlmClient 客户端实现，负责封装外部系统调用。
- */
+
 @Component
-@ConditionalOnProperty(prefix = "codepilot.llm", name = "provider", havingValue = "deepseek")
 public class DeepSeekLlmClient implements LlmClient {
 
     private final LlmProperties llmProperties;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
-/**
- * 创建 DeepSeekLlmClient 实例。
- */
-public DeepSeekLlmClient(LlmProperties llmProperties, ObjectMapper objectMapper) {
+
+    public DeepSeekLlmClient(LlmProperties llmProperties, ObjectMapper objectMapper) {
         this.llmProperties = llmProperties;
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newHttpClient();
     }
-    /**
-     * 执行 generate 相关逻辑。
-     */
-@Override
-    public String generate(String systemPrompt, String userPrompt) {
-        validateConfiguration();
+
+    @Override
+    public String provider() {
+        return "deepseek";
+    }
+
+    @Override
+    public String generate(LlmRuntimeConfig config, String systemPrompt, String userPrompt) {
+        LlmRuntimeConfig resolvedConfig = resolveConfig(config);
+        validateConfiguration(resolvedConfig);
         try {
-            HttpResponse<String> response = sendChatCompletion(buildRequestBody(systemPrompt, userPrompt));
+            HttpResponse<String> response = sendChatCompletion(
+                    resolvedConfig,
+                    buildRequestBody(resolvedConfig, systemPrompt, userPrompt)
+            );
             return extractContent(response.body());
         } catch (IOException | InterruptedException exception) {
             if (exception instanceof InterruptedException) {
@@ -58,11 +60,17 @@ public DeepSeekLlmClient(LlmProperties llmProperties, ObjectMapper objectMapper)
         }
     }
 
-@Override
-    public LlmToolChatResponse chatWithTools(List<LlmMessage> messages, List<LlmToolDefinition> tools) {
-        validateConfiguration();
+    @Override
+    public LlmToolChatResponse chatWithTools(LlmRuntimeConfig config,
+                                             List<LlmMessage> messages,
+                                             List<LlmToolDefinition> tools) {
+        LlmRuntimeConfig resolvedConfig = resolveConfig(config);
+        validateConfiguration(resolvedConfig);
         try {
-            HttpResponse<String> response = sendChatCompletion(buildToolRequestBody(messages, tools));
+            HttpResponse<String> response = sendChatCompletion(
+                    resolvedConfig,
+                    buildToolRequestBody(resolvedConfig, messages, tools)
+            );
             return extractToolChatResponse(response.body());
         } catch (IOException | InterruptedException exception) {
             if (exception instanceof InterruptedException) {
@@ -75,10 +83,11 @@ public DeepSeekLlmClient(LlmProperties llmProperties, ObjectMapper objectMapper)
         }
     }
 
-private HttpResponse<String> sendChatCompletion(String requestBody) throws IOException, InterruptedException {
+    private HttpResponse<String> sendChatCompletion(LlmRuntimeConfig config, String requestBody)
+            throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(normalizeBaseUrl(llmProperties.getBaseUrl()) + "/chat/completions"))
-                .header("Authorization", "Bearer " + llmProperties.getApiKey().trim())
+                .uri(URI.create(normalizeBaseUrl(config.baseUrl()) + "/chat/completions"))
+                .header("Authorization", "Bearer " + config.apiKey().trim())
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
@@ -92,12 +101,10 @@ private HttpResponse<String> sendChatCompletion(String requestBody) throws IOExc
         }
         return response;
     }
-/**
- * 构建Request Body相关逻辑。
- */
-private String buildRequestBody(String systemPrompt, String userPrompt) throws IOException {
+
+    private String buildRequestBody(LlmRuntimeConfig config, String systemPrompt, String userPrompt) throws IOException {
         ObjectNode body = objectMapper.createObjectNode();
-        body.put("model", llmProperties.getModel().trim());
+        body.put("model", config.modelName().trim());
         body.put("temperature", 0.2d);
         body.put("stream", false);
 
@@ -111,9 +118,11 @@ private String buildRequestBody(String systemPrompt, String userPrompt) throws I
         return objectMapper.writeValueAsString(body);
     }
 
-private String buildToolRequestBody(List<LlmMessage> messages, List<LlmToolDefinition> tools) throws IOException {
+    private String buildToolRequestBody(LlmRuntimeConfig config,
+                                        List<LlmMessage> messages,
+                                        List<LlmToolDefinition> tools) throws IOException {
         ObjectNode body = objectMapper.createObjectNode();
-        body.put("model", llmProperties.getModel().trim());
+        body.put("model", config.modelName().trim());
         body.put("temperature", 0.2d);
         body.put("stream", false);
         body.put("tool_choice", "auto");
@@ -150,7 +159,7 @@ private String buildToolRequestBody(List<LlmMessage> messages, List<LlmToolDefin
         return objectMapper.writeValueAsString(body);
     }
 
-private ObjectNode toToolCallNode(LlmToolCall toolCall) {
+    private ObjectNode toToolCallNode(LlmToolCall toolCall) {
         ObjectNode toolCallNode = objectMapper.createObjectNode();
         toolCallNode.put("id", toolCall.id());
         toolCallNode.put("type", "function");
@@ -159,10 +168,8 @@ private ObjectNode toToolCallNode(LlmToolCall toolCall) {
         functionNode.put("arguments", toolCall.arguments() == null ? "{}" : toolCall.arguments());
         return toolCallNode;
     }
-/**
- * 提取Content相关逻辑。
- */
-private String extractContent(String responseBody) throws IOException {
+
+    private String extractContent(String responseBody) throws IOException {
         JsonNode root = objectMapper.readTree(responseBody);
         JsonNode contentNode = root.path("choices").path(0).path("message").path("content");
         String content = contentNode.isMissingNode() || contentNode.isNull() ? null : contentNode.asText();
@@ -172,7 +179,7 @@ private String extractContent(String responseBody) throws IOException {
         return content.trim();
     }
 
-private LlmToolChatResponse extractToolChatResponse(String responseBody) throws IOException {
+    private LlmToolChatResponse extractToolChatResponse(String responseBody) throws IOException {
         JsonNode root = objectMapper.readTree(responseBody);
         JsonNode choice = root.path("choices").path(0);
         JsonNode message = choice.path("message");
@@ -195,43 +202,48 @@ private LlmToolChatResponse extractToolChatResponse(String responseBody) throws 
         }
         return new LlmToolChatResponse(content, finishReason, toolCalls);
     }
-/**
- * 校验Configuration相关逻辑。
- */
-private void validateConfiguration() {
-        if (llmProperties.getApiKey() == null || llmProperties.getApiKey().isBlank()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "使用 deepseek provider 时必须配?codepilot.llm.api-key");
+
+    private void validateConfiguration(LlmRuntimeConfig config) {
+        if (config.apiKey() == null || config.apiKey().isBlank()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "DeepSeek API key is required");
         }
-        if (llmProperties.getModel() == null || llmProperties.getModel().isBlank()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "使用 deepseek provider 时必须配?codepilot.llm.model");
+        if (config.modelName() == null || config.modelName().isBlank()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "DeepSeek model is required");
         }
-        if (llmProperties.getBaseUrl() == null || llmProperties.getBaseUrl().isBlank()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "使用 deepseek provider 时必须配?codepilot.llm.base-url");
+        if (config.baseUrl() == null || config.baseUrl().isBlank()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "DeepSeek base URL is required");
         }
     }
-/**
- * 规范化Base Url相关逻辑。
- */
-private String normalizeBaseUrl(String baseUrl) {
+
+    private LlmRuntimeConfig resolveConfig(LlmRuntimeConfig config) {
+        if (config != null) {
+            return config;
+        }
+        return new LlmRuntimeConfig(
+                provider(),
+                llmProperties.getModel(),
+                llmProperties.getModel(),
+                llmProperties.getBaseUrl(),
+                llmProperties.getApiKey()
+        );
+    }
+
+    private String normalizeBaseUrl(String baseUrl) {
         String normalized = baseUrl.trim();
         while (normalized.endsWith("/")) {
             normalized = normalized.substring(0, normalized.length() - 1);
         }
         return normalized;
     }
-/**
- * 执行 truncate 相关逻辑。
- */
-private String truncate(String value) {
+
+    private String truncate(String value) {
         if (value == null) {
             return "";
         }
         return value.length() <= 500 ? value : value.substring(0, 500);
     }
-/**
- * 构建Error Message相关逻辑。
- */
-private String buildErrorMessage(Exception exception) {
+
+    private String buildErrorMessage(Exception exception) {
         String message = exception.getMessage();
         if (message == null || message.isBlank()) {
             return exception.getClass().getSimpleName();
@@ -239,4 +251,3 @@ private String buildErrorMessage(Exception exception) {
         return message;
     }
 }
-

@@ -1,7 +1,7 @@
 import { FolderGit2, Trash2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { ProjectRepo } from "@/types/project";
 
@@ -19,7 +19,7 @@ export function ProjectCard({
       <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
               <FolderGit2 className="h-4 w-4" />
             </div>
             <div>

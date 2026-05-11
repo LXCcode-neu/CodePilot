@@ -11,6 +11,8 @@ spring:
         - classpath:db/schema/code_file.sql
         - classpath:db/schema/code_symbol.sql
         - classpath:db/schema/patch_record.sql
+        - classpath:db/schema/project_llm_config.sql
+        - classpath:db/schema/llm_api_key_config.sql
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/codepilot?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
@@ -48,6 +50,8 @@ codepilot:
     base-url: https://github.com
     api-base-url: https://api.github.com
     token: ${GITHUB_TOKEN:}
+  secret:
+    api-key-encryption-key: ${CODEPILOT_API_KEY_ENCRYPTION_KEY:please-change-this-api-key-encryption-key}
   lock:
     task-run:
       ttl: 30m

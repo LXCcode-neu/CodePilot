@@ -83,6 +83,7 @@ public class GeneratePatchTool implements AgentTool {
     @Override
     public ToolResult execute(AgentContext context) {
         String rawOutput = llmService.generate(
+                context.llmRuntimeConfig(),
                 promptBuilder.buildSystemPrompt(),
                 promptBuilder.buildUserPrompt(
                         context.issueTitle(),

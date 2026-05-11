@@ -49,7 +49,7 @@ public class SearchRelevantCodeTool implements AgentTool {
         String issueText = buildIssueText(context);
         List<CodeSearchResult> searchResults;
         try {
-            searchResults = agenticCodeSearchService.search(context.localPath(), issueText);
+            searchResults = agenticCodeSearchService.search(context.localPath(), issueText, context.llmRuntimeConfig());
         } catch (RuntimeException exception) {
             return ToolResult.failure("code search failed: " + buildErrorMessage(exception), Map.of(
                     "mode", codeSearchProperties.getMode(),

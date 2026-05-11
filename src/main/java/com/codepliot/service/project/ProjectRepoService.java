@@ -8,6 +8,7 @@ import com.codepliot.model.ErrorCode;
 import com.codepliot.model.ProjectCreateRequest;
 import com.codepliot.model.ProjectRepoVO;
 import com.codepliot.repository.ProjectRepoMapper;
+import com.codepliot.service.ProjectLlmConfigService;
 import com.codepliot.service.task.AgentTaskService;
 import com.codepliot.utils.SecurityUtils;
 import java.util.List;
@@ -19,10 +20,14 @@ public class ProjectRepoService {
 
     private final ProjectRepoMapper projectRepoMapper;
     private final AgentTaskService agentTaskService;
+    private final ProjectLlmConfigService projectLlmConfigService;
 
-    public ProjectRepoService(ProjectRepoMapper projectRepoMapper, AgentTaskService agentTaskService) {
+    public ProjectRepoService(ProjectRepoMapper projectRepoMapper,
+                              AgentTaskService agentTaskService,
+                              ProjectLlmConfigService projectLlmConfigService) {
         this.projectRepoMapper = projectRepoMapper;
         this.agentTaskService = agentTaskService;
+        this.projectLlmConfigService = projectLlmConfigService;
     }
 
     @Transactional
@@ -60,6 +65,7 @@ public class ProjectRepoService {
     public void delete(Long id) {
         ProjectRepo projectRepo = requireOwnedRepo(id);
         agentTaskService.deleteByProjectId(projectRepo.getId());
+        projectLlmConfigService.deleteByProjectId(projectRepo.getId());
         projectRepoMapper.deleteById(projectRepo.getId());
     }
 

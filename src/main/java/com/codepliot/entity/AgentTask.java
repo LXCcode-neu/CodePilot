@@ -33,5 +33,14 @@ public class AgentTask extends BaseEntity {
 
     @TableField("error_message")
     private String errorMessage;
+
+    @TableField("llm_provider")
+    private String llmProvider;
+
+    @TableField("llm_model_name")
+    private String llmModelName;
+
+    @TableField("llm_display_name")
+    private String llmDisplayName;
 }
 

@@ -15,6 +15,7 @@ public final class AgentContext {
     private final String repoUrl;
     private final String repoName;
     private String localPath;
+    private final LlmRuntimeConfig llmRuntimeConfig;
     private final String issueTitle;
     private final String issueDescription;
     private List<RetrievedCodeChunk> retrievedChunks;
@@ -33,12 +34,25 @@ public final class AgentContext {
                         String localPath,
                         String issueTitle,
                         String issueDescription) {
+        this(taskId, userId, projectId, repoUrl, repoName, localPath, null, issueTitle, issueDescription);
+    }
+
+    public AgentContext(Long taskId,
+                        Long userId,
+                        Long projectId,
+                        String repoUrl,
+                        String repoName,
+                        String localPath,
+                        LlmRuntimeConfig llmRuntimeConfig,
+                        String issueTitle,
+                        String issueDescription) {
         this.taskId = taskId;
         this.userId = userId;
         this.projectId = projectId;
         this.repoUrl = repoUrl;
         this.repoName = repoName;
         this.localPath = localPath;
+        this.llmRuntimeConfig = llmRuntimeConfig;
         this.issueTitle = issueTitle;
         this.issueDescription = issueDescription;
         this.retrievedChunks = List.of();
@@ -87,6 +101,10 @@ public final class AgentContext {
      */
     public String localPath() {
         return localPath;
+    }
+
+    public LlmRuntimeConfig llmRuntimeConfig() {
+        return llmRuntimeConfig;
     }
 
     /**

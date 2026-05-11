@@ -53,6 +53,7 @@ public AnalyzeIssueTool(LlmService llmService, IssueAnalysisPromptBuilder prompt
 @Override
     public ToolResult execute(AgentContext context) {
         String analysis = llmService.generate(
+                context.llmRuntimeConfig(),
                 promptBuilder.buildSystemPrompt(),
                 promptBuilder.buildUserPrompt(
                         context.issueTitle(),

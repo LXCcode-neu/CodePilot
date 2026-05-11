@@ -3,6 +3,7 @@ package com.codepliot.service.agent;
 import com.codepliot.entity.AgentStepType;
 import com.codepliot.entity.AgentTask;
 import com.codepliot.entity.AgentTaskStatus;
+import com.codepliot.entity.ProjectLlmConfig;
 import com.codepliot.entity.ProjectRepo;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.AgentContext;
@@ -10,6 +11,7 @@ import com.codepliot.model.AgentExecutionDecision;
 import com.codepliot.model.ErrorCode;
 import com.codepliot.model.TaskEventMessage;
 import com.codepliot.policy.AgentExecutionPolicy;
+import com.codepliot.service.ProjectLlmConfigService;
 import com.codepliot.service.sse.SseService;
 import com.codepliot.service.task.AgentStepService;
 import com.codepliot.service.task.AgentTaskService;
@@ -42,6 +44,7 @@ public class AgentExecutor {
     private final TaskRunLockService taskRunLockService;
     private final SseService sseService;
     private final AgentExecutionPolicy agentExecutionPolicy;
+    private final ProjectLlmConfigService projectLlmConfigService;
 
     /**
      * 创建 Agent 执行器。
@@ -52,7 +55,8 @@ public class AgentExecutor {
                          List<AgentTool> agentTools,
                          TaskRunLockService taskRunLockService,
                          SseService sseService,
-                         AgentExecutionPolicy agentExecutionPolicy) {
+                         AgentExecutionPolicy agentExecutionPolicy,
+                         ProjectLlmConfigService projectLlmConfigService) {
         this.agentTaskService = agentTaskService;
         this.agentStepService = agentStepService;
         this.objectMapper = objectMapper;
@@ -60,6 +64,7 @@ public class AgentExecutor {
         this.taskRunLockService = taskRunLockService;
         this.sseService = sseService;
         this.agentExecutionPolicy = agentExecutionPolicy;
+        this.projectLlmConfigService = projectLlmConfigService;
     }
 
     /**
@@ -110,6 +115,7 @@ public class AgentExecutor {
      * 构建本次运行使用的上下文对象。
      */
     private AgentContext buildContext(AgentTask task, ProjectRepo projectRepo) {
+        ProjectLlmConfig llmConfig = projectLlmConfigService.requireProjectConfig(task.getProjectId());
         return new AgentContext(
                 task.getId(),
                 task.getUserId(),
@@ -117,6 +123,7 @@ public class AgentExecutor {
                 projectRepo.getRepoUrl(),
                 projectRepo.getRepoName(),
                 projectRepo.getLocalPath(),
+                projectLlmConfigService.toRuntimeConfig(llmConfig),
                 task.getIssueTitle(),
                 task.getIssueDescription()
         );

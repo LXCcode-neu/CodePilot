@@ -57,6 +57,9 @@ export const request = {
   post<T>(url: string, data?: unknown, config?: AxiosRequestConfig) {
     return client.post(url, data, config) as Promise<T>;
   },
+  put<T>(url: string, data?: unknown, config?: AxiosRequestConfig) {
+    return client.put(url, data, config) as Promise<T>;
+  },
   delete<T>(url: string, config?: AxiosRequestConfig) {
     return client.delete(url, config) as Promise<T>;
   },

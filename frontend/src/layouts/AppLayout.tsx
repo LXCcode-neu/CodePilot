@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { Bot, FolderGit2, Github, LayoutDashboard, LogOut, PlusSquare, UserRound } from "lucide-react";
+import { Bot, FolderGit2, Github, LayoutDashboard, LogOut, PlusSquare, Settings, UserRound } from "lucide-react";
 import { getCurrentUser } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { clearToken } from "@/lib/token";
@@ -11,6 +11,7 @@ const navItems = [
   { to: "/", label: "首页概览", icon: LayoutDashboard, end: true },
   { to: "/github-issues", label: "GitHub Issue", icon: Github, end: true },
   { to: "/projects", label: "仓库管理", icon: FolderGit2, end: true },
+  { to: "/llm-config", label: "模型配置", icon: Settings, end: true },
   { to: "/tasks", label: "任务列表", icon: Bot, end: true },
   { to: "/tasks/new", label: "创建任务", icon: PlusSquare, end: true },
 ];

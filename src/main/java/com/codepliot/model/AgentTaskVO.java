@@ -14,6 +14,9 @@ public record AgentTaskVO(
         String status,
         String resultSummary,
         String errorMessage,
+        String llmProvider,
+        String llmModelName,
+        String llmDisplayName,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
@@ -30,6 +33,9 @@ public static AgentTaskVO from(AgentTask agentTask) {
                 agentTask.getStatus(),
                 agentTask.getResultSummary(),
                 agentTask.getErrorMessage(),
+                agentTask.getLlmProvider(),
+                agentTask.getLlmModelName(),
+                agentTask.getLlmDisplayName(),
                 agentTask.getCreatedAt(),
                 agentTask.getUpdatedAt()
         );

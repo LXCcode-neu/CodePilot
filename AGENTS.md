@@ -156,6 +156,7 @@ Those rules should live in a separate document, for example:
 12. Keep database access in `repository` and business orchestration in `service`.
 13. New backend tables should preferably provide a repeatable startup initialization path, such as Spring Boot SQL init scripts, instead of relying only on manual execution.
 14. GitHub Issue fetching is implemented through the existing Spring Web backend stack. Keep GitHub tokens server-side via configuration such as `GITHUB_TOKEN`; do not expose them to the frontend.
+15. Global or project-level LLM API keys may be stored in the database only after server-side encryption. Never return plaintext API keys to the frontend; return only masked key metadata.
 
 ### Default Interpretation
 

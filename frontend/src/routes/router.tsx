@@ -9,6 +9,7 @@ import { GitHubIssuePage } from "@/pages/GitHubIssuePage";
 import { TaskListPage } from "@/pages/TaskListPage";
 import { CreateTaskPage } from "@/pages/CreateTaskPage";
 import { TaskDetailPage } from "@/pages/TaskDetailPage";
+import { LlmConfigPage } from "@/pages/LlmConfigPage";
 import { hasToken } from "@/lib/token";
 
 function RequireAuth() {
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
           { path: "/", element: <DashboardPage /> },
           { path: "/github-issues", element: <GitHubIssuePage /> },
           { path: "/projects", element: <ProjectListPage /> },
+          { path: "/llm-config", element: <LlmConfigPage /> },
           { path: "/tasks", element: <TaskListPage /> },
           { path: "/tasks/new", element: <CreateTaskPage /> },
           { path: "/tasks/:id", element: <TaskDetailPage /> },

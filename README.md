@@ -160,6 +160,7 @@ This repository contains:
 - agent task creation, querying, and async execution
 - JGit repository sync
 - LLM function-calling driven multi-round code search with grep / glob / read tools
+- global LLM API key list management with encrypted API key storage, active-key switching, and optional per-project overrides
 - LLM analysis and patch generation abstraction
 - patch record persistence, safety review, and manual confirmation
 - task deletion and cascading cleanup when deleting a project repository
@@ -198,7 +199,17 @@ Prepare before startup:
 - writable `codepilot.workspace.root`
 - valid JWT secret
 - working LLM configuration
+- `CODEPILOT_API_KEY_ENCRYPTION_KEY` for encrypting project-level LLM API keys in the database
 - optional `GITHUB_TOKEN` for reading private repositories or increasing GitHub API rate limits
+
+LLM configuration:
+
+- Configure global API keys from the sidebar "模型配置" page.
+- Multiple keys can be stored; one key is marked active and used by default.
+- Project-level overrides can still be configured from project cards when needed.
+- API keys are encrypted before being stored in `llm_api_key_config` or `project_llm_config`.
+- Task creation uses the project override first, then falls back to the global config.
+- Each task stores the provider/model snapshot used at creation time.
 
 ### Run Backend
 
@@ -252,7 +263,7 @@ The dashboard can load GitHub issues for repositories added to CodePilot.
 - Configure the token before starting the backend:
 
 ```powershell
-$env:GITHUB_TOKEN="github_pat_xxx"
+$env:GITHUB_TOKEN="your_github_token_here"
 java -jar target/codepilot-0.0.1-SNAPSHOT.jar
 ```
 

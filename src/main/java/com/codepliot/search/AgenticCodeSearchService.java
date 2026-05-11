@@ -6,6 +6,7 @@ import com.codepliot.search.dto.CodeSnippet;
 import com.codepliot.search.dto.GrepMatch;
 import com.codepliot.search.grep.GrepSearchService.GrepSearchResponse;
 import com.codepliot.model.LlmMessage;
+import com.codepliot.model.LlmRuntimeConfig;
 import com.codepliot.model.LlmToolCall;
 import com.codepliot.model.LlmToolChatResponse;
 import com.codepliot.model.LlmToolDefinition;
@@ -62,6 +63,10 @@ public class AgenticCodeSearchService {
     }
 
     public List<CodeSearchResult> search(String repoPath, String issueText) {
+        return search(repoPath, issueText, null);
+    }
+
+    public List<CodeSearchResult> search(String repoPath, String issueText, LlmRuntimeConfig llmRuntimeConfig) {
         if (repoPath == null || repoPath.isBlank() || issueText == null || issueText.isBlank()) {
             return List.of();
         }
@@ -77,7 +82,7 @@ public class AgenticCodeSearchService {
         while (collected.size() < maxResults && Instant.now().isBefore(deadline)) {
             LlmToolChatResponse response;
             try {
-                response = llmService.chatWithTools(messages, toolDefinitions());
+                response = llmService.chatWithTools(llmRuntimeConfig, messages, toolDefinitions());
             } catch (RuntimeException exception) {
                 break;
             }

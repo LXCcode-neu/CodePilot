@@ -18,6 +18,9 @@ export interface AgentTask {
   status: AgentTaskStatus | string;
   resultSummary?: string | null;
   errorMessage?: string | null;
+  llmProvider?: string | null;
+  llmModelName?: string | null;
+  llmDisplayName?: string | null;
   createdAt: string;
   updatedAt: string;
 }

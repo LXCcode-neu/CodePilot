@@ -43,6 +43,7 @@ const DELETE_CONFIRM_MESSAGE = "确定删除这个任务吗？删除后对应的
 const DELETE_ERROR = "删除任务失败";
 const TASK_INFO_TITLE = "任务信息";
 const PROJECT_LABEL = "关联仓库";
+const MODEL_LABEL = "Model";
 const CREATED_AT_LABEL = "创建时间";
 const UPDATED_AT_LABEL = "最近更新时间";
 const SUMMARY_LABEL = "结果摘要";
@@ -324,6 +325,12 @@ export function TaskDetailPage() {
               <p className="text-xs uppercase tracking-wide text-slate-400">{PROJECT_LABEL}</p>
               <p className="mt-1 font-semibold text-slate-900">{project?.repoName || `Project #${task.projectId}`}</p>
               <p className="mt-1 break-all text-xs text-slate-500">{project?.repoUrl || "--"}</p>
+            </div>
+            <Separator />
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-400">{MODEL_LABEL}</p>
+              <p className="mt-1 font-semibold text-slate-900">{task.llmDisplayName || task.llmModelName || "--"}</p>
+              <p className="mt-1 text-xs text-slate-500">{task.llmProvider || "--"}</p>
             </div>
             <Separator />
             <div className="grid gap-3 md:grid-cols-2">

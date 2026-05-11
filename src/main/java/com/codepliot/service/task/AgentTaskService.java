@@ -5,6 +5,7 @@ import com.codepliot.entity.AgentStep;
 import com.codepliot.entity.AgentTask;
 import com.codepliot.entity.AgentTaskStatus;
 import com.codepliot.entity.PatchRecord;
+import com.codepliot.entity.ProjectLlmConfig;
 import com.codepliot.entity.ProjectRepo;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.AgentTaskCreateRequest;
@@ -14,6 +15,7 @@ import com.codepliot.repository.AgentStepMapper;
 import com.codepliot.repository.AgentTaskMapper;
 import com.codepliot.repository.PatchRecordMapper;
 import com.codepliot.repository.ProjectRepoMapper;
+import com.codepliot.service.ProjectLlmConfigService;
 import com.codepliot.service.sse.SseService;
 import com.codepliot.utils.SecurityUtils;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class AgentTaskService {
     private final AgentStepMapper agentStepMapper;
     private final PatchRecordMapper patchRecordMapper;
     private final ProjectRepoMapper projectRepoMapper;
+    private final ProjectLlmConfigService projectLlmConfigService;
     private final TaskRunLockService taskRunLockService;
     private final SseService sseService;
 
@@ -35,12 +38,14 @@ public class AgentTaskService {
                             AgentStepMapper agentStepMapper,
                             PatchRecordMapper patchRecordMapper,
                             ProjectRepoMapper projectRepoMapper,
+                            ProjectLlmConfigService projectLlmConfigService,
                             TaskRunLockService taskRunLockService,
                             SseService sseService) {
         this.agentTaskMapper = agentTaskMapper;
         this.agentStepMapper = agentStepMapper;
         this.patchRecordMapper = patchRecordMapper;
         this.projectRepoMapper = projectRepoMapper;
+        this.projectLlmConfigService = projectLlmConfigService;
         this.taskRunLockService = taskRunLockService;
         this.sseService = sseService;
     }
@@ -49,6 +54,7 @@ public class AgentTaskService {
     public AgentTaskVO create(AgentTaskCreateRequest request) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         requireOwnedProject(currentUserId, request.projectId());
+        ProjectLlmConfig llmConfig = projectLlmConfigService.requireProjectConfig(request.projectId());
 
         AgentTask agentTask = new AgentTask();
         agentTask.setUserId(currentUserId);
@@ -58,6 +64,9 @@ public class AgentTaskService {
         agentTask.setStatus(AgentTaskStatus.PENDING.name());
         agentTask.setResultSummary(null);
         agentTask.setErrorMessage(null);
+        agentTask.setLlmProvider(llmConfig.getProvider());
+        agentTask.setLlmModelName(llmConfig.getModelName());
+        agentTask.setLlmDisplayName(llmConfig.getDisplayName());
         agentTaskMapper.insert(agentTask);
         return AgentTaskVO.from(agentTask);
     }

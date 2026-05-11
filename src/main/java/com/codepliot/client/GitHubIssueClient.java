@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -21,6 +23,7 @@ import org.springframework.web.client.RestClient;
 public class GitHubIssueClient {
 
     private static final String GITHUB_API_VERSION = "2022-11-28";
+    private static final Pattern LAST_PAGE_PATTERN = Pattern.compile("[?&]page=(\\d+)[^>]*>;\\s*rel=\"last\"");
 
     private final GitHubProperties properties;
     private final ObjectMapper objectMapper;
@@ -35,38 +38,31 @@ public class GitHubIssueClient {
     public GitHubIssuePageVO listIssues(String owner, String repo, String state, int page, int pageSize) {
         int safePage = Math.max(page, 1);
         int safePageSize = Math.min(Math.max(pageSize, 1), 100);
-        List<GitHubIssueVO> issues = fetchAllRepositoryIssues(owner, repo, state);
-        int totalCount = issues.size();
-        int totalPages = totalCount == 0 ? 0 : (int) Math.ceil((double) totalCount / safePageSize);
-        int effectivePage = totalPages == 0 ? 1 : Math.min(safePage, totalPages);
-        int fromIndex = totalCount == 0 ? 0 : (effectivePage - 1) * safePageSize;
-        int toIndex = Math.min(fromIndex + safePageSize, totalCount);
+        ResponseEntity<String> response = fetchRepositoryIssuesPage(owner, repo, state, safePage, safePageSize);
+        List<GitHubIssueVO> issues = parseIssueList(response.getBody());
+        int totalPages = resolveTotalPages(response, safePage, issues);
+        int totalCount = estimateTotalCount(totalPages, safePageSize, safePage, issues.size());
 
         return new GitHubIssuePageVO(
-                issues.subList(fromIndex, toIndex),
-                effectivePage,
+                issues,
+                safePage,
                 safePageSize,
                 totalCount,
                 totalPages,
-                effectivePage > 1,
-                totalPages > 0 && effectivePage < totalPages
+                safePage > 1,
+                totalPages > 0 && safePage < totalPages
         );
     }
 
-    private List<GitHubIssueVO> fetchAllRepositoryIssues(String owner, String repo, String state) {
-        List<GitHubIssueVO> issues = new ArrayList<>();
-        int githubPage = 1;
-        boolean hasNext;
-        do {
-            int currentPage = githubPage;
-            ResponseEntity<String> response = restClient.get()
+    private ResponseEntity<String> fetchRepositoryIssuesPage(String owner, String repo, String state, int page, int pageSize) {
+        return restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/repos/{owner}/{repo}/issues")
                         .queryParam("state", normalizeState(state))
                         .queryParam("sort", "updated")
                         .queryParam("direction", "desc")
-                        .queryParam("page", currentPage)
-                        .queryParam("per_page", 100)
+                        .queryParam("page", page)
+                        .queryParam("per_page", pageSize)
                         .build(owner, repo))
                 .headers(this::applyHeaders)
                 .retrieve()
@@ -74,12 +70,6 @@ public class GitHubIssueClient {
                     throwGitHubException(errorResponse.getStatusCode());
                 })
                 .toEntity(String.class);
-
-            issues.addAll(parseIssueList(response.getBody()));
-            hasNext = hasNextPage(response);
-            githubPage++;
-        } while (hasNext);
-        return issues;
     }
 
     public GitHubIssueVO getIssue(String owner, String repo, int issueNumber) {
@@ -170,6 +160,31 @@ public class GitHubIssueClient {
         return linkHeaders.stream().anyMatch(link -> link.contains("rel=\"next\""));
     }
 
+    private int resolveTotalPages(ResponseEntity<String> response, int currentPage, List<GitHubIssueVO> issues) {
+        List<String> linkHeaders = response.getHeaders().get(HttpHeaders.LINK);
+        if (linkHeaders != null) {
+            for (String linkHeader : linkHeaders) {
+                Matcher matcher = LAST_PAGE_PATTERN.matcher(linkHeader);
+                if (matcher.find()) {
+                    return Integer.parseInt(matcher.group(1));
+                }
+            }
+        }
+        if (hasNextPage(response)) {
+            return currentPage + 1;
+        }
+        return issues.isEmpty() && currentPage == 1 ? 0 : currentPage;
+    }
+
+    private int estimateTotalCount(int totalPages, int pageSize, int currentPage, int currentItemCount) {
+        if (totalPages == 0) {
+            return 0;
+        }
+        if (currentPage >= totalPages) {
+            return Math.max(0, (currentPage - 1) * pageSize + currentItemCount);
+        }
+        return totalPages * pageSize;
+    }
     private JsonNode parseJson(String body) {
         try {
             return objectMapper.readTree(body == null ? "" : body);
