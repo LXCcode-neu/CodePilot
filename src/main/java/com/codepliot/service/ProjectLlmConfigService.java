@@ -7,6 +7,7 @@ import com.codepliot.exception.BusinessException;
 import com.codepliot.model.ErrorCode;
 import com.codepliot.model.LlmAvailableModelVO;
 import com.codepliot.model.LlmConfigTestResult;
+import com.codepliot.model.LlmProviderVO;
 import com.codepliot.model.LlmRuntimeConfig;
 import com.codepliot.model.ProjectLlmConfigSaveRequest;
 import com.codepliot.model.ProjectLlmConfigVO;
@@ -24,33 +25,33 @@ public class ProjectLlmConfigService {
 
     private static final long GLOBAL_PROJECT_REPO_ID = 0L;
 
-    private static final List<LlmAvailableModelVO> AVAILABLE_MODELS = List.of(
-            new LlmAvailableModelVO("deepseek", "deepseek-chat", "DeepSeek Chat", "https://api.deepseek.com"),
-            new LlmAvailableModelVO("deepseek", "deepseek-reasoner", "DeepSeek Reasoner", "https://api.deepseek.com"),
-            new LlmAvailableModelVO("deepseek", "deepseek-v4-flash", "DeepSeek V4 Flash", "https://api.deepseek.com"),
-            new LlmAvailableModelVO("mock", "mock", "Mock Model", "http://mock.local")
-    );
-
     private final ProjectLlmConfigMapper projectLlmConfigMapper;
     private final ProjectRepoMapper projectRepoMapper;
     private final ApiKeyCryptoUtils apiKeyCryptoUtils;
     private final LlmService llmService;
     private final LlmApiKeyConfigService llmApiKeyConfigService;
+    private final LlmProviderService llmProviderService;
 
     public ProjectLlmConfigService(ProjectLlmConfigMapper projectLlmConfigMapper,
                                    ProjectRepoMapper projectRepoMapper,
                                    ApiKeyCryptoUtils apiKeyCryptoUtils,
                                    LlmService llmService,
-                                   LlmApiKeyConfigService llmApiKeyConfigService) {
+                                   LlmApiKeyConfigService llmApiKeyConfigService,
+                                   LlmProviderService llmProviderService) {
         this.projectLlmConfigMapper = projectLlmConfigMapper;
         this.projectRepoMapper = projectRepoMapper;
         this.apiKeyCryptoUtils = apiKeyCryptoUtils;
         this.llmService = llmService;
         this.llmApiKeyConfigService = llmApiKeyConfigService;
+        this.llmProviderService = llmProviderService;
+    }
+
+    public List<LlmProviderVO> listProviders() {
+        return llmProviderService.listProviders();
     }
 
     public List<LlmAvailableModelVO> listAvailableModels() {
-        return AVAILABLE_MODELS;
+        return llmProviderService.listAvailableModels();
     }
 
     public ProjectLlmConfigVO getProjectConfig(Long projectRepoId) {
@@ -192,11 +193,7 @@ public class ProjectLlmConfigService {
     }
 
     private LlmAvailableModelVO requireSupportedModel(String provider, String modelName) {
-        return AVAILABLE_MODELS.stream()
-                .filter(model -> model.provider().equalsIgnoreCase(provider == null ? "" : provider.trim()))
-                .filter(model -> model.modelName().equals(modelName == null ? "" : modelName.trim()))
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(ErrorCode.BAD_REQUEST, "Unsupported model"));
+        return llmProviderService.resolveModel(provider, modelName, modelName, null);
     }
 
     private String resolveDisplayName(String displayName, LlmAvailableModelVO model) {

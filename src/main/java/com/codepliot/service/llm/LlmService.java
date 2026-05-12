@@ -26,7 +26,9 @@ public class LlmService {
     public LlmService(LlmProperties llmProperties, List<LlmClient> clients) {
         this.llmProperties = llmProperties;
         this.clients = clients.stream()
-                .collect(Collectors.toMap(client -> normalizeProvider(client.provider()), Function.identity()));
+                .flatMap(client -> client.supportedProviders().stream()
+                        .map(provider -> Map.entry(normalizeProvider(provider), client)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public LlmService(LlmClient llmClient) {

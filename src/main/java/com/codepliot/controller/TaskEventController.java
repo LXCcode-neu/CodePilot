@@ -1,8 +1,8 @@
 package com.codepliot.controller;
 
+import com.codepliot.entity.AgentTask;
 import com.codepliot.model.TaskEventMessage;
 import com.codepliot.service.sse.SseService;
-import com.codepliot.entity.AgentTask;
 import com.codepliot.service.task.AgentTaskService;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -12,26 +12,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-/**
- * TaskEventController 控制器，负责对外提供 HTTP 接口。
- */
+
 @RestController
 @RequestMapping("/api/tasks/{taskId}/events")
 public class TaskEventController {
 
     private final AgentTaskService agentTaskService;
     private final SseService sseService;
-/**
- * 创建 TaskEventController 实例。
- */
-public TaskEventController(AgentTaskService agentTaskService, SseService sseService) {
+
+    public TaskEventController(AgentTaskService agentTaskService, SseService sseService) {
         this.agentTaskService = agentTaskService;
         this.sseService = sseService;
     }
-    /**
-     * 执行 subscribe 相关逻辑。
-     */
-@GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@PathVariable Long taskId) {
         AgentTask agentTask = agentTaskService.getOwnedTaskEntity(taskId);
         SseEmitter emitter = sseService.subscribe(taskId);
@@ -41,7 +35,7 @@ public TaskEventController(AgentTaskService agentTaskService, SseService sseServ
                     agentTask.getStatus(),
                     resolvePhase(agentTask.getStatus()),
                     null,
-                    "褰撳墠浠诲姟鐘舵€侊細" + agentTask.getStatus(),
+                    "当前任务状态：" + agentTask.getStatus(),
                     LocalDateTime.now()
             ));
             if (isTerminalStatus(agentTask.getStatus())) {
@@ -52,16 +46,12 @@ public TaskEventController(AgentTaskService agentTaskService, SseService sseServ
         }
         return emitter;
     }
-/**
- * 执行 isTerminalStatus 相关逻辑。
- */
-private boolean isTerminalStatus(String status) {
+
+    private boolean isTerminalStatus(String status) {
         return "COMPLETED".equals(status) || "FAILED".equals(status);
     }
-/**
- * 解析并返回Phase相关逻辑。
- */
-private String resolvePhase(String status) {
+
+    private String resolvePhase(String status) {
         if ("COMPLETED".equals(status) || "FAILED".equals(status)) {
             return "COMPLETED";
         }
@@ -71,4 +61,3 @@ private String resolvePhase(String status) {
         return "RUNNING";
     }
 }
-

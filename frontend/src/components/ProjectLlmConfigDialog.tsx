@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { LoaderCircle, PlugZap, Settings } from "lucide-react";
 import {
-  getAvailableLlmModels,
+  getLlmProviders,
   getProjectLlmConfig,
   saveProjectLlmConfig,
   testProjectLlmConfig,
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { LlmAvailableModel, ProjectLlmConfig } from "@/types/llm-config";
+import type { LlmProvider, ProjectLlmConfig } from "@/types/llm-config";
 import type { ProjectRepo } from "@/types/project";
 
 interface ProjectLlmConfigDialogProps {
@@ -28,10 +28,12 @@ interface ProjectLlmConfigDialogProps {
 
 export function ProjectLlmConfigDialog({ project, onSaved }: ProjectLlmConfigDialogProps) {
   const [open, setOpen] = useState(false);
-  const [models, setModels] = useState<LlmAvailableModel[]>([]);
+  const [providers, setProviders] = useState<LlmProvider[]>([]);
   const [config, setConfig] = useState<ProjectLlmConfig | null>(null);
   const [provider, setProvider] = useState("");
   const [modelName, setModelName] = useState("");
+  const [remark, setRemark] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,14 +42,9 @@ export function ProjectLlmConfigDialog({ project, onSaved }: ProjectLlmConfigDia
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const providerModels = useMemo(
-    () => models.filter((model) => model.provider === provider),
-    [models, provider]
-  );
-
-  const selectedModel = useMemo(
-    () => models.find((model) => model.provider === provider && model.modelName === modelName),
-    [modelName, models, provider]
+  const selectedProvider = useMemo(
+    () => providers.find((item) => item.provider === provider),
+    [provider, providers]
   );
 
   useEffect(() => {
@@ -58,19 +55,18 @@ export function ProjectLlmConfigDialog({ project, onSaved }: ProjectLlmConfigDia
     setLoading(true);
     setError("");
     setMessage("");
-    Promise.all([getAvailableLlmModels(), getProjectLlmConfig(project.id)])
-      .then(([availableModels, projectConfig]) => {
-        setModels(availableModels);
+    Promise.all([getLlmProviders(), getProjectLlmConfig(project.id)])
+      .then(([availableProviders, projectConfig]) => {
+        setProviders(availableProviders);
         setConfig(projectConfig);
-        const initialModel =
-          projectConfig
-            ? availableModels.find(
-                (model) => model.provider === projectConfig.provider && model.modelName === projectConfig.modelName
-              )
-            : availableModels[0];
-        setProvider(projectConfig?.provider || initialModel?.provider || "");
-        setModelName(projectConfig?.modelName || initialModel?.modelName || "");
-        setBaseUrl(projectConfig?.baseUrl || initialModel?.defaultBaseUrl || "");
+        const initialProvider = projectConfig
+          ? availableProviders.find((item) => item.provider === projectConfig.provider)
+          : availableProviders[0];
+        setProvider(projectConfig?.provider || initialProvider?.provider || "");
+        setModelName(projectConfig?.modelName || "");
+        setRemark(projectConfig?.displayName || "");
+        setWebsiteUrl("");
+        setBaseUrl(projectConfig?.baseUrl || initialProvider?.defaultBaseUrl || "");
         setApiKey("");
       })
       .catch((err) => setError(err instanceof Error ? err.message : "加载模型配置失败"))
@@ -78,21 +74,25 @@ export function ProjectLlmConfigDialog({ project, onSaved }: ProjectLlmConfigDia
   }, [open, project.id]);
 
   function handleProviderChange(value: string) {
-    const nextModel = models.find((model) => model.provider === value);
+    const nextProvider = providers.find((item) => item.provider === value);
     setProvider(value);
-    setModelName(nextModel?.modelName || "");
-    setBaseUrl(nextModel?.defaultBaseUrl || "");
-  }
-
-  function handleModelChange(value: string) {
-    const nextModel = models.find((model) => model.provider === provider && model.modelName === value);
-    setModelName(value);
-    setBaseUrl(nextModel?.defaultBaseUrl || baseUrl);
+    setModelName("");
+    setRemark("");
+    setWebsiteUrl("");
+    setBaseUrl(nextProvider?.defaultBaseUrl || "");
   }
 
   async function handleSave() {
-    if (!selectedModel) {
-      setError("请选择模型");
+    if (!provider) {
+      setError("请选择供应商");
+      return;
+    }
+    if (!modelName.trim()) {
+      setError("请输入模型名称");
+      return;
+    }
+    if (!baseUrl.trim()) {
+      setError("请输入请求地址");
       return;
     }
 
@@ -102,9 +102,9 @@ export function ProjectLlmConfigDialog({ project, onSaved }: ProjectLlmConfigDia
     try {
       const saved = await saveProjectLlmConfig(project.id, {
         provider,
-        modelName,
-        displayName: selectedModel.displayName,
-        baseUrl,
+        modelName: modelName.trim(),
+        displayName: remark.trim() || modelName.trim(),
+        baseUrl: baseUrl.trim(),
         apiKey: apiKey.trim() || undefined,
       });
       setConfig(saved);
@@ -158,40 +158,35 @@ export function ProjectLlmConfigDialog({ project, onSaved }: ProjectLlmConfigDia
         ) : (
           <div className="space-y-4">
             <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">模型供应商</label>
+              <label className="text-sm font-medium text-slate-700">供应商</label>
               <Select value={provider} onValueChange={handleProviderChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="选择模型供应商" />
+                  <SelectValue placeholder="选择供应商" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[...new Set(models.map((model) => model.provider))].map((item) => (
-                    <SelectItem key={item} value={item}>
-                      {item}
+                  {providers.map((item) => (
+                    <SelectItem key={item.provider} value={item.provider}>
+                      {item.displayName}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">模型</label>
-              <Select value={modelName} onValueChange={handleModelChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="选择模型" />
-                </SelectTrigger>
-                <SelectContent>
-                  {providerModels.map((model) => (
-                    <SelectItem key={`${model.provider}:${model.modelName}`} value={model.modelName}>
-                      {model.displayName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <label className="text-sm font-medium text-slate-700">模型名称</label>
+                <Input value={modelName} onChange={(event) => setModelName(event.target.value)} placeholder="例如：glm-4-flash" />
+              </div>
+              <div className="grid gap-2">
+                <label className="text-sm font-medium text-slate-700">备注</label>
+                <Input value={remark} onChange={(event) => setRemark(event.target.value)} placeholder="例如：公司专用账号" />
+              </div>
             </div>
 
             <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">Base URL</label>
-              <Input value={baseUrl} onChange={(event) => setBaseUrl(event.target.value)} />
+              <label className="text-sm font-medium text-slate-700">官网链接</label>
+              <Input value={websiteUrl} onChange={(event) => setWebsiteUrl(event.target.value)} placeholder="https://example.com（可选）" />
             </div>
 
             <div className="grid gap-2">
@@ -204,9 +199,20 @@ export function ProjectLlmConfigDialog({ project, onSaved }: ProjectLlmConfigDia
               />
             </div>
 
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">请求地址</label>
+              <Input value={baseUrl} onChange={(event) => setBaseUrl(event.target.value)} placeholder="https://your-api-endpoint.com" />
+            </div>
+
             {config?.hasApiKey ? (
               <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
                 API Key：{config.apiKeyMask || "已配置"}
+              </div>
+            ) : null}
+
+            {selectedProvider && !selectedProvider.supportsTools ? (
+              <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                当前供应商可能不支持 Agent 工具调用。
               </div>
             ) : null}
 

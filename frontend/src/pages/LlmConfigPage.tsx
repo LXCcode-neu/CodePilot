@@ -3,7 +3,7 @@ import { CheckCircle2, KeyRound, LoaderCircle, Plus, RefreshCw } from "lucide-re
 import {
   applyLlmApiKey,
   createLlmApiKey,
-  getAvailableLlmModels,
+  getLlmProviders,
   listLlmApiKeys,
 } from "@/api/llm-config";
 import { Button } from "@/components/ui/button";
@@ -18,15 +18,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDateTime } from "@/lib/utils";
-import type { LlmApiKey, LlmAvailableModel } from "@/types/llm-config";
+import type { LlmApiKey, LlmProvider } from "@/types/llm-config";
 
 export function LlmConfigPage() {
-  const [models, setModels] = useState<LlmAvailableModel[]>([]);
+  const [providers, setProviders] = useState<LlmProvider[]>([]);
   const [apiKeys, setApiKeys] = useState<LlmApiKey[]>([]);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [provider, setProvider] = useState("");
   const [modelName, setModelName] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [loading, setLoading] = useState(true);
@@ -34,10 +35,9 @@ export function LlmConfigPage() {
   const [applyingId, setApplyingId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  const providerModels = useMemo(() => models.filter((model) => model.provider === provider), [models, provider]);
-  const selectedModel = useMemo(
-    () => models.find((model) => model.provider === provider && model.modelName === modelName),
-    [modelName, models, provider]
+  const selectedProvider = useMemo(
+    () => providers.find((item) => item.provider === provider),
+    [provider, providers]
   );
 
   useEffect(() => {
@@ -48,10 +48,13 @@ export function LlmConfigPage() {
     setLoading(true);
     setError("");
     try {
-      const [availableModels, keys] = await Promise.all([getAvailableLlmModels(), listLlmApiKeys()]);
-      setModels(availableModels);
+      const [availableProviders, keys] = await Promise.all([
+        getLlmProviders(),
+        listLlmApiKeys(),
+      ]);
+      setProviders(availableProviders);
       setApiKeys(keys);
-      primeForm(availableModels);
+      primeForm(availableProviders);
     } catch (err) {
       setError(err instanceof Error ? err.message : "加载 API Key 失败");
     } finally {
@@ -59,12 +62,13 @@ export function LlmConfigPage() {
     }
   }
 
-  function primeForm(availableModels = models) {
-    const initialModel = availableModels[0];
+  function primeForm(availableProviders = providers) {
+    const initialProvider = availableProviders[0];
     setName("");
-    setProvider(initialModel?.provider || "");
-    setModelName(initialModel?.modelName || "");
-    setBaseUrl(initialModel?.defaultBaseUrl || "");
+    setProvider(initialProvider?.provider || "");
+    setModelName("");
+    setDisplayName("");
+    setBaseUrl(initialProvider?.defaultBaseUrl || "");
     setApiKey("");
   }
 
@@ -77,25 +81,28 @@ export function LlmConfigPage() {
   }
 
   function handleProviderChange(value: string) {
-    const nextModel = models.find((model) => model.provider === value);
+    const nextProvider = providers.find((item) => item.provider === value);
     setProvider(value);
-    setModelName(nextModel?.modelName || "");
-    setBaseUrl(nextModel?.defaultBaseUrl || "");
-  }
-
-  function handleModelChange(value: string) {
-    const nextModel = models.find((model) => model.provider === provider && model.modelName === value);
-    setModelName(value);
-    setBaseUrl(nextModel?.defaultBaseUrl || baseUrl);
+    setModelName("");
+    setDisplayName("");
+    setBaseUrl(nextProvider?.defaultBaseUrl || "");
   }
 
   async function handleCreate() {
-    if (!selectedModel) {
-      setError("请选择模型");
+    if (!provider) {
+      setError("请选择模型厂商");
       return;
     }
     if (!name.trim()) {
       setError("请输入名称");
+      return;
+    }
+    if (!modelName.trim()) {
+      setError("请输入模型名称");
+      return;
+    }
+    if (!baseUrl.trim()) {
+      setError("请输入 Base URL");
       return;
     }
     if (!apiKey.trim()) {
@@ -109,9 +116,9 @@ export function LlmConfigPage() {
       await createLlmApiKey({
         name: name.trim(),
         provider,
-        modelName,
-        displayName: selectedModel.displayName,
-        baseUrl,
+        modelName: modelName.trim(),
+        displayName: displayName.trim() || modelName.trim(),
+        baseUrl: baseUrl.trim(),
         apiKey: apiKey.trim(),
       });
       setOpen(false);
@@ -141,7 +148,7 @@ export function LlmConfigPage() {
       <section className="space-y-4">
         <h1 className="text-3xl font-bold text-slate-900">API keys</h1>
         <p className="max-w-5xl text-sm leading-7 text-slate-600">
-          列表内是你的全部 API key。API key 仅在创建时提交，保存后只显示脱敏首尾。选择“应用”后，后续任务会使用该 key。
+          列表内是你的全部 API Key。API Key 仅在创建时提交，保存后只显示脱敏信息；选择“应用”后，后续任务会使用该配置。
         </p>
       </section>
 
@@ -151,11 +158,11 @@ export function LlmConfigPage() {
             <thead className="border-b border-slate-200 text-slate-500">
               <tr>
                 <th className="w-[18%] px-4 py-4 font-semibold">名称</th>
-                <th className="w-[15%] px-4 py-4 font-semibold">厂商</th>
-                <th className="w-[25%] px-4 py-4 font-semibold">Key</th>
+                <th className="w-[14%] px-4 py-4 font-semibold">厂商</th>
+                <th className="w-[18%] px-4 py-4 font-semibold">模型</th>
+                <th className="w-[22%] px-4 py-4 font-semibold">Key</th>
                 <th className="w-[16%] px-4 py-4 font-semibold">创建日期</th>
-                <th className="w-[16%] px-4 py-4 font-semibold">最近使用日期</th>
-                <th className="w-[10%] px-4 py-4 text-right font-semibold">操作</th>
+                <th className="w-[12%] px-4 py-4 text-right font-semibold">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -170,9 +177,9 @@ export function LlmConfigPage() {
                   <tr key={item.id}>
                     <td className="px-4 py-3 font-medium text-slate-900">{item.name}</td>
                     <td className="px-4 py-3">{item.provider}</td>
+                    <td className="truncate px-4 py-3">{item.modelName}</td>
                     <td className="truncate px-4 py-3 font-mono">{item.apiKeyMask}</td>
                     <td className="px-4 py-3">{formatDate(item.createdAt)}</td>
-                    <td className="px-4 py-3">{item.lastUsedAt ? formatDate(item.lastUsedAt) : "-"}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end">
                         {item.active ? (
@@ -210,64 +217,70 @@ export function LlmConfigPage() {
 
         <Button onClick={() => handleOpenChange(true)}>
           <Plus className="h-4 w-4" />
-          创建 API key
+          创建 API Key
         </Button>
       </section>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>创建 API key</DialogTitle>
-            <DialogDescription>API Key 保存后将只显示脱敏首尾。</DialogDescription>
+            <DialogTitle>创建 API Key</DialogTitle>
+            <DialogDescription>选择供应商后，请手动填写请求地址、模型名称与 API Key。</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">名称</label>
-              <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="例如 Codepilot" />
-            </div>
-
-            <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">厂商</label>
+              <label className="text-sm font-medium text-slate-700">供应商</label>
               <Select value={provider} onValueChange={handleProviderChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="选择厂商" />
+                  <SelectValue placeholder="选择供应商" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[...new Set(models.map((model) => model.provider))].map((item) => (
-                    <SelectItem key={item} value={item}>
-                      {item}
+                  {providers.map((item) => (
+                    <SelectItem key={item.provider} value={item.provider}>
+                      {item.displayName}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">模型</label>
-              <Select value={modelName} onValueChange={handleModelChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="选择模型" />
-                </SelectTrigger>
-                <SelectContent>
-                  {providerModels.map((model) => (
-                    <SelectItem key={`${model.provider}:${model.modelName}`} value={model.modelName}>
-                      {model.displayName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <label className="text-sm font-medium text-slate-700">供应商名称</label>
+                <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="例如：OpenAI 官方" />
+              </div>
+              <div className="grid gap-2">
+                <label className="text-sm font-medium text-slate-700">备注</label>
+                <Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="例如：公司专用账号" />
+              </div>
             </div>
 
             <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">Base URL</label>
-              <Input value={baseUrl} onChange={(event) => setBaseUrl(event.target.value)} />
+              <label className="text-sm font-medium text-slate-700">官网链接</label>
+              <Input placeholder="https://example.com（可选）" />
             </div>
 
             <div className="grid gap-2">
               <label className="text-sm font-medium text-slate-700">API Key</label>
-              <Input type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder="sk-..." />
+              <Input type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder="请输入 API Key" />
             </div>
+
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">请求地址</label>
+              <Input value={baseUrl} onChange={(event) => setBaseUrl(event.target.value)} placeholder="https://your-api-endpoint.com" />
+            </div>
+
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">模型名称</label>
+              <Input value={modelName} onChange={(event) => setModelName(event.target.value)} placeholder="请输入厂商支持的模型 ID" />
+            </div>
+
+            {selectedProvider && !selectedProvider.supportsTools ? (
+              <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                当前厂商可能不支持 Agent 工具调用。
+              </div>
+            ) : null}
 
             {error ? <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div> : null}
           </div>
@@ -275,7 +288,7 @@ export function LlmConfigPage() {
           <DialogFooter>
             <Button onClick={handleCreate} disabled={saving}>
               {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
-              创建 API key
+              创建 API Key
             </Button>
           </DialogFooter>
         </DialogContent>

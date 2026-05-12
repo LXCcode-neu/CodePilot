@@ -12,6 +12,10 @@ public interface LlmClient {
         return "mock";
     }
 
+    default List<String> supportedProviders() {
+        return List.of(provider());
+    }
+
     default String generate(String systemPrompt, String userPrompt) {
         throw new UnsupportedOperationException("generate is not implemented");
     }

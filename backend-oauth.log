@@ -2388,3 +2388,1230 @@ Closing non transactional SqlSession [org.apache.ibatis.session.defaults.Default
 2026-05-11T22:40:40.932+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
 2026-05-11T22:40:40.932+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=GitHubIssuePageVO[items=[], page=1, pageSize=10, totalCount=0,  (truncated)...]
 2026-05-11T22:40:40.934+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6bc144eb] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@2054427384 wrapping com.mysql.cj.jdbc.ConnectionImpl@5b718c0c] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6bc144eb]
+2026-05-11T22:41:19.807+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/models", parameters={}
+2026-05-11T22:41:19.807+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectLlmConfigController#listModels()
+2026-05-11T22:41:19.808+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+Creating a new SqlSession
+2026-05-11T22:41:19.808+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmAvailableModelVO[provider=deepseek, modelName=deepseek-chat (truncated)...]
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@10609b93] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:19.808+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-05-11T22:41:19.809+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:19.809+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+JDBC Connection [HikariProxyConnection@1985468070 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+2026-05-11T22:41:19.810+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-11T22:41:19.811+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==    Columns: id, username, password, email, created_at, updated_at
+2026-05-11T22:41:19.811+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-11T22:41:19.811+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@10609b93]
+2026-05-11T22:41:19.812+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-11T22:41:19.812+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/api-keys", parameters={}
+2026-05-11T22:41:19.812+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:19.812+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.LlmApiKeyConfigController#list()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@38e6c2d2] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1132019386 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,key_name,provider,model_name,display_name,base_url,api_key_encrypted,active,last_used_at,created_at,updated_at FROM llm_api_key_config WHERE (user_id = ?) ORDER BY active DESC,created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, key_name, provider, model_name, display_name, base_url, api_key_encrypted, active, last_used_at, created_at, updated_at
+<==        Row: 2053782941201551362, 2048313214093004801, test, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 1, null, 2026-05-11 18:23:05, 2026-05-11 18:23:05
+<==        Row: 2053782973757739009, 2048313214093004801, t3, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 0, null, 2026-05-11 18:23:13, 2026-05-11 18:23:13
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@38e6c2d2]
+2026-05-11T22:41:19.817+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:19.817+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmApiKeyVO[id=2053782941201551362, name=test, provider=deepse (truncated)...]
+2026-05-11T22:41:19.817+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@279c61c] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@80205988 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@279c61c]
+2026-05-11T22:41:20.862+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-11T22:41:20.863+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3fb4b0f9] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1518607373 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==> Parameters: 2048313214093004801(Long)
+2026-05-11T22:41:20.865+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+2026-05-11T22:41:20.866+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+2026-05-11T22:41:20.867+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+2026-05-11T22:41:20.867+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+2026-05-11T22:41:20.868+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==      Total: 4
+2026-05-11T22:41:20.868+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3fb4b0f9]
+2026-05-11T22:41:20.868+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:20.868+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-11T22:41:20.868+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2053847717810249730, userId=20483132140930048 (truncated)...]
+2026-05-11T22:41:20.868+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:20.870+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:21.376+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@53e7f40e] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:21.377+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc29371] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:21.378+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+JDBC Connection [HikariProxyConnection@1472669921 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+2026-05-11T22:41:21.378+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+JDBC Connection [HikariProxyConnection@468558132 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+2026-05-11T22:41:21.379+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+==> Parameters: kanye(String)
+2026-05-11T22:41:21.379+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+<==    Columns: id, username, password, email, created_at, updated_at
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-11T22:41:21.380+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+<==      Total: 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc29371]
+2026-05-11T22:41:21.380+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@53e7f40e]
+2026-05-11T22:41:21.380+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/api-keys", parameters={}
+2026-05-11T22:41:21.381+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/models", parameters={}
+2026-05-11T22:41:21.381+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.LlmApiKeyConfigController#list()
+2026-05-11T22:41:21.381+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectLlmConfigController#listModels()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2d63f3fc] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:21.381+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:21.382+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmAvailableModelVO[provider=deepseek, modelName=deepseek-chat (truncated)...]
+JDBC Connection [HikariProxyConnection@336806038 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,key_name,provider,model_name,display_name,base_url,api_key_encrypted,active,last_used_at,created_at,updated_at FROM llm_api_key_config WHERE (user_id = ?) ORDER BY active DESC,created_at DESC
+2026-05-11T22:41:21.383+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, key_name, provider, model_name, display_name, base_url, api_key_encrypted, active, last_used_at, created_at, updated_at
+<==        Row: 2053782941201551362, 2048313214093004801, test, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 1, null, 2026-05-11 18:23:05, 2026-05-11 18:23:05
+<==        Row: 2053782973757739009, 2048313214093004801, t3, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 0, null, 2026-05-11 18:23:13, 2026-05-11 18:23:13
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2d63f3fc]
+2026-05-11T22:41:21.385+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:21.386+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmApiKeyVO[id=2053782941201551362, name=test, provider=deepse (truncated)...]
+2026-05-11T22:41:21.386+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3ba07b82] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@760502375 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+2026-05-11T22:41:21.854+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+==> Parameters: kanye(String)
+2026-05-11T22:41:21.855+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+<==    Columns: id, username, password, email, created_at, updated_at
+2026-05-11T22:41:21.855+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-11T22:41:21.856+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==      Total: 1
+2026-05-11T22:41:21.856+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3ba07b82]
+2026-05-11T22:41:21.856+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+2026-05-11T22:41:21.856+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-11T22:41:21.857+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+2026-05-11T22:41:21.857+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-11T22:41:21.857+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@58adfddf] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1617551651 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@58adfddf]
+2026-05-11T22:41:21.861+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:21.861+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2053847717810249730, userId=20483132140930048 (truncated)...]
+2026-05-11T22:41:21.863+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@79f88956] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@849817364 wrapping com.mysql.cj.jdbc.ConnectionImpl@5b718c0c] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@79f88956]
+2026-05-11T22:41:21.873+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/projects/2053847717810249730/github/issues?state=all&page=1&pageSize=10", parameters={masked}
+2026-05-11T22:41:21.874+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.GitHubIssueController#list(Long, String, Integer, Integer)
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6cb14236] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1949185014 wrapping com.mysql.cj.jdbc.ConnectionImpl@5b718c0c] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (id = ? AND user_id = ?) limit 1
+==> Parameters: 2053847717810249730(Long), 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6cb14236]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@58f8644a] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1052650897 wrapping com.mysql.cj.jdbc.ConnectionImpl@5b718c0c] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,github_user_id,github_login,github_name,github_avatar_url,access_token_encrypted,scope,created_at,updated_at FROM user_github_account WHERE (user_id = ?) limit 1
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, github_user_id, github_login, github_name, github_avatar_url, access_token_encrypted, scope, created_at, updated_at
+<==        Row: 2053847547227906049, 2048313214093004801, 199789418, LXCcode-neu, Turlin, https://avatars.githubusercontent.com/u/199789418?v=4, <<BLOB>>, read:user,repo, 2026-05-11 22:39:49, 2026-05-11 22:39:49
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@58f8644a]
+Creating a new SqlSession
+2026-05-11T22:41:22.233+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@381743c9] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:22.237+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+JDBC Connection [HikariProxyConnection@1401484245 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+2026-05-11T22:41:22.238+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-11T22:41:22.239+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==    Columns: id, username, password, email, created_at, updated_at
+2026-05-11T22:41:22.240+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-11T22:41:22.240+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@381743c9]
+2026-05-11T22:41:22.240+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-11T22:41:22.241+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/github/account", parameters={}
+2026-05-11T22:41:22.241+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:22.241+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.GitHubAuthController#account()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6e936da7] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1813537463 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,github_user_id,github_login,github_name,github_avatar_url,access_token_encrypted,scope,created_at,updated_at FROM user_github_account WHERE (user_id = ?) limit 1
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, github_user_id, github_login, github_name, github_avatar_url, access_token_encrypted, scope, created_at, updated_at
+<==        Row: 2053847547227906049, 2048313214093004801, 199789418, LXCcode-neu, Turlin, https://avatars.githubusercontent.com/u/199789418?v=4, <<BLOB>>, read:user,repo, 2026-05-11 22:39:49, 2026-05-11 22:39:49
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6e936da7]
+2026-05-11T22:41:22.246+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:22.246+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=GitHubAccountVO[connected=true, githubLogin=LXCcode-neu, github (truncated)...]
+2026-05-11T22:41:22.247+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@221fffd9] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@88402743 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@221fffd9]
+2026-05-11T22:41:22.714+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-11T22:41:22.714+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-05-11T22:41:22.715+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+2026-05-11T22:41:22.715+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5c4a4cca] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:22.716+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+JDBC Connection [HikariProxyConnection@32932269 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+2026-05-11T22:41:22.717+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+2026-05-11T22:41:22.717+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+==> Parameters: 2048313214093004801(Long)
+2026-05-11T22:41:22.718+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+2026-05-11T22:41:22.718+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-11T22:41:22.718+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5c4a4cca]
+2026-05-11T22:41:22.721+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:22.722+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2053847717810249730, userId=20483132140930048 (truncated)...]
+2026-05-11T22:41:22.722+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:22.825+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.client.DefaultRestClient         : Reading to [java.lang.String] as "application/json;charset=utf-8"
+2026-05-11T22:41:22.827+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:22.827+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=GitHubIssuePageVO[items=[], page=1, pageSize=10, totalCount=0,  (truncated)...]
+2026-05-11T22:41:22.827+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1ddfae13] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@514243593 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+Creating a new SqlSession
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@118b3b04] was not registered for synchronization because synchronization is not active
+<==      Total: 1
+2026-05-11T22:41:23.369+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1ddfae13]
+2026-05-11T22:41:23.370+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-11T22:41:23.370+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/models", parameters={}
+JDBC Connection [HikariProxyConnection@1129595966 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+2026-05-11T22:41:23.371+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectLlmConfigController#listModels()
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+2026-05-11T22:41:23.371+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+==> Parameters: kanye(String)
+2026-05-11T22:41:23.371+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:23.371+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+2026-05-11T22:41:23.372+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmAvailableModelVO[provider=deepseek, modelName=deepseek-chat (truncated)...]
+2026-05-11T22:41:23.372+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==    Columns: id, username, password, email, created_at, updated_at
+2026-05-11T22:41:23.372+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+2026-05-11T22:41:23.373+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@118b3b04]
+2026-05-11T22:41:23.373+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:23.373+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:23.374+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/api-keys", parameters={}
+2026-05-11T22:41:23.374+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.LlmApiKeyConfigController#list()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@712c3df0] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@199631532 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,key_name,provider,model_name,display_name,base_url,api_key_encrypted,active,last_used_at,created_at,updated_at FROM llm_api_key_config WHERE (user_id = ?) ORDER BY active DESC,created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, key_name, provider, model_name, display_name, base_url, api_key_encrypted, active, last_used_at, created_at, updated_at
+<==        Row: 2053782941201551362, 2048313214093004801, test, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 1, null, 2026-05-11 18:23:05, 2026-05-11 18:23:05
+<==        Row: 2053782973757739009, 2048313214093004801, t3, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 0, null, 2026-05-11 18:23:13, 2026-05-11 18:23:13
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@712c3df0]
+2026-05-11T22:41:23.380+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:23.381+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmApiKeyVO[id=2053782941201551362, name=test, provider=deepse (truncated)...]
+2026-05-11T22:41:23.381+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+2026-05-11T22:41:23.635+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5e8ca962] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@18678e16] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:23.637+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+JDBC Connection [HikariProxyConnection@317501100 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@1777923177 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+==> Parameters: kanye(String)
+2026-05-11T22:41:23.638+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+<==    Columns: id, username, password, email, created_at, updated_at
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-11T22:41:23.639+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+<==      Total: 1
+2026-05-11T22:41:23.640+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5e8ca962]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@18678e16]
+2026-05-11T22:41:23.640+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+2026-05-11T22:41:23.641+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-11T22:41:23.641+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/api/tasks", parameters={}
+2026-05-11T22:41:23.641+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+2026-05-11T22:41:23.641+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.AgentTaskController#list()
+2026-05-11T22:41:23.641+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@21f09a21] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:23.642+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3f10f7ff] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@445440196 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@455334197 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==>  Preparing: SELECT id,user_id,project_id,issue_title,issue_description,status,result_summary,error_message,llm_provider,llm_model_name,llm_display_name,created_at,updated_at FROM agent_task WHERE (user_id = ?) ORDER BY created_at DESC
+==> Parameters: 2048313214093004801(Long)
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==    Columns: id, user_id, project_id, issue_title, issue_description, status, result_summary, error_message, llm_provider, llm_model_name, llm_display_name, created_at, updated_at
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2053777445249863681, 2048313214093004801, 2051629598805921794, 修复验证码不为6位, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, deepseek, deepseek-chat, DeepSeek Chat, 2026-05-11 18:01:15, 2026-05-11 18:01:15
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+<==        Row: 2053477049910304769, 2048313214093004801, 2051629598805921794, 修复验证码·, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-10 22:07:35, 2026-05-10 22:07:35
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2053440935173763074, 2048313214093004801, 2051637718307344386, 使用智谱 BigModel对接时报错, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-10 19:44:05, 2026-05-10 19:44:05
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==        Row: 2052729361879973889, 2048313214093004801, 2051637718307344386, fix: prevent stderr from corrupting IME identifier in keyboard detection, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-08 20:36:32, 2026-05-08 20:36:32
+<==      Total: 4
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@21f09a21]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3f10f7ff]
+2026-05-11T22:41:23.648+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:23.648+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:23.648+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2053847717810249730, userId=20483132140930048 (truncated)...]
+2026-05-11T22:41:23.649+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[AgentTaskVO[id=2053777445249863681, userId=2048313214093004801 (truncated)...]
+2026-05-11T22:41:23.650+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:23.650+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1545817d] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1615734823 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1545817d]
+2026-05-11T22:41:24.017+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-11T22:41:24.018+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+Creating a new SqlSession
+2026-05-11T22:41:24.018+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@66ca97f6] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:24.019+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+JDBC Connection [HikariProxyConnection@1606265915 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==> Parameters: 2048313214093004801(Long)
+2026-05-11T22:41:24.020+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-11T22:41:24.020+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+2026-05-11T22:41:24.021+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+2026-05-11T22:41:24.021+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+2026-05-11T22:41:24.022+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+2026-05-11T22:41:24.022+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@66ca97f6]
+2026-05-11T22:41:24.024+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:24.024+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2053847717810249730, userId=20483132140930048 (truncated)...]
+2026-05-11T22:41:24.026+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@89f945f] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:24.326+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@e9d40c8] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@104703386 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@731612919 wrapping com.mysql.cj.jdbc.ConnectionImpl@5b718c0c] will not be managed by Spring
+2026-05-11T22:41:24.328+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+==> Parameters: kanye(String)
+2026-05-11T22:41:24.332+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+<==    Columns: id, username, password, email, created_at, updated_at
+<==    Columns: id, username, password, email, created_at, updated_at
+2026-05-11T22:41:24.334+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+2026-05-11T22:41:24.334+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==      Total: 1
+2026-05-11T22:41:24.335+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@89f945f]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@e9d40c8]
+2026-05-11T22:41:24.335+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-11T22:41:24.335+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/api/tasks", parameters={}
+2026-05-11T22:41:24.335+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-11T22:41:24.335+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+2026-05-11T22:41:24.337+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.AgentTaskController#list()
+2026-05-11T22:41:24.337+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5e28e0f7] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6b06e8c2] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@723951167 wrapping com.mysql.cj.jdbc.ConnectionImpl@5b718c0c] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@719436289 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==>  Preparing: SELECT id,user_id,project_id,issue_title,issue_description,status,result_summary,error_message,llm_provider,llm_model_name,llm_display_name,created_at,updated_at FROM agent_task WHERE (user_id = ?) ORDER BY created_at DESC
+==> Parameters: 2048313214093004801(Long)
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==    Columns: id, user_id, project_id, issue_title, issue_description, status, result_summary, error_message, llm_provider, llm_model_name, llm_display_name, created_at, updated_at
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2053777445249863681, 2048313214093004801, 2051629598805921794, 修复验证码不为6位, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, deepseek, deepseek-chat, DeepSeek Chat, 2026-05-11 18:01:15, 2026-05-11 18:01:15
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+<==        Row: 2053477049910304769, 2048313214093004801, 2051629598805921794, 修复验证码·, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-10 22:07:35, 2026-05-10 22:07:35
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2053440935173763074, 2048313214093004801, 2051637718307344386, 使用智谱 BigModel对接时报错, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-10 19:44:05, 2026-05-10 19:44:05
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==        Row: 2052729361879973889, 2048313214093004801, 2051637718307344386, fix: prevent stderr from corrupting IME identifier in keyboard detection, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-08 20:36:32, 2026-05-08 20:36:32
+<==      Total: 4
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6b06e8c2]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5e28e0f7]
+2026-05-11T22:41:24.344+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:24.344+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:24.344+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2053847717810249730, userId=20483132140930048 (truncated)...]
+2026-05-11T22:41:24.344+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[AgentTaskVO[id=2053777445249863681, userId=2048313214093004801 (truncated)...]
+2026-05-11T22:41:24.345+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:24.345+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+2026-05-11T22:41:24.855+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@49b11594] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6851e477] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:24.859+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+JDBC Connection [HikariProxyConnection@1120610766 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@1978010452 wrapping com.mysql.cj.jdbc.ConnectionImpl@70f148dc] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+==> Parameters: kanye(String)
+2026-05-11T22:41:24.862+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+<==    Columns: id, username, password, email, created_at, updated_at
+2026-05-11T22:41:24.862+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-11T22:41:24.863+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==      Total: 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@49b11594]
+2026-05-11T22:41:24.864+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6851e477]
+2026-05-11T22:41:24.864+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/models", parameters={}
+2026-05-11T22:41:24.865+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/api-keys", parameters={}
+2026-05-11T22:41:24.865+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectLlmConfigController#listModels()
+2026-05-11T22:41:24.865+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-11T22:41:24.865+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.LlmApiKeyConfigController#list()
+2026-05-11T22:41:24.865+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T22:41:24.865+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+Creating a new SqlSession
+2026-05-11T22:41:24.866+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmAvailableModelVO[provider=deepseek, modelName=deepseek-chat (truncated)...]
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@58c34a3e] was not registered for synchronization because synchronization is not active
+2026-05-11T22:41:24.866+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+JDBC Connection [HikariProxyConnection@882179345 wrapping com.mysql.cj.jdbc.ConnectionImpl@5c8a1833] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,key_name,provider,model_name,display_name,base_url,api_key_encrypted,active,last_used_at,created_at,updated_at FROM llm_api_key_config WHERE (user_id = ?) ORDER BY active DESC,created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, key_name, provider, model_name, display_name, base_url, api_key_encrypted, active, last_used_at, created_at, updated_at
+<==        Row: 2053782941201551362, 2048313214093004801, test, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 1, null, 2026-05-11 18:23:05, 2026-05-11 18:23:05
+<==        Row: 2053782973757739009, 2048313214093004801, t3, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 0, null, 2026-05-11 18:23:13, 2026-05-11 18:23:13
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@58c34a3e]
+2026-05-11T22:41:24.871+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-11T22:41:24.871+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmApiKeyVO[id=2053782941201551362, name=test, provider=deepse (truncated)...]
+2026-05-11T22:41:24.872+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T07:51:38.718+08:00  WARN 22696 --- [codepilot] [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=7h53m4s808ms68?s300ns).
+2026-05-12T09:10:04.706+08:00  WARN 22696 --- [codepilot] [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h18m25s988ms54?s900ns).
+2026-05-12T09:29:39.226+08:00  WARN 22696 --- [codepilot] [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=7m4s355ms114?s).
+2026-05-12T11:50:22.426+08:00  WARN 22696 --- [codepilot] [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2h9m43s12ms195?s400ns).
+2026-05-12T14:11:16.229+08:00  WARN 22696 --- [codepilot] [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=58m22s504ms90?s800ns).
+2026-05-12T16:22:23.184+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/", parameters={}
+2026-05-12T16:22:23.189+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.b.a.w.s.WelcomePageHandlerMapping    : Mapped to ParameterizableViewController [view="forward:index.html"]
+2026-05-12T16:22:23.193+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, application/xhtml+xml, image/avif, image/webp, image/apng, application/xml;q=0.9, */*;q=0.8, application/signed-exchange;v=b3;q=0.7]
+2026-05-12T16:22:23.193+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.w.servlet.view.InternalResourceView  : View name [forward:], model {}
+2026-05-12T16:22:23.195+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.w.servlet.view.InternalResourceView  : Forwarding to [index.html]
+2026-05-12T16:22:23.198+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : "FORWARD" dispatch for GET "/index.html", parameters={}
+2026-05-12T16:22:23.200+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:23.213+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Exiting from "FORWARD" dispatch, status 200
+2026-05-12T16:22:23.215+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:23.252+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-TbOnQckP.css", parameters={}
+2026-05-12T16:22:23.252+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-CDvrjnYu.js", parameters={}
+2026-05-12T16:22:23.253+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:23.253+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:23.256+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:23.259+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:39.564+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/", parameters={}
+2026-05-12T16:22:39.564+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.b.a.w.s.WelcomePageHandlerMapping    : Mapped to ParameterizableViewController [view="forward:index.html"]
+2026-05-12T16:22:39.565+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, application/xhtml+xml, image/avif, image/webp, image/apng, application/xml;q=0.9, */*;q=0.8, application/signed-exchange;v=b3;q=0.7]
+2026-05-12T16:22:39.565+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.w.servlet.view.InternalResourceView  : View name [forward:], model {}
+2026-05-12T16:22:39.565+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.w.servlet.view.InternalResourceView  : Forwarding to [index.html]
+2026-05-12T16:22:39.567+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : "FORWARD" dispatch for GET "/index.html", parameters={}
+2026-05-12T16:22:39.567+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:39.569+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Exiting from "FORWARD" dispatch, status 200
+2026-05-12T16:22:39.569+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:39.630+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-CDvrjnYu.js", parameters={}
+2026-05-12T16:22:39.631+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:39.632+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-TbOnQckP.css", parameters={}
+2026-05-12T16:22:39.633+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:39.635+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:39.638+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7dca7c67] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@234ff001] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@49b7a143] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@289688644 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@238477895 wrapping com.mysql.cj.jdbc.ConnectionImpl@2a219c39] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+JDBC Connection [HikariProxyConnection@1928387003 wrapping com.mysql.cj.jdbc.ConnectionImpl@cbcf266] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+==> Parameters: kanye(String)
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==    Columns: id, username, password, email, created_at, updated_at
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+<==      Total: 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@49b7a143]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@234ff001]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7dca7c67]
+2026-05-12T16:22:40.582+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-12T16:22:40.582+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/api/tasks", parameters={}
+2026-05-12T16:22:40.582+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/user/me", parameters={}
+2026-05-12T16:22:40.582+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+2026-05-12T16:22:40.582+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.AgentTaskController#list()
+2026-05-12T16:22:40.583+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.UserController#getCurrentUser()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6db3dda6] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1587972664 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE id=?
+Creating a new SqlSession
+Creating a new SqlSession
+==> Parameters: 2048313214093004801(Long)
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@309aeef2] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4fc80a5d] was not registered for synchronization because synchronization is not active
+<==    Columns: id, username, password, email, created_at, updated_at
+JDBC Connection [HikariProxyConnection@989937438 wrapping com.mysql.cj.jdbc.ConnectionImpl@cbcf266] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@159848060 wrapping com.mysql.cj.jdbc.ConnectionImpl@2a219c39] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+==>  Preparing: SELECT id,user_id,project_id,issue_title,issue_description,status,result_summary,error_message,llm_provider,llm_model_name,llm_display_name,created_at,updated_at FROM agent_task WHERE (user_id = ?) ORDER BY created_at DESC
+<==      Total: 1
+==> Parameters: 2048313214093004801(Long)
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6db3dda6]
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, project_id, issue_title, issue_description, status, result_summary, error_message, llm_provider, llm_model_name, llm_display_name, created_at, updated_at
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2053777445249863681, 2048313214093004801, 2051629598805921794, 修复验证码不为6位, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, deepseek, deepseek-chat, DeepSeek Chat, 2026-05-11 18:01:15, 2026-05-11 18:01:15
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2053477049910304769, 2048313214093004801, 2051629598805921794, 修复验证码·, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-10 22:07:35, 2026-05-10 22:07:35
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+<==        Row: 2053440935173763074, 2048313214093004801, 2051637718307344386, 使用智谱 BigModel对接时报错, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-10 19:44:05, 2026-05-10 19:44:05
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2052729361879973889, 2048313214093004801, 2051637718307344386, fix: prevent stderr from corrupting IME identifier in keyboard detection, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-08 20:36:32, 2026-05-08 20:36:32
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4fc80a5d]
+2026-05-12T16:22:40.594+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:40.594+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:40.596+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2053847717810249730, userId=20483132140930048 (truncated)...]
+2026-05-12T16:22:40.596+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=UserVO[id=2048313214093004801, username=kanye, email=123456@qq. (truncated)...]
+2026-05-12T16:22:40.600+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:40.600+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@309aeef2]
+2026-05-12T16:22:40.604+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:40.604+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[AgentTaskVO[id=2053777445249863681, userId=2048313214093004801 (truncated)...]
+2026-05-12T16:22:40.613+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:41.142+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-05-12T16:22:41.143+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:41.144+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-12T16:22:41.146+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+2026-05-12T16:22:41.147+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-12T16:22:41.148+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+2026-05-12T16:22:41.149+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-12T16:22:41.150+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+2026-05-12T16:22:42.787+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@66d4c041] was not registered for synchronization because synchronization is not active
+2026-05-12T16:22:42.788+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+JDBC Connection [HikariProxyConnection@980767551 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+2026-05-12T16:22:42.789+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+2026-05-12T16:22:42.789+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+==> Parameters: kanye(String)
+2026-05-12T16:22:42.789+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-12T16:22:42.790+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-12T16:22:42.790+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+<==      Total: 1
+2026-05-12T16:22:42.790+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@66d4c041]
+2026-05-12T16:22:42.791+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/github/account", parameters={}
+2026-05-12T16:22:42.791+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.GitHubAuthController#account()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7dca59e0] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1455566097 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,github_user_id,github_login,github_name,github_avatar_url,access_token_encrypted,scope,created_at,updated_at FROM user_github_account WHERE (user_id = ?) limit 1
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, github_user_id, github_login, github_name, github_avatar_url, access_token_encrypted, scope, created_at, updated_at
+<==        Row: 2053847547227906049, 2048313214093004801, 199789418, LXCcode-neu, Turlin, https://avatars.githubusercontent.com/u/199789418?v=4, <<BLOB>>, read:user,repo, 2026-05-11 22:39:49, 2026-05-11 22:39:49
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7dca59e0]
+2026-05-12T16:22:42.797+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:42.798+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=GitHubAccountVO[connected=true, githubLogin=LXCcode-neu, github (truncated)...]
+2026-05-12T16:22:42.798+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@189e4afd] was not registered for synchronization because synchronization is not active
+2026-05-12T16:22:44.979+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+JDBC Connection [HikariProxyConnection@475451381 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+2026-05-12T16:22:44.980+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+2026-05-12T16:22:44.981+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+<==    Columns: id, username, password, email, created_at, updated_at
+2026-05-12T16:22:44.981+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-12T16:22:44.982+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==      Total: 1
+2026-05-12T16:22:44.982+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@189e4afd]
+2026-05-12T16:22:44.983+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-12T16:22:44.983+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-12T16:22:44.983+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+2026-05-12T16:22:44.983+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@29f78fe3] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1183212211 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@29f78fe3]
+2026-05-12T16:22:44.988+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:44.989+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2053847717810249730, userId=20483132140930048 (truncated)...]
+2026-05-12T16:22:44.990+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1af5c0a4] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@138756926 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1af5c0a4]
+2026-05-12T16:22:45.003+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/projects/2053847717810249730/github/issues?state=all&page=1&pageSize=10", parameters={masked}
+2026-05-12T16:22:45.004+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.GitHubIssueController#list(Long, String, Integer, Integer)
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@786346a] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@859976926 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (id = ? AND user_id = ?) limit 1
+==> Parameters: 2053847717810249730(Long), 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@786346a]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1dd6cf6c] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@725978584 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,github_user_id,github_login,github_name,github_avatar_url,access_token_encrypted,scope,created_at,updated_at FROM user_github_account WHERE (user_id = ?) limit 1
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, github_user_id, github_login, github_name, github_avatar_url, access_token_encrypted, scope, created_at, updated_at
+<==        Row: 2053847547227906049, 2048313214093004801, 199789418, LXCcode-neu, Turlin, https://avatars.githubusercontent.com/u/199789418?v=4, <<BLOB>>, read:user,repo, 2026-05-11 22:39:49, 2026-05-11 22:39:49
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1dd6cf6c]
+Creating a new SqlSession
+2026-05-12T16:22:45.549+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@507c4a8f] was not registered for synchronization because synchronization is not active
+2026-05-12T16:22:45.551+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:45.552+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+JDBC Connection [HikariProxyConnection@838952549 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+2026-05-12T16:22:45.552+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+==> Parameters: kanye(String)
+2026-05-12T16:22:45.553+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-12T16:22:45.553+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-12T16:22:45.554+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+<==      Total: 1
+2026-05-12T16:22:45.554+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@507c4a8f]
+2026-05-12T16:22:45.554+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/api/github/account", parameters={}
+2026-05-12T16:22:45.555+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.GitHubAuthController#account()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@bf68832] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@20556070 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,github_user_id,github_login,github_name,github_avatar_url,access_token_encrypted,scope,created_at,updated_at FROM user_github_account WHERE (user_id = ?) limit 1
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, github_user_id, github_login, github_name, github_avatar_url, access_token_encrypted, scope, created_at, updated_at
+<==        Row: 2053847547227906049, 2048313214093004801, 199789418, LXCcode-neu, Turlin, https://avatars.githubusercontent.com/u/199789418?v=4, <<BLOB>>, read:user,repo, 2026-05-11 22:39:49, 2026-05-11 22:39:49
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@bf68832]
+2026-05-12T16:22:45.563+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:45.563+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=GitHubAccountVO[connected=true, githubLogin=LXCcode-neu, github (truncated)...]
+2026-05-12T16:22:45.564+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:46.077+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/projects", parameters={}
+2026-05-12T16:22:46.079+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.FrontendRouteController#forwardToFrontend()
+2026-05-12T16:22:46.080+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, application/xhtml+xml, image/avif, image/webp, image/apng, application/xml;q=0.9, */*;q=0.8, application/signed-exchange;v=b3;q=0.7]
+2026-05-12T16:22:46.080+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.w.servlet.view.InternalResourceView  : View name [forward:], model {}
+2026-05-12T16:22:46.080+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.w.servlet.view.InternalResourceView  : Forwarding to [/index.html]
+2026-05-12T16:22:46.081+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : "FORWARD" dispatch for GET "/index.html", parameters={}
+2026-05-12T16:22:46.082+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:46.083+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Exiting from "FORWARD" dispatch, status 200
+2026-05-12T16:22:46.084+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:46.085+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.client.DefaultRestClient         : Reading to [java.lang.String] as "application/json;charset=utf-8"
+2026-05-12T16:22:46.087+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:46.088+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=GitHubIssuePageVO[items=[], page=1, pageSize=10, totalCount=0,  (truncated)...]
+2026-05-12T16:22:46.088+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:46.106+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-CDvrjnYu.js", parameters={}
+2026-05-12T16:22:46.106+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-TbOnQckP.css", parameters={}
+2026-05-12T16:22:46.107+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:46.107+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:46.108+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:46.113+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5b83a4d2] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@19bbe298] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1903998064 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@1246059085 wrapping com.mysql.cj.jdbc.ConnectionImpl@2a219c39] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@19bbe298]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5b83a4d2]
+2026-05-12T16:22:46.136+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/user/me", parameters={}
+2026-05-12T16:22:46.136+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-12T16:22:46.137+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.UserController#getCurrentUser()
+2026-05-12T16:22:46.137+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@21c0bae] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@970915814 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE id=?
+==> Parameters: 2048313214093004801(Long)
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@716ec51e] was not registered for synchronization because synchronization is not active
+<==    Columns: id, username, password, email, created_at, updated_at
+JDBC Connection [HikariProxyConnection@1980923989 wrapping com.mysql.cj.jdbc.ConnectionImpl@2a219c39] will not be managed by Spring
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+<==      Total: 1
+==> Parameters: 2048313214093004801(Long)
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@21c0bae]
+2026-05-12T16:22:46.140+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:46.141+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=UserVO[id=2048313214093004801, username=kanye, email=123456@qq. (truncated)...]
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+2026-05-12T16:22:46.142+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@716ec51e]
+2026-05-12T16:22:46.145+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:46.146+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2053847717810249730, userId=20483132140930048 (truncated)...]
+2026-05-12T16:22:46.146+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:22:46.150+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-05-12T16:22:46.152+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-05-12T16:22:46.153+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-12T16:22:46.154+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+2026-05-12T16:22:46.154+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-12T16:22:46.154+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+2026-05-12T16:22:46.155+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-12T16:22:46.155+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@8d3d76b] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1747497973 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@8d3d76b]
+2026-05-12T16:22:49.981+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/api/github/account", parameters={}
+2026-05-12T16:22:49.983+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.GitHubAuthController#account()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b3152f0] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1348219506 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,github_user_id,github_login,github_name,github_avatar_url,access_token_encrypted,scope,created_at,updated_at FROM user_github_account WHERE (user_id = ?) limit 1
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, github_user_id, github_login, github_name, github_avatar_url, access_token_encrypted, scope, created_at, updated_at
+<==        Row: 2053847547227906049, 2048313214093004801, 199789418, LXCcode-neu, Turlin, https://avatars.githubusercontent.com/u/199789418?v=4, <<BLOB>>, read:user,repo, 2026-05-11 22:39:49, 2026-05-11 22:39:49
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b3152f0]
+2026-05-12T16:22:49.985+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:49.985+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=GitHubAccountVO[connected=true, githubLogin=LXCcode-neu, github (truncated)...]
+2026-05-12T16:22:49.987+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@62193e74] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@288653692 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@62193e74]
+2026-05-12T16:22:49.996+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/github/repositories", parameters={}
+2026-05-12T16:22:49.996+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.GitHubAuthController#repositories()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1922daca] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@845397252 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,github_user_id,github_login,github_name,github_avatar_url,access_token_encrypted,scope,created_at,updated_at FROM user_github_account WHERE (user_id = ?) limit 1
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, github_user_id, github_login, github_name, github_avatar_url, access_token_encrypted, scope, created_at, updated_at
+<==        Row: 2053847547227906049, 2048313214093004801, 199789418, LXCcode-neu, Turlin, https://avatars.githubusercontent.com/u/199789418?v=4, <<BLOB>>, read:user,repo, 2026-05-11 22:39:49, 2026-05-11 22:39:49
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1922daca]
+2026-05-12T16:22:50.707+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.client.DefaultRestClient         : Reading to [java.lang.String] as "application/json;charset=utf-8"
+2026-05-12T16:22:50.827+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:50.827+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[GitHubAuthorizedRepoVO[id=1220827493, owner=LXCcode-neu, name= (truncated)...]
+2026-05-12T16:22:50.830+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4db89ca8] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@860472952 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4db89ca8]
+2026-05-12T16:22:54.572+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : POST "/api/projects/import-github-repo", parameters={}
+2026-05-12T16:22:54.573+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#importGitHubRepo(GitHubRepoImportRequest)
+2026-05-12T16:22:54.576+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [GitHubRepoImportRequest[githubRepoId=1202660595, owner=LXCcode-neu, repoName=PaiSmart-main]]
+Creating a new SqlSession
+Registering transaction synchronization for SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4]
+JDBC Connection [HikariProxyConnection@392266707 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will be managed by Spring
+==>  Preparing: SELECT id,user_id,github_user_id,github_login,github_name,github_avatar_url,access_token_encrypted,scope,created_at,updated_at FROM user_github_account WHERE (user_id = ?) limit 1
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, github_user_id, github_login, github_name, github_avatar_url, access_token_encrypted, scope, created_at, updated_at
+<==        Row: 2053847547227906049, 2048313214093004801, 199789418, LXCcode-neu, Turlin, https://avatars.githubusercontent.com/u/199789418?v=4, <<BLOB>>, read:user,repo, 2026-05-11 22:39:49, 2026-05-11 22:39:49
+<==      Total: 1
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4]
+2026-05-12T16:22:55.214+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.client.DefaultRestClient         : Reading to [java.lang.String] as "application/json;charset=utf-8"
+Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4] from current transaction
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ? AND repo_url = ?) limit 1
+==> Parameters: 2048313214093004801(Long), https://github.com/LXCcode-neu/PaiSmart-main.git(String)
+<==      Total: 0
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4]
+Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4] from current transaction
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ? AND github_repo_id = ?) limit 1
+==> Parameters: 2048313214093004801(Long), 1202660595(Long)
+<==      Total: 0
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4]
+Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4] from current transaction
+==>  Preparing: INSERT INTO project_repo ( id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, default_branch, status, created_at, updated_at ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+==> Parameters: 2054115087892062209(Long), 2048313214093004801(Long), https://github.com/LXCcode-neu/PaiSmart-main.git(String), PaiSmart-main(String), LXCcode-neu(String), PaiSmart-main(String), 1202660595(Long), false(Boolean), main(String), CREATED(String), 2026-05-12T16:22:55.225979300(LocalDateTime), 2026-05-12T16:22:55.225979300(LocalDateTime)
+<==    Updates: 1
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4]
+Transaction synchronization committing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4]
+Transaction synchronization deregistering SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4]
+Transaction synchronization closing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1fc7fcc4]
+2026-05-12T16:22:55.233+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:55.237+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=GitHub repository imported, data=ProjectRepoVO[id=2054115087892062209, userId (truncated)...]
+2026-05-12T16:22:55.238+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@43ba8bd2] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1697716277 wrapping com.mysql.cj.jdbc.ConnectionImpl@cbcf266] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@43ba8bd2]
+2026-05-12T16:22:55.249+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-12T16:22:55.250+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@e56cb08] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1280320277 wrapping com.mysql.cj.jdbc.ConnectionImpl@cbcf266] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2054115087892062209, 2048313214093004801, https://github.com/LXCcode-neu/PaiSmart-main.git, PaiSmart-main, LXCcode-neu, PaiSmart-main, 1202660595, 0, null, main, CREATED, 2026-05-12 16:22:55, 2026-05-12 16:22:55
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==      Total: 5
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@e56cb08]
+2026-05-12T16:22:55.257+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:55.257+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2054115087892062209, userId=20483132140930048 (truncated)...]
+2026-05-12T16:22:55.258+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2be32b5d] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1097404860 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2be32b5d]
+2026-05-12T16:22:59.528+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : DELETE "/api/projects/2053449468448309249", parameters={}
+2026-05-12T16:22:59.528+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#delete(Long)
+Creating a new SqlSession
+Registering transaction synchronization for SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558]
+JDBC Connection [HikariProxyConnection@411749783 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (id = ? AND user_id = ?) limit 1
+==> Parameters: 2053449468448309249(Long), 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2053449468448309249, 2048313214093004801, https://github.com/reworkd/AgentGPT.git, AgentGPT, null, null, null, 0, null, null, CREATED, 2026-05-10 20:17:59, 2026-05-10 20:17:59
+<==      Total: 1
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558]
+Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558] from current transaction
+==>  Preparing: SELECT id,user_id,project_id,issue_title,issue_description,status,result_summary,error_message,llm_provider,llm_model_name,llm_display_name,created_at,updated_at FROM agent_task WHERE (project_id = ?) ORDER BY id ASC
+==> Parameters: 2053449468448309249(Long)
+<==      Total: 0
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558]
+Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558] from current transaction
+==>  Preparing: DELETE FROM project_llm_config WHERE (project_repo_id = ?)
+==> Parameters: 2053449468448309249(Long)
+<==    Updates: 1
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558]
+Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558] from current transaction
+==>  Preparing: DELETE FROM project_repo WHERE id=?
+==> Parameters: 2053449468448309249(Long)
+<==    Updates: 1
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558]
+Transaction synchronization committing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558]
+Transaction synchronization deregistering SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558]
+Transaction synchronization closing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3617f558]
+2026-05-12T16:22:59.573+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:59.575+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Project repository deleted, data=null)]
+2026-05-12T16:22:59.576+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@15279a9b] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@360954137 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@15279a9b]
+2026-05-12T16:22:59.589+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-12T16:22:59.589+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@10be66b8] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@971298166 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2054115087892062209, 2048313214093004801, https://github.com/LXCcode-neu/PaiSmart-main.git, PaiSmart-main, LXCcode-neu, PaiSmart-main, 1202660595, 0, null, main, CREATED, 2026-05-12 16:22:55, 2026-05-12 16:22:55
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@10be66b8]
+2026-05-12T16:22:59.594+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:22:59.594+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2054115087892062209, userId=20483132140930048 (truncated)...]
+2026-05-12T16:22:59.595+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3174abe] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1662252152 wrapping com.mysql.cj.jdbc.ConnectionImpl@2a219c39] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3174abe]
+2026-05-12T16:23:10.934+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/models", parameters={}
+2026-05-12T16:23:10.935+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectLlmConfigController#listModels()
+2026-05-12T16:23:10.935+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@457cd97f] was not registered for synchronization because synchronization is not active
+2026-05-12T16:23:10.936+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmAvailableModelVO[provider=deepseek, modelName=deepseek-chat (truncated)...]
+2026-05-12T16:23:10.937+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+JDBC Connection [HikariProxyConnection@1764753863 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+2026-05-12T16:23:10.937+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+==> Parameters: kanye(String)
+2026-05-12T16:23:10.938+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+2026-05-12T16:23:10.939+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@457cd97f]
+2026-05-12T16:23:10.940+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+2026-05-12T16:23:10.940+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/api-keys", parameters={}
+2026-05-12T16:23:10.940+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-12T16:23:10.940+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.LlmApiKeyConfigController#list()
+2026-05-12T16:23:10.941+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4fa8556a] was not registered for synchronization because synchronization is not active
+2026-05-12T16:23:10.941+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-12T16:23:10.942+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+JDBC Connection [HikariProxyConnection@393680969 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,key_name,provider,model_name,display_name,base_url,api_key_encrypted,active,last_used_at,created_at,updated_at FROM llm_api_key_config WHERE (user_id = ?) ORDER BY active DESC,created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, key_name, provider, model_name, display_name, base_url, api_key_encrypted, active, last_used_at, created_at, updated_at
+<==        Row: 2053782941201551362, 2048313214093004801, test, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 1, null, 2026-05-11 18:23:05, 2026-05-11 18:23:05
+<==        Row: 2053782973757739009, 2048313214093004801, t3, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 0, null, 2026-05-11 18:23:13, 2026-05-11 18:23:13
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4fa8556a]
+2026-05-12T16:23:10.947+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:23:10.948+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmApiKeyVO[id=2053782941201551362, name=test, provider=deepse (truncated)...]
+2026-05-12T16:23:10.948+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@51de80cd] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2d5c895a] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1390022887 wrapping com.mysql.cj.jdbc.ConnectionImpl@2a219c39] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@766871178 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2d5c895a]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@51de80cd]
+2026-05-12T16:23:16.755+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-12T16:23:16.755+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/api/tasks", parameters={}
+2026-05-12T16:23:16.756+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+2026-05-12T16:23:16.757+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.AgentTaskController#list()
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2dc19e07] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@41b43612] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@930967252 wrapping com.mysql.cj.jdbc.ConnectionImpl@2a219c39] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@1854924316 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+2026-05-12T16:23:16.758+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==>  Preparing: SELECT id,user_id,project_id,issue_title,issue_description,status,result_summary,error_message,llm_provider,llm_model_name,llm_display_name,created_at,updated_at FROM agent_task WHERE (user_id = ?) ORDER BY created_at DESC
+2026-05-12T16:23:16.758+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+==> Parameters: 2048313214093004801(Long)
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, project_id, issue_title, issue_description, status, result_summary, error_message, llm_provider, llm_model_name, llm_display_name, created_at, updated_at
+2026-05-12T16:23:16.760+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+<==        Row: 2053777445249863681, 2048313214093004801, 2051629598805921794, 修复验证码不为6位, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, deepseek, deepseek-chat, DeepSeek Chat, 2026-05-11 18:01:15, 2026-05-11 18:01:15
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+2026-05-12T16:23:16.760+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==        Row: 2053477049910304769, 2048313214093004801, 2051629598805921794, 修复验证码·, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-10 22:07:35, 2026-05-10 22:07:35
+<==        Row: 2054115087892062209, 2048313214093004801, https://github.com/LXCcode-neu/PaiSmart-main.git, PaiSmart-main, LXCcode-neu, PaiSmart-main, 1202660595, 0, null, main, CREATED, 2026-05-12 16:22:55, 2026-05-12 16:22:55
+<==        Row: 2053440935173763074, 2048313214093004801, 2051637718307344386, 使用智谱 BigModel对接时报错, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-10 19:44:05, 2026-05-10 19:44:05
+2026-05-12T16:23:16.761+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==        Row: 2052729361879973889, 2048313214093004801, 2051637718307344386, fix: prevent stderr from corrupting IME identifier in keyboard detection, <<BLOB>>, COMPLETED, <<BLOB>>, <<BLOB>>, null, null, null, 2026-05-08 20:36:32, 2026-05-08 20:36:32
+2026-05-12T16:23:16.762+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==      Total: 4
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@41b43612]
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+2026-05-12T16:23:16.762+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+<==      Total: 4
+2026-05-12T16:23:16.763+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:23:16.763+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2dc19e07]
+2026-05-12T16:23:16.763+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[AgentTaskVO[id=2053777445249863681, userId=2048313214093004801 (truncated)...]
+2026-05-12T16:23:16.763+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:23:16.764+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2054115087892062209, userId=20483132140930048 (truncated)...]
+2026-05-12T16:23:16.764+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:23:16.764+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+2026-05-12T16:23:17.643+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4646b421] was not registered for synchronization because synchronization is not active
+2026-05-12T16:23:17.648+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+JDBC Connection [HikariProxyConnection@2075503620 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+2026-05-12T16:23:17.648+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+==> Parameters: kanye(String)
+2026-05-12T16:23:17.649+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+2026-05-12T16:23:17.649+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==    Columns: id, username, password, email, created_at, updated_at
+2026-05-12T16:23:17.649+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4646b421]
+2026-05-12T16:23:17.651+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-12T16:23:17.651+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-12T16:23:17.651+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-12T16:23:17.652+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1898b0ee] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1097140696 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2054115087892062209, 2048313214093004801, https://github.com/LXCcode-neu/PaiSmart-main.git, PaiSmart-main, LXCcode-neu, PaiSmart-main, 1202660595, 0, null, main, CREATED, 2026-05-12 16:22:55, 2026-05-12 16:22:55
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1898b0ee]
+2026-05-12T16:23:17.657+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:23:17.657+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2054115087892062209, userId=20483132140930048 (truncated)...]
+2026-05-12T16:23:17.658+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+2026-05-12T16:23:18.375+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@58d18a48] was not registered for synchronization because synchronization is not active
+2026-05-12T16:23:18.375+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+JDBC Connection [HikariProxyConnection@521924258 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+2026-05-12T16:23:18.376+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+2026-05-12T16:23:18.377+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+==> Parameters: kanye(String)
+2026-05-12T16:23:18.377+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-12T16:23:18.377+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-12T16:23:18.378+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+<==      Total: 1
+2026-05-12T16:23:18.378+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@58d18a48]
+2026-05-12T16:23:18.378+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/projects", parameters={}
+2026-05-12T16:23:18.378+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectRepoController#list()
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@331cc840] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@261269620 wrapping com.mysql.cj.jdbc.ConnectionImpl@6d630138] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,repo_url,repo_name,github_owner,github_repo_name,github_repo_id,github_private,local_path,default_branch,status,created_at,updated_at FROM project_repo WHERE (user_id = ?) ORDER BY created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, repo_url, repo_name, github_owner, github_repo_name, github_repo_id, github_private, local_path, default_branch, status, created_at, updated_at
+<==        Row: 2054115087892062209, 2048313214093004801, https://github.com/LXCcode-neu/PaiSmart-main.git, PaiSmart-main, LXCcode-neu, PaiSmart-main, 1202660595, 0, null, main, CREATED, 2026-05-12 16:22:55, 2026-05-12 16:22:55
+<==        Row: 2053847717810249730, 2048313214093004801, https://github.com/LXCcode-neu/fory.git, fory, LXCcode-neu, fory, 1178655803, 0, null, main, CREATED, 2026-05-11 22:40:29, 2026-05-11 22:40:29
+<==        Row: 2051637718307344386, 2048313214093004801, https://github.com/zai-org/Open-AutoGLM.git, Open-AutoGLM, null, null, null, 0, C:\CodePilot\data\workspace\2051637718307344386\repo, null, CREATED, 2026-05-05 20:18:44, 2026-05-05 20:18:44
+<==        Row: 2051629598805921794, 2048313214093004801, https://github.com/LXCcode-neu/hm-dianping.git, hm-dianping, null, null, null, 0, C:\CodePilot\data\workspace\2051629598805921794\repo, null, CREATED, 2026-05-05 19:46:28, 2026-05-05 19:46:28
+<==      Total: 4
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@331cc840]
+2026-05-12T16:23:18.384+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:23:18.385+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[ProjectRepoVO[id=2054115087892062209, userId=20483132140930048 (truncated)...]
+2026-05-12T16:23:18.385+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@474d5de1] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@505310115 wrapping com.mysql.cj.jdbc.ConnectionImpl@2a219c39] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+==> Parameters: kanye(String)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@474d5de1]
+2026-05-12T16:23:19.012+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/models", parameters={}
+2026-05-12T16:23:19.012+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.ProjectLlmConfigController#listModels()
+Creating a new SqlSession
+2026-05-12T16:23:19.013+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6eefe04b] was not registered for synchronization because synchronization is not active
+2026-05-12T16:23:19.013+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-05-12T16:23:19.013+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmAvailableModelVO[provider=deepseek, modelName=deepseek-chat (truncated)...]
+JDBC Connection [HikariProxyConnection@1773051581 wrapping com.mysql.cj.jdbc.ConnectionImpl@2a219c39] will not be managed by Spring
+2026-05-12T16:23:19.014+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+==>  Preparing: SELECT id,username,password,email,created_at,updated_at FROM user WHERE (username = ?) limit 1
+2026-05-12T16:23:19.014+08:00 DEBUG 22696 --- [codepilot] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+==> Parameters: kanye(String)
+2026-05-12T16:23:19.015+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-12T16:23:19.015+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.codepliot.handler.GlobalExceptionHandler#handleException(Exception)
+<==    Columns: id, username, password, email, created_at, updated_at
+<==        Row: 2048313214093004801, kanye, $2a$10$J.M8dmX.wAmW6L1EsFXpVO7HwrYUvqfLz2gYB0DBcGaHLvedv5F/C, 123456@qq.com, 2026-04-26 16:08:21, 2026-04-26 16:08:21
+2026-05-12T16:23:19.016+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+<==      Total: 1
+2026-05-12T16:23:19.016+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=500, message=No static resource favicon.ico., data=null)]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6eefe04b]
+2026-05-12T16:23:19.017+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/llm/api-keys", parameters={}
+2026-05-12T16:23:19.017+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-05-12T16:23:19.017+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.codepliot.controller.LlmApiKeyConfigController#list()
+2026-05-12T16:23:19.017+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@481eec5] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@360557478 wrapping com.mysql.cj.jdbc.ConnectionImpl@2a219c39] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,key_name,provider,model_name,display_name,base_url,api_key_encrypted,active,last_used_at,created_at,updated_at FROM llm_api_key_config WHERE (user_id = ?) ORDER BY active DESC,created_at DESC
+==> Parameters: 2048313214093004801(Long)
+<==    Columns: id, user_id, key_name, provider, model_name, display_name, base_url, api_key_encrypted, active, last_used_at, created_at, updated_at
+<==        Row: 2053782941201551362, 2048313214093004801, test, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 1, null, 2026-05-11 18:23:05, 2026-05-11 18:23:05
+<==        Row: 2053782973757739009, 2048313214093004801, t3, deepseek, deepseek-chat, DeepSeek Chat, https://api.deepseek.com, <<BLOB>>, 0, null, 2026-05-11 18:23:13, 2026-05-11 18:23:13
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@481eec5]
+2026-05-12T16:23:19.022+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2026-05-12T16:23:19.022+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Writing [Result(code=0, message=Success, data=[LlmApiKeyVO[id=2053782941201551362, name=test, provider=deepse (truncated)...]
+2026-05-12T16:23:19.023+08:00 DEBUG 22696 --- [codepilot] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK

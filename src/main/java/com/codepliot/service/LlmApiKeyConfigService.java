@@ -25,13 +25,16 @@ public class LlmApiKeyConfigService {
     private final LlmApiKeyConfigMapper llmApiKeyConfigMapper;
     private final ApiKeyCryptoUtils apiKeyCryptoUtils;
     private final LlmService llmService;
+    private final LlmProviderService llmProviderService;
 
     public LlmApiKeyConfigService(LlmApiKeyConfigMapper llmApiKeyConfigMapper,
                                   ApiKeyCryptoUtils apiKeyCryptoUtils,
-                                  LlmService llmService) {
+                                  LlmService llmService,
+                                  LlmProviderService llmProviderService) {
         this.llmApiKeyConfigMapper = llmApiKeyConfigMapper;
         this.apiKeyCryptoUtils = apiKeyCryptoUtils;
         this.llmService = llmService;
+        this.llmProviderService = llmProviderService;
     }
 
     public List<LlmApiKeyVO> listCurrentUserKeys() {
@@ -49,12 +52,18 @@ public class LlmApiKeyConfigService {
     public LlmApiKeyVO create(LlmApiKeyCreateRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
         boolean shouldActivate = activeKey(userId) == null;
+        var model = llmProviderService.resolveModel(
+                request.provider(),
+                request.modelName(),
+                request.displayName(),
+                request.baseUrl()
+        );
 
         LlmApiKeyConfig config = new LlmApiKeyConfig();
         config.setUserId(userId);
         config.setKeyName(request.name().trim());
-        config.setProvider(request.provider().trim().toLowerCase());
-        config.setModelName(request.modelName().trim());
+        config.setProvider(model.provider());
+        config.setModelName(model.modelName());
         config.setDisplayName(request.displayName().trim());
         config.setBaseUrl(normalizeBaseUrl(request.baseUrl()));
         config.setApiKeyEncrypted(apiKeyCryptoUtils.encrypt(request.apiKey().trim()));

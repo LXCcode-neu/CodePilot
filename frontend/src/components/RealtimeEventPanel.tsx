@@ -33,7 +33,7 @@ const DETAIL_TITLE = "事件明细";
 const EMPTY_EVENTS_MESSAGE = "SSE 建立后，这里会持续展示任务事件。";
 
 function getPhaseLabel(phase?: string) {
-  if (phase === "STARTED") {
+  if (phase === "STARTED" || phase === "PENDING") {
     return START_TITLE;
   }
   if (phase === "RUNNING") {
@@ -42,10 +42,13 @@ function getPhaseLabel(phase?: string) {
   if (phase === "COMPLETED") {
     return COMPLETED_TITLE;
   }
-  return "EVENT";
+  return "事件";
 }
 
 function getStatusMessage(taskStatus?: string | null, stepType?: string | null) {
+  if (taskStatus === "PENDING") {
+    return "任务尚未开始。";
+  }
   if (taskStatus === "WAITING_CONFIRM") {
     return "已生成 Patch，等待人工确认。";
   }
@@ -66,15 +69,7 @@ function getEventDisplayMessage(event?: TaskEventMessage) {
     return "";
   }
 
-  if (event.phase === "STARTED") {
-    return "已提交 Agent 运行请求。";
-  }
-
-  if (event.phase === "COMPLETED" || event.phase === "RUNNING") {
-    return getStatusMessage(event.status, event.stepType);
-  }
-
-  return event.message;
+  return getStatusMessage(event.status, event.stepType);
 }
 
 function getEventDisplayTitle(event: TaskEventMessage) {
@@ -92,7 +87,7 @@ export function RealtimeEventPanel({
   taskStatus?: string | null;
 }) {
   const visibleEvents = events.filter((event) => !event.stepType || isVisibleStepType(event.stepType));
-  const startedEvent = visibleEvents.find((event) => event.phase === "STARTED");
+  const startedEvent = visibleEvents.find((event) => event.phase === "STARTED" || event.phase === "PENDING");
   const runningEvent = [...visibleEvents].reverse().find((event) => event.phase === "RUNNING");
   const completedEvent = visibleEvents.find((event) => event.phase === "COMPLETED");
 

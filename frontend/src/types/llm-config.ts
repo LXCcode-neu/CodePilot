@@ -3,6 +3,15 @@ export interface LlmAvailableModel {
   modelName: string;
   displayName: string;
   defaultBaseUrl: string;
+  supportsTools?: boolean;
+}
+
+export interface LlmProvider {
+  provider: string;
+  displayName: string;
+  defaultBaseUrl: string;
+  defaultModels: LlmAvailableModel[];
+  supportsTools: boolean;
 }
 
 export interface ProjectLlmConfig {

@@ -2,6 +2,7 @@ package com.codepliot.controller;
 
 import com.codepliot.model.LlmAvailableModelVO;
 import com.codepliot.model.LlmConfigTestResult;
+import com.codepliot.model.LlmProviderVO;
 import com.codepliot.model.ProjectLlmConfigSaveRequest;
 import com.codepliot.model.ProjectLlmConfigVO;
 import com.codepliot.model.Result;
@@ -29,6 +30,11 @@ public class ProjectLlmConfigController {
     @GetMapping("/llm/models")
     public Result<List<LlmAvailableModelVO>> listModels() {
         return Result.success(projectLlmConfigService.listAvailableModels());
+    }
+
+    @GetMapping("/llm/providers")
+    public Result<List<LlmProviderVO>> listProviders() {
+        return Result.success(projectLlmConfigService.listProviders());
     }
 
     @GetMapping("/llm/config")

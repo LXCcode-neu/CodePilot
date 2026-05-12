@@ -3,6 +3,7 @@ import type {
   LlmAvailableModel,
   LlmApiKey,
   LlmConfigTestResult,
+  LlmProvider,
   CreateLlmApiKeyRequest,
   ProjectLlmConfig,
   SaveProjectLlmConfigRequest,
@@ -10,6 +11,10 @@ import type {
 
 export function getAvailableLlmModels() {
   return request.get<LlmAvailableModel[]>("/api/llm/models");
+}
+
+export function getLlmProviders() {
+  return request.get<LlmProvider[]>("/api/llm/providers");
 }
 
 export function getGlobalLlmConfig() {
