@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -39,6 +40,9 @@ class PatchServiceImplTest {
 
     @Mock
     private SseService sseService;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @AfterEach
     void clearSecurityContext() {
@@ -74,7 +78,8 @@ class PatchServiceImplTest {
                 agentTaskMapper,
                 new ObjectMapper(),
                 new AgentExecutionPolicy(),
-                sseService
+                sseService,
+                eventPublisher
         );
 
         AgentTaskVO result = patchService.confirmTaskPatch(11L);

@@ -24,7 +24,6 @@ export function LlmConfigPage() {
   const [providers, setProviders] = useState<LlmProvider[]>([]);
   const [apiKeys, setApiKeys] = useState<LlmApiKey[]>([]);
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
   const [provider, setProvider] = useState("");
   const [modelName, setModelName] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -64,7 +63,6 @@ export function LlmConfigPage() {
 
   function primeForm(availableProviders = providers) {
     const initialProvider = availableProviders[0];
-    setName("");
     setProvider(initialProvider?.provider || "");
     setModelName("");
     setDisplayName("");
@@ -93,10 +91,6 @@ export function LlmConfigPage() {
       setError("请选择模型厂商");
       return;
     }
-    if (!name.trim()) {
-      setError("请输入名称");
-      return;
-    }
     if (!modelName.trim()) {
       setError("请输入模型名称");
       return;
@@ -114,7 +108,7 @@ export function LlmConfigPage() {
     setError("");
     try {
       await createLlmApiKey({
-        name: name.trim(),
+        name: selectedProvider?.displayName || provider,
         provider,
         modelName: modelName.trim(),
         displayName: displayName.trim() || modelName.trim(),
@@ -245,15 +239,9 @@ export function LlmConfigPage() {
               </Select>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <label className="text-sm font-medium text-slate-700">供应商名称</label>
-                <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="例如：OpenAI 官方" />
-              </div>
-              <div className="grid gap-2">
-                <label className="text-sm font-medium text-slate-700">备注</label>
-                <Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="例如：公司专用账号" />
-              </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">备注</label>
+              <Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="例如：公司专用账号" />
             </div>
 
             <div className="grid gap-2">

@@ -46,6 +46,8 @@ security:
 codepilot:
   workspace:
     root: ./data/workspace
+  git:
+    clone-timeout-seconds: 120
   github:
     base-url: https://github.com
     api-base-url: https://api.github.com

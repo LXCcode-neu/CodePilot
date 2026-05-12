@@ -42,5 +42,11 @@ public class AgentTask extends BaseEntity {
 
     @TableField("llm_display_name")
     private String llmDisplayName;
+
+    @TableField("source_type")
+    private String sourceType;
+
+    @TableField("source_id")
+    private Long sourceId;
 }
 

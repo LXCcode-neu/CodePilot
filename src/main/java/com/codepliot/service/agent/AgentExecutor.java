@@ -79,11 +79,10 @@ public class AgentExecutor {
             execute(task, projectRepo);
         } catch (RuntimeException exception) {
             log.error("Agent task async execution failed, taskId={}", task.getId(), exception);
+            completeWithFailure(task.getId(), exception);
         } catch (Throwable throwable) {
             log.error("Agent task async execution failed with unexpected throwable, taskId={}", task.getId(), throwable);
-            agentTaskService.updateStatus(task.getId(), AgentTaskStatus.FAILED, null, errorMessage(throwable));
-            pushTaskEvent(task.getId(), AgentTaskStatus.FAILED.name(), "COMPLETED", null, errorMessage(throwable));
-            sseService.complete(task.getId());
+            completeWithFailure(task.getId(), throwable);
         } finally {
             taskRunLockService.unlock(task.getId(), lockValue);
         }
@@ -115,7 +114,7 @@ public class AgentExecutor {
      * 构建本次运行使用的上下文对象。
      */
     private AgentContext buildContext(AgentTask task, ProjectRepo projectRepo) {
-        ProjectLlmConfig llmConfig = projectLlmConfigService.requireProjectConfig(task.getProjectId());
+        ProjectLlmConfig llmConfig = projectLlmConfigService.requireProjectConfig(task.getProjectId(), task.getUserId());
         return new AgentContext(
                 task.getId(),
                 task.getUserId(),
@@ -226,6 +225,13 @@ public class AgentExecutor {
             return throwable.getClass().getSimpleName();
         }
         return throwable.getMessage();
+    }
+
+    private void completeWithFailure(Long taskId, Throwable throwable) {
+        String message = errorMessage(throwable);
+        agentTaskService.updateStatus(taskId, AgentTaskStatus.FAILED, null, message);
+        pushTaskEvent(taskId, AgentTaskStatus.FAILED.name(), "COMPLETED", null, message);
+        sseService.complete(taskId);
     }
 
     /**

@@ -6,6 +6,7 @@ import { DashboardPage } from "@/pages/DashboardPage";
 import { GitHubAuthPage } from "@/pages/GitHubAuthPage";
 import { GitHubCallbackPage } from "@/pages/GitHubCallbackPage";
 import { GitHubIssuePage } from "@/pages/GitHubIssuePage";
+import { IssueAutomationPage } from "@/pages/IssueAutomationPage";
 import { LlmConfigPage } from "@/pages/LlmConfigPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { ProjectListPage } from "@/pages/ProjectListPage";
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
           { path: "/github-auth", element: <GitHubAuthPage /> },
           { path: "/github/callback", element: <GitHubCallbackPage /> },
           { path: "/github-issues", element: <GitHubIssuePage /> },
+          { path: "/issue-automation", element: <IssueAutomationPage /> },
           { path: "/projects", element: <ProjectListPage /> },
           { path: "/llm-config", element: <LlmConfigPage /> },
           { path: "/tasks", element: <TaskListPage /> },

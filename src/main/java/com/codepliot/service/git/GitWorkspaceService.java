@@ -6,6 +6,8 @@ import com.codepliot.model.ErrorCode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,12 +40,36 @@ public class GitWorkspaceService {
         createDirectories(getProjectWorkspace(projectId));
     }
 
+    public void deleteRepositoryWorkspace(Long projectId) {
+        Path repositoryPath = getRepositoryPath(projectId);
+        Path projectWorkspace = getProjectWorkspace(projectId);
+        if (!repositoryPath.startsWith(projectWorkspace) || !Files.exists(repositoryPath)) {
+            return;
+        }
+        try (Stream<Path> paths = Files.walk(repositoryPath)) {
+            paths.sorted(Comparator.reverseOrder())
+                    .forEach(this::deletePath);
+        } catch (IOException ex) {
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR,
+                    "Failed to clean repository workspace: " + repositoryPath);
+        }
+    }
+
     private void createDirectories(Path path) {
         try {
             Files.createDirectories(path);
         } catch (IOException ex) {
             throw new BusinessException(ErrorCode.INTERNAL_ERROR,
                     "Failed to prepare workspace directory: " + path);
+        }
+    }
+
+    private void deletePath(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException ex) {
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR,
+                    "Failed to delete workspace path: " + path);
         }
     }
 

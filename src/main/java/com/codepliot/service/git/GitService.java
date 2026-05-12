@@ -1,5 +1,6 @@
 package com.codepliot.service.git;
 
+import com.codepliot.config.GitOperationProperties;
 import com.codepliot.entity.ProjectRepo;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.ErrorCode;
@@ -18,13 +19,16 @@ public class GitService {
     private final ProjectRepoMapper projectRepoMapper;
     private final GitWorkspaceService gitWorkspaceService;
     private final GitHubAuthService gitHubAuthService;
+    private final GitOperationProperties gitOperationProperties;
 
     public GitService(ProjectRepoMapper projectRepoMapper,
                       GitWorkspaceService gitWorkspaceService,
-                      GitHubAuthService gitHubAuthService) {
+                      GitHubAuthService gitHubAuthService,
+                      GitOperationProperties gitOperationProperties) {
         this.projectRepoMapper = projectRepoMapper;
         this.gitWorkspaceService = gitWorkspaceService;
         this.gitHubAuthService = gitHubAuthService;
+        this.gitOperationProperties = gitOperationProperties;
     }
 
     public String cloneRepository(Long projectId) {
@@ -44,7 +48,8 @@ public class GitService {
         try {
             var cloneCommand = Git.cloneRepository()
                     .setURI(projectRepo.getRepoUrl())
-                    .setDirectory(repositoryPath.toFile());
+                    .setDirectory(repositoryPath.toFile())
+                    .setTimeout(Math.max(gitOperationProperties.getCloneTimeoutSeconds(), 1));
             String accessToken = gitHubAuthService.resolveAccessTokenForUser(projectRepo.getUserId());
             if (accessToken != null && !accessToken.isBlank()) {
                 cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(accessToken.trim(), "x-oauth-basic"));
@@ -53,6 +58,7 @@ public class GitService {
                 return updateLocalPath(projectRepo, repositoryPath);
             }
         } catch (GitAPIException | RuntimeException ex) {
+            gitWorkspaceService.deleteRepositoryWorkspace(projectId);
             throw new BusinessException(ErrorCode.INTERNAL_ERROR,
                     "Failed to clone GitHub repository: " + buildErrorMessage(ex));
         }

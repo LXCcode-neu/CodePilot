@@ -9,6 +9,7 @@ import com.codepliot.model.AgentExecutionDecision;
 import com.codepliot.model.AgentTaskVO;
 import com.codepliot.model.ErrorCode;
 import com.codepliot.model.PatchGenerateResult;
+import com.codepliot.model.PatchGeneratedEvent;
 import com.codepliot.model.PatchRecordVO;
 import com.codepliot.model.PatchSafetyCheckResult;
 import com.codepliot.model.TaskEventMessage;
@@ -20,6 +21,7 @@ import com.codepliot.utils.SecurityUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +38,7 @@ public class PatchServiceImpl implements PatchService {
     private final ObjectMapper objectMapper;
     private final AgentExecutionPolicy agentExecutionPolicy;
     private final SseService sseService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 创建 Patch 服务实现。
@@ -44,12 +47,14 @@ public class PatchServiceImpl implements PatchService {
                             AgentTaskMapper agentTaskMapper,
                             ObjectMapper objectMapper,
                             AgentExecutionPolicy agentExecutionPolicy,
-                            SseService sseService) {
+                            SseService sseService,
+                            ApplicationEventPublisher eventPublisher) {
         this.patchRecordMapper = patchRecordMapper;
         this.agentTaskMapper = agentTaskMapper;
         this.objectMapper = objectMapper;
         this.agentExecutionPolicy = agentExecutionPolicy;
         this.sseService = sseService;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -77,6 +82,7 @@ public class PatchServiceImpl implements PatchService {
         patchRecord.setPrNumber(null);
         patchRecord.setPrBranch(null);
         persist(patchRecord);
+        eventPublisher.publishEvent(new PatchGeneratedEvent(taskId, patchRecord.getId(), true, null));
         return patchRecord;
     }
 
@@ -102,6 +108,7 @@ public class PatchServiceImpl implements PatchService {
         patchRecord.setPrNumber(null);
         patchRecord.setPrBranch(null);
         persist(patchRecord);
+        eventPublisher.publishEvent(new PatchGeneratedEvent(taskId, patchRecord.getId(), false, risk));
         return patchRecord;
     }
 

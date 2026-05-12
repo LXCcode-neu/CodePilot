@@ -147,6 +147,20 @@ public class ProjectLlmConfigService {
         return config;
     }
 
+    public ProjectLlmConfig requireProjectConfig(Long projectRepoId, Long userId) {
+        ProjectLlmConfig config = findByProjectId(projectRepoId);
+        if (config == null) {
+            config = llmApiKeyConfigService.requireActiveAsProjectConfig(userId);
+        }
+        if (config == null || !Boolean.TRUE.equals(config.getEnabled())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Please configure the global LLM model and API key first");
+        }
+        if (config.getApiKeyEncrypted() == null || config.getApiKeyEncrypted().isBlank()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Project API key is not configured");
+        }
+        return config;
+    }
+
     public ProjectLlmConfig requireGlobalConfig() {
         ProjectLlmConfig config = findByProjectId(GLOBAL_PROJECT_REPO_ID);
         if (config == null || !Boolean.TRUE.equals(config.getEnabled())) {

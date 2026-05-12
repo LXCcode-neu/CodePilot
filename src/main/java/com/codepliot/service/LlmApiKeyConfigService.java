@@ -96,7 +96,11 @@ public class LlmApiKeyConfigService {
     }
 
     public ProjectLlmConfig requireActiveAsProjectConfig() {
-        LlmApiKeyConfig active = activeKey(SecurityUtils.getCurrentUserId());
+        return requireActiveAsProjectConfig(SecurityUtils.getCurrentUserId());
+    }
+
+    public ProjectLlmConfig requireActiveAsProjectConfig(Long userId) {
+        LlmApiKeyConfig active = activeKey(userId);
         if (active == null || !Boolean.TRUE.equals(active.getActive())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "Please configure and apply an API key first");
         }

@@ -67,6 +67,31 @@ public class AgentTaskService {
         agentTask.setLlmProvider(llmConfig.getProvider());
         agentTask.setLlmModelName(llmConfig.getModelName());
         agentTask.setLlmDisplayName(llmConfig.getDisplayName());
+        agentTask.setSourceType("MANUAL");
+        agentTask.setSourceId(null);
+        agentTaskMapper.insert(agentTask);
+        return AgentTaskVO.from(agentTask);
+    }
+
+    @Transactional
+    public AgentTaskVO createFromGitHubIssue(Long projectId, Long issueEventId, String issueTitle, String issueDescription) {
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        requireOwnedProject(currentUserId, projectId);
+        ProjectLlmConfig llmConfig = projectLlmConfigService.requireProjectConfig(projectId);
+
+        AgentTask agentTask = new AgentTask();
+        agentTask.setUserId(currentUserId);
+        agentTask.setProjectId(projectId);
+        agentTask.setIssueTitle(issueTitle == null ? "" : issueTitle.trim());
+        agentTask.setIssueDescription(issueDescription == null ? "" : issueDescription.trim());
+        agentTask.setStatus(AgentTaskStatus.PENDING.name());
+        agentTask.setResultSummary(null);
+        agentTask.setErrorMessage(null);
+        agentTask.setLlmProvider(llmConfig.getProvider());
+        agentTask.setLlmModelName(llmConfig.getModelName());
+        agentTask.setLlmDisplayName(llmConfig.getDisplayName());
+        agentTask.setSourceType("GITHUB_ISSUE");
+        agentTask.setSourceId(issueEventId);
         agentTaskMapper.insert(agentTask);
         return AgentTaskVO.from(agentTask);
     }
