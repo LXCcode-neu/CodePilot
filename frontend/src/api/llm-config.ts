@@ -45,6 +45,10 @@ export function applyLlmApiKey(id: string) {
   return request.put<LlmApiKey>(`/api/llm/api-keys/${id}/apply`);
 }
 
+export function deleteLlmApiKey(id: string) {
+  return request.delete<void>(`/api/llm/api-keys/${id}`);
+}
+
 export function testLlmApiKey(id: string) {
   return request.post<LlmConfigTestResult>(`/api/llm/api-keys/${id}/test`);
 }

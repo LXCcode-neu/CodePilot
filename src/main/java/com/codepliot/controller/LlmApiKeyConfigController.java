@@ -7,6 +7,7 @@ import com.codepliot.model.Result;
 import com.codepliot.service.LlmApiKeyConfigService;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,5 +44,11 @@ public class LlmApiKeyConfigController {
     @PostMapping("/{id}/test")
     public Result<LlmConfigTestResult> test(@PathVariable Long id) {
         return Result.success(llmApiKeyConfigService.test(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public Result<Void> delete(@PathVariable Long id) {
+        llmApiKeyConfigService.delete(id);
+        return Result.success("API key deleted", null);
     }
 }

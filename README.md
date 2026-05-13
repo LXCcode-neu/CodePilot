@@ -163,6 +163,8 @@ This repository contains:
 - global LLM API key list management with encrypted API key storage, active-key switching, and optional per-project overrides
 - LLM analysis and patch generation abstraction
 - patch record persistence, safety review, and manual confirmation
+- group robot notification approval links for GitHub Issue auto-fix or ignore decisions
+- repair-result group notifications with diff summary and PR draft preview
 - task deletion and cascading cleanup when deleting a project repository
 - Redis-backed task run lock
 - Spring Async background execution
@@ -204,6 +206,7 @@ Prepare before startup:
 - `GITHUB_CLIENT_ID` for GitHub OAuth authorization
 - `GITHUB_CLIENT_SECRET` for GitHub OAuth authorization
 - `GITHUB_OAUTH_REDIRECT_URI` for the frontend callback page, for example `http://localhost:5173/github/callback`
+- `CODEPILOT_PUBLIC_BASE_URL` for externally reachable group robot action links, for example `https://codepilot.example.com`
 
 LLM configuration:
 
@@ -269,6 +272,21 @@ The dashboard can load GitHub issues for repositories added to CodePilot.
 $env:GITHUB_TOKEN="your_github_token_here"
 java -jar target/codepilot-0.0.1-SNAPSHOT.jar
 ```
+
+### Issue Auto-Fix Group Approval
+
+When repository watching and a notification channel are configured, new GitHub Issues can be pushed to Feishu or WeCom group robots with one-time approval links.
+
+- New Issue notification includes:
+  - `修复`: opens a confirmation page and starts the existing Agent task flow after confirmation
+  - `忽略`: opens a confirmation page and marks the Issue event ignored after confirmation
+- Action links are backed by `notification_action_token`; only token hashes are stored, tokens expire after 24 hours, and each token can be used once.
+- After patch generation, CodePilot sends a group notification containing:
+  - changed-file summary
+  - added/removed line counts
+  - PR draft title, branch, commit message, and body preview
+  - a link back to the task for full diff review and manual PR submission
+- Set `CODEPILOT_PUBLIC_BASE_URL` to the public URL users can open from the group chat. If it is not set, generated links default to `http://localhost:8080`.
 
 ### GitHub Account Authorization
 

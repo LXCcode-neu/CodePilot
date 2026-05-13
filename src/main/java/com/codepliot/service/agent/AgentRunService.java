@@ -52,17 +52,20 @@ public class AgentRunService {
      * <p>接口线程只负责完成运行前校验和异步提交，不在这里同步执行完整 Agent 流程。
      */
     public AgentTaskVO run(Long taskId) {
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-        AgentTask task = requireOwnedTask(taskId, currentUserId);
+        return run(taskId, SecurityUtils.getCurrentUserId());
+    }
+
+    public AgentTaskVO run(Long taskId, Long userId) {
+        AgentTask task = requireOwnedTask(taskId, userId);
 
         // 先加 Redis 锁，避免同一个任务被重复点击运行。
         String lockValue = taskRunLockService.lock(taskId);
         try {
             requireRunnableStatus(task);
-            ProjectRepo projectRepo = requireOwnedProject(task.getProjectId(), currentUserId);
+            ProjectRepo projectRepo = requireOwnedProject(task.getProjectId(), userId);
 
             // 通过数据库状态抢占运行资格，避免并发线程同时进入执行阶段。
-            claimRunnableTask(taskId, currentUserId);
+            claimRunnableTask(taskId, userId);
 
             // 先给前端一个“已开始”的明确反馈，再把任务提交到异步线程池。
             task.setStatus(AgentTaskStatus.CLONING.name());

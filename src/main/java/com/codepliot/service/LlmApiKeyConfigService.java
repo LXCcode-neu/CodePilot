@@ -95,6 +95,17 @@ public class LlmApiKeyConfigService {
         }
     }
 
+    @Transactional
+    public void delete(Long id) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        LlmApiKeyConfig config = requireOwnedKey(id, userId);
+        boolean deletedActiveKey = Boolean.TRUE.equals(config.getActive());
+        llmApiKeyConfigMapper.deleteById(config.getId());
+        if (deletedActiveKey) {
+            activateLatestKey(userId);
+        }
+    }
+
     public ProjectLlmConfig requireActiveAsProjectConfig() {
         return requireActiveAsProjectConfig(SecurityUtils.getCurrentUserId());
     }
@@ -133,6 +144,17 @@ public class LlmApiKeyConfigService {
                 .eq(LlmApiKeyConfig::getUserId, userId)
                 .eq(LlmApiKeyConfig::getActive, true)
                 .last("limit 1"));
+    }
+
+    private void activateLatestKey(Long userId) {
+        LlmApiKeyConfig latest = llmApiKeyConfigMapper.selectOne(new LambdaQueryWrapper<LlmApiKeyConfig>()
+                .eq(LlmApiKeyConfig::getUserId, userId)
+                .orderByDesc(LlmApiKeyConfig::getCreatedAt)
+                .last("limit 1"));
+        if (latest != null) {
+            latest.setActive(true);
+            llmApiKeyConfigMapper.updateById(latest);
+        }
     }
 
     private LlmApiKeyConfig requireOwnedKey(Long id, Long userId) {

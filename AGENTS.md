@@ -158,6 +158,7 @@ Those rules should live in a separate document, for example:
 14. GitHub Issue fetching is implemented through the existing Spring Web backend stack. Keep GitHub tokens server-side via configuration such as `GITHUB_TOKEN`; do not expose them to the frontend.
 15. Global or project-level LLM API keys may be stored in the database only after server-side encryption. Never return plaintext API keys to the frontend; return only masked key metadata.
 16. GitHub OAuth access tokens may be stored only after server-side encryption. Never return plaintext GitHub access tokens to the frontend.
+17. Notification approval links must use server-generated one-time tokens. Store only token hashes, expire tokens, and never expose webhook URLs or secret tokens outside server-side configuration.
 
 ### Default Interpretation
 

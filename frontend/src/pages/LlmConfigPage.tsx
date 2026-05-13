@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, KeyRound, LoaderCircle, Plus, RefreshCw } from "lucide-react";
+import { CheckCircle2, KeyRound, LoaderCircle, Plus, RefreshCw, Trash2 } from "lucide-react";
 import {
   applyLlmApiKey,
   createLlmApiKey,
+  deleteLlmApiKey,
   getLlmProviders,
   listLlmApiKeys,
 } from "@/api/llm-config";
@@ -32,6 +33,8 @@ export function LlmConfigPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [applyingId, setApplyingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<LlmApiKey | null>(null);
   const [error, setError] = useState("");
 
   const selectedProvider = useMemo(
@@ -137,6 +140,23 @@ export function LlmConfigPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!deleteTarget) {
+      return;
+    }
+    setDeletingId(deleteTarget.id);
+    setError("");
+    try {
+      await deleteLlmApiKey(deleteTarget.id);
+      setDeleteTarget(null);
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete API Key failed");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className="space-y-8">
       <section className="space-y-4">
@@ -151,12 +171,12 @@ export function LlmConfigPage() {
           <table className="w-full table-fixed text-left text-sm">
             <thead className="border-b border-slate-200 text-slate-500">
               <tr>
-                <th className="w-[18%] px-4 py-4 font-semibold">名称</th>
-                <th className="w-[14%] px-4 py-4 font-semibold">厂商</th>
-                <th className="w-[18%] px-4 py-4 font-semibold">模型</th>
-                <th className="w-[22%] px-4 py-4 font-semibold">Key</th>
+                <th className="w-[16%] px-4 py-4 font-semibold">名称</th>
+                <th className="w-[12%] px-4 py-4 font-semibold">厂商</th>
+                <th className="w-[16%] px-4 py-4 font-semibold">模型</th>
+                <th className="w-[20%] px-4 py-4 font-semibold">Key</th>
                 <th className="w-[16%] px-4 py-4 font-semibold">创建日期</th>
-                <th className="w-[12%] px-4 py-4 text-right font-semibold">操作</th>
+                <th className="w-[20%] px-4 py-4 text-right font-semibold">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -175,7 +195,7 @@ export function LlmConfigPage() {
                     <td className="truncate px-4 py-3 font-mono">{item.apiKeyMask}</td>
                     <td className="px-4 py-3">{formatDate(item.createdAt)}</td>
                     <td className="px-4 py-3">
-                      <div className="flex justify-end">
+                      <div className="flex justify-end gap-2">
                         {item.active ? (
                           <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
                             <CheckCircle2 className="h-3.5 w-3.5" />
@@ -192,6 +212,17 @@ export function LlmConfigPage() {
                             应用
                           </Button>
                         )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeleteTarget(item)}
+                          disabled={deletingId === item.id}
+                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                          title="删除 API Key"
+                        >
+                          {deletingId === item.id ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                          删除
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -277,6 +308,32 @@ export function LlmConfigPage() {
             <Button onClick={handleCreate} disabled={saving}>
               {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
               创建 API Key
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(deleteTarget)} onOpenChange={(nextOpen) => !nextOpen && setDeleteTarget(null)}>
+        <DialogContent className="w-[min(92vw,440px)]">
+          <DialogHeader>
+            <DialogTitle>删除 API Key</DialogTitle>
+            <DialogDescription>
+              删除后无法恢复。{deleteTarget?.active ? "当前 key 正在应用中，删除后会自动应用剩余最新的一条 key。" : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-lg bg-slate-50 px-3 py-3 text-sm text-slate-700">
+            <div className="font-medium text-slate-900">{deleteTarget?.name}</div>
+            <div className="mt-1 font-mono text-xs text-slate-500">{deleteTarget?.apiKeyMask}</div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={Boolean(deletingId)}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={Boolean(deletingId)}>
+              {deletingId ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              删除
             </Button>
           </DialogFooter>
         </DialogContent>

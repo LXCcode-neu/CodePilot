@@ -33,7 +33,19 @@ public class FeishuNotificationSender implements NotificationSender {
     }
 
     private String buildText(NotificationMessage message) {
-        return message.title() + "\n\n" + message.content()
-                + (message.linkUrl() == null || message.linkUrl().isBlank() ? "" : "\n\n" + message.linkUrl());
+        StringBuilder text = new StringBuilder();
+        text.append(message.title()).append("\n\n").append(message.content());
+        if (message.linkUrl() != null && !message.linkUrl().isBlank()) {
+            text.append("\n\n").append(message.linkUrl());
+        }
+        if (message.actions() != null && !message.actions().isEmpty()) {
+            text.append("\n\n操作：");
+            message.actions().forEach(action -> text
+                    .append("\n[")
+                    .append(action.label())
+                    .append("] ")
+                    .append(action.url()));
+        }
+        return text.toString();
     }
 }

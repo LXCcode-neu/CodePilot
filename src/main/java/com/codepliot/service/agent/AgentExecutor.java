@@ -164,7 +164,7 @@ public class AgentExecutor {
                     agentTool.stepName() + " 执行成功"
             );
         } catch (RuntimeException exception) {
-            agentStepService.failStep(stepId, errorMessage(exception));
+            failStepIfPossible(stepId, exception);
             pushTaskEvent(
                     context.taskId(),
                     AgentTaskStatus.FAILED.name(),
@@ -173,6 +173,19 @@ public class AgentExecutor {
                     agentTool.stepName() + " 执行失败：" + errorMessage(exception)
             );
             throw exception;
+        }
+    }
+
+    private void failStepIfPossible(Long stepId, RuntimeException originalException) {
+        try {
+            agentStepService.failStep(stepId, errorMessage(originalException));
+        } catch (RuntimeException failStepException) {
+            log.warn(
+                    "Failed to mark agent step as failed, stepId={}, originalError={}, failStepError={}",
+                    stepId,
+                    errorMessage(originalException),
+                    errorMessage(failStepException)
+            );
         }
     }
 

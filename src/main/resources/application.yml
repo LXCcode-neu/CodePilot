@@ -13,6 +13,7 @@ spring:
         - classpath:db/schema/patch_record.sql
         - classpath:db/schema/project_llm_config.sql
         - classpath:db/schema/llm_api_key_config.sql
+        - classpath:db/schema/notification_action_token.sql
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/codepilot?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
@@ -44,6 +45,8 @@ security:
     expire-seconds: 86400
 
 codepilot:
+  app:
+    public-base-url: ${CODEPILOT_PUBLIC_BASE_URL:http://localhost:8080}
   workspace:
     root: ./data/workspace
   git:

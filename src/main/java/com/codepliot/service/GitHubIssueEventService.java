@@ -2,6 +2,7 @@ package com.codepliot.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.codepliot.entity.GitHubIssueEvent;
+import com.codepliot.entity.PatchRecord;
 import com.codepliot.entity.UserRepoWatch;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.AgentTaskVO;
@@ -10,6 +11,7 @@ import com.codepliot.model.GitHubIssueEventRunResult;
 import com.codepliot.model.GitHubIssueEventVO;
 import com.codepliot.model.GitHubIssueVO;
 import com.codepliot.repository.GitHubIssueEventMapper;
+import com.codepliot.repository.PatchRecordMapper;
 import com.codepliot.repository.UserRepoWatchMapper;
 import com.codepliot.service.agent.AgentRunService;
 import com.codepliot.service.task.AgentTaskService;
@@ -31,6 +33,7 @@ public class GitHubIssueEventService {
 
     private final GitHubIssueEventMapper gitHubIssueEventMapper;
     private final UserRepoWatchMapper userRepoWatchMapper;
+    private final PatchRecordMapper patchRecordMapper;
     private final NotificationService notificationService;
     private final NotificationTemplateFactory notificationTemplateFactory;
     private final AgentTaskService agentTaskService;
@@ -38,12 +41,14 @@ public class GitHubIssueEventService {
 
     public GitHubIssueEventService(GitHubIssueEventMapper gitHubIssueEventMapper,
                                    UserRepoWatchMapper userRepoWatchMapper,
+                                   PatchRecordMapper patchRecordMapper,
                                    NotificationService notificationService,
                                    NotificationTemplateFactory notificationTemplateFactory,
                                    AgentTaskService agentTaskService,
                                    AgentRunService agentRunService) {
         this.gitHubIssueEventMapper = gitHubIssueEventMapper;
         this.userRepoWatchMapper = userRepoWatchMapper;
+        this.patchRecordMapper = patchRecordMapper;
         this.notificationService = notificationService;
         this.notificationTemplateFactory = notificationTemplateFactory;
         this.agentTaskService = agentTaskService;
@@ -111,17 +116,37 @@ public class GitHubIssueEventService {
     @Transactional
     public GitHubIssueEventVO ignore(Long id) {
         GitHubIssueEvent event = requireOwnedEvent(id);
+        ignoreEvent(event);
+        return GitHubIssueEventVO.from(event);
+    }
+
+    @Transactional
+    public GitHubIssueEventVO ignoreFromNotification(Long id, Long userId) {
+        GitHubIssueEvent event = requireUserEvent(id, userId);
+        ignoreEvent(event);
+        return GitHubIssueEventVO.from(event);
+    }
+
+    private void ignoreEvent(GitHubIssueEvent event) {
         if (event.getAgentTaskId() != null || STATUS_RUNNING.equals(event.getStatus())
                 || STATUS_PATCH_READY.equals(event.getStatus())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "GitHub issue event cannot be ignored in current status");
         }
         event.setStatus(STATUS_IGNORED);
         gitHubIssueEventMapper.updateById(event);
-        return GitHubIssueEventVO.from(event);
     }
 
     public GitHubIssueEventRunResult run(Long id) {
         GitHubIssueEvent event = requireOwnedEvent(id);
+        return runEvent(event, SecurityUtils.getCurrentUserId());
+    }
+
+    public GitHubIssueEventRunResult runFromNotification(Long id, Long userId) {
+        GitHubIssueEvent event = requireUserEvent(id, userId);
+        return runEvent(event, userId);
+    }
+
+    private GitHubIssueEventRunResult runEvent(GitHubIssueEvent event, Long userId) {
         if (event.getAgentTaskId() != null) {
             return new GitHubIssueEventRunResult(event.getAgentTaskId(), event.getStatus());
         }
@@ -131,6 +156,7 @@ public class GitHubIssueEventService {
 
         UserRepoWatch watch = requireWatch(event.getRepoWatchId());
         AgentTaskVO task = agentTaskService.createFromGitHubIssue(
+                userId,
                 event.getProjectRepoId(),
                 event.getId(),
                 event.getIssueTitle(),
@@ -142,7 +168,7 @@ public class GitHubIssueEventService {
         notificationService.sendToUser(event.getUserId(), notificationTemplateFactory.repairStarted(watch, event, task.id()));
 
         try {
-            agentRunService.run(task.id());
+            agentRunService.run(task.id(), userId);
         } catch (RuntimeException exception) {
             markFailed(task.id(), exception.getMessage());
             throw exception;
@@ -159,9 +185,12 @@ public class GitHubIssueEventService {
         event.setStatus(STATUS_PATCH_READY);
         gitHubIssueEventMapper.updateById(event);
         UserRepoWatch watch = requireWatch(event.getRepoWatchId());
+        PatchRecord patchRecord = patchRecordMapper.selectById(patchId);
         notificationService.sendToUser(
                 event.getUserId(),
-                notificationTemplateFactory.patchReady(watch, event, taskId, patchId)
+                patchRecord == null
+                        ? notificationTemplateFactory.patchReady(watch, event, taskId, patchId)
+                        : notificationTemplateFactory.patchReady(watch, event, patchRecord)
         );
     }
 
@@ -181,9 +210,13 @@ public class GitHubIssueEventService {
     }
 
     private GitHubIssueEvent requireOwnedEvent(Long id) {
+        return requireUserEvent(id, SecurityUtils.getCurrentUserId());
+    }
+
+    private GitHubIssueEvent requireUserEvent(Long id, Long userId) {
         GitHubIssueEvent event = gitHubIssueEventMapper.selectOne(new LambdaQueryWrapper<GitHubIssueEvent>()
                 .eq(GitHubIssueEvent::getId, id)
-                .eq(GitHubIssueEvent::getUserId, SecurityUtils.getCurrentUserId())
+                .eq(GitHubIssueEvent::getUserId, userId)
                 .last("limit 1"));
         if (event == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "GitHub issue event not found");
