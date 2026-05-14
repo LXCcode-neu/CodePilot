@@ -160,6 +160,9 @@ Those rules should live in a separate document, for example:
 16. GitHub OAuth access tokens may be stored only after server-side encryption. Never return plaintext GitHub access tokens to the frontend.
 17. Notification approval links must use server-generated one-time tokens. Store only token hashes, expire tokens, and never expose webhook URLs or secret tokens outside server-side configuration.
 18. Chat-based bot approvals must use short server-side action codes. Bind action codes to the originating chat after first use, expire them, and keep platform app secrets server-side only.
+19. Generated patches must pass automatic verification before entering `WAITING_CONFIRM`. Verification failures must block PR confirmation and be surfaced as `VERIFY_FAILED` with command output context.
+20. Patch verification command results must be persisted through the repository/service layer so later UI, bot, and retry flows can inspect actual command evidence.
+21. Verification repair attempts must generate full replacement patches, rerun verification, and stay bounded by configuration instead of looping indefinitely.
 
 ### Default Interpretation
 

@@ -46,8 +46,10 @@ public class VerifyPatchTool implements AgentTool {
         PatchVerificationResult result = patchVerificationService.verify(
                 context.localPath(),
                 context.taskId(),
+                context.patchRecordId(),
                 patchText
         );
+        context.updatePatchVerificationResult(result);
         return ToolResult.success(result.summary(), result);
     }
 }

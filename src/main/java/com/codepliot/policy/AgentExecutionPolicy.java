@@ -3,6 +3,7 @@ package com.codepliot.policy;
 import com.codepliot.entity.AgentTaskStatus;
 import com.codepliot.model.AgentExecutionDecision;
 import com.codepliot.model.PatchSafetyCheckResult;
+import com.codepliot.model.PatchVerificationResult;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,7 +19,19 @@ public class AgentExecutionPolicy {
      *
      * <p>当前版本统一进入 WAITING_CONFIRM，由用户确认后再进入最终完成状态。
      */
-    public AgentExecutionDecision afterPatchGenerated(PatchSafetyCheckResult safetyCheckResult) {
+    public AgentExecutionDecision afterPatchGenerated(PatchSafetyCheckResult safetyCheckResult,
+                                                      PatchVerificationResult verificationResult) {
+        if (verificationResult != null && !verificationResult.passed()) {
+            String summary = "Patch 自动验证失败，已阻止确认 PR";
+            if (verificationResult.summary() != null && !verificationResult.summary().isBlank()) {
+                summary = verificationResult.summary();
+            }
+            return new AgentExecutionDecision(
+                    AgentTaskStatus.VERIFY_FAILED,
+                    summary,
+                    summary
+            );
+        }
         String summary = "Patch 已生成，等待人工确认";
         if (safetyCheckResult != null && safetyCheckResult.requiresAttention()) {
             summary = "Patch 已生成，存在风险提示，等待人工确认";

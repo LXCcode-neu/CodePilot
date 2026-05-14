@@ -110,6 +110,7 @@ public class GeneratePatchTool implements AgentTool {
             );
             context.updatePatchGenerateResult(result);
             context.updatePatchSafetyCheckResult(safetyCheckResult);
+            context.updatePatchRecordId(patchRecord.getId());
             return ToolResult.success("patch generation completed", PatchRecordVO.from(patchRecord));
         } catch (IllegalArgumentException exception) {
             patchService.saveFailedPatch(context.taskId(), rawOutput, "Failed to parse LLM JSON output");

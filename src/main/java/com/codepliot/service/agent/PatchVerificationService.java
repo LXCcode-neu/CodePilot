@@ -1,7 +1,10 @@
 package com.codepliot.service.agent;
 
+import com.codepliot.config.PatchVerificationProperties;
+import com.codepliot.exception.AgentTaskCancelledException;
 import com.codepliot.model.PatchVerificationCommandResult;
 import com.codepliot.model.PatchVerificationResult;
+import com.codepliot.service.PatchVerificationRecordService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -21,13 +24,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.springframework.stereotype.Service;
 
-/**
- * Patch 自动验证服务。
- */
 @Service
 public class PatchVerificationService {
 
-    private static final Duration COMMAND_TIMEOUT = Duration.ofMinutes(2);
     private static final int OUTPUT_SUMMARY_LIMIT = 4000;
     private static final Set<String> EXCLUDED_DIRECTORIES = Set.of(
             ".git",
@@ -38,21 +37,34 @@ public class PatchVerificationService {
     );
 
     private final ObjectMapper objectMapper;
+    private final PatchVerificationProperties properties;
+    private final PatchVerificationRecordService patchVerificationRecordService;
+    private final AgentTaskCancellationService agentTaskCancellationService;
 
-    public PatchVerificationService(ObjectMapper objectMapper) {
+    public PatchVerificationService(ObjectMapper objectMapper,
+                                    PatchVerificationProperties properties,
+                                    PatchVerificationRecordService patchVerificationRecordService,
+                                    AgentTaskCancellationService agentTaskCancellationService) {
         this.objectMapper = objectMapper;
+        this.properties = properties;
+        this.patchVerificationRecordService = patchVerificationRecordService;
+        this.agentTaskCancellationService = agentTaskCancellationService;
     }
 
     public PatchVerificationResult verify(String repoPath, Long taskId, String patchText) {
+        return verify(repoPath, taskId, null, patchText);
+    }
+
+    public PatchVerificationResult verify(String repoPath, Long taskId, Long patchRecordId, String patchText) {
         if (patchText == null || patchText.isBlank()) {
-            return new PatchVerificationResult(
+            return saveAndReturn(taskId, patchRecordId, new PatchVerificationResult(
                     true,
                     false,
                     true,
-                    "Patch 为空，跳过自动验证。",
+                    "Patch is empty. Automatic verification was skipped.",
                     List.of(),
                     List.of()
-            );
+            ));
         }
 
         Path sourceRoot = resolveRepositoryRoot(repoPath);
@@ -67,38 +79,56 @@ public class PatchVerificationService {
             PatchVerificationCommandResult checkResult = runCommand(
                     "patch apply check",
                     List.of(executable("git"), "apply", "--check", patchFile.toAbsolutePath().toString()),
-                    verificationRoot
+                    verificationRoot,
+                    taskId
             );
             results.add(checkResult);
             if (!checkResult.passed()) {
-                return buildResult(false, false, verificationRoot, results, "Patch 无法应用，已停止后续验证。");
+                return saveAndReturn(taskId, patchRecordId, buildResult(
+                        false,
+                        false,
+                        verificationRoot,
+                        results,
+                        "Patch cannot be applied. Verification stopped."
+                ));
             }
 
             PatchVerificationCommandResult applyResult = runCommand(
                     "patch apply",
                     List.of(executable("git"), "apply", patchFile.toAbsolutePath().toString()),
-                    verificationRoot
+                    verificationRoot,
+                    taskId
             );
             results.add(applyResult);
             if (!applyResult.passed()) {
-                return buildResult(true, false, verificationRoot, results, "Patch 应用失败，已停止后续验证。");
+                return saveAndReturn(taskId, patchRecordId, buildResult(
+                        true,
+                        false,
+                        verificationRoot,
+                        results,
+                        "Patch apply failed. Verification stopped."
+                ));
             }
 
             for (VerificationCommand command : detectVerificationCommands(verificationRoot)) {
-                results.add(runCommand(command.name(), command.command(), command.workingDirectory()));
+                results.add(runCommand(command.name(), command.command(), command.workingDirectory(), taskId));
             }
             boolean passed = results.stream().allMatch(PatchVerificationCommandResult::passed);
-            String summary = passed ? "Patch 已通过自动验证。" : "Patch 自动验证存在失败项，请人工重点确认。";
-            return buildResult(true, passed, verificationRoot, results, summary);
+            String summary = passed
+                    ? "Patch passed automatic verification."
+                    : "Patch automatic verification failed. Manual review is required.";
+            return saveAndReturn(taskId, patchRecordId, buildResult(true, passed, verificationRoot, results, summary));
+        } catch (AgentTaskCancelledException exception) {
+            throw exception;
         } catch (RuntimeException | IOException exception) {
-            return new PatchVerificationResult(
+            return saveAndReturn(taskId, patchRecordId, new PatchVerificationResult(
                     false,
                     false,
                     false,
-                    "Patch 自动验证执行异常：" + buildErrorMessage(exception),
+                    "Patch automatic verification failed with exception: " + buildErrorMessage(exception),
                     List.of(),
                     List.of()
-            );
+            ));
         }
     }
 
@@ -106,8 +136,8 @@ public class PatchVerificationService {
         List<VerificationCommand> commands = new ArrayList<>();
         if (Files.isRegularFile(root.resolve("pom.xml"))) {
             commands.add(new VerificationCommand(
-                    "maven compile",
-                    List.of(executable("mvn"), "-q", "-DskipTests", "compile"),
+                    "maven test",
+                    List.of(mavenExecutable(root), "test"),
                     root
             ));
         }
@@ -129,6 +159,12 @@ public class PatchVerificationService {
         }
         for (Path packageJson : findPackageJsonFiles(root)) {
             if (hasNpmBuildScript(packageJson)) {
+                boolean hasLockfile = hasNpmLockfile(packageJson.getParent());
+                commands.add(new VerificationCommand(
+                        hasLockfile ? "npm ci" : "npm install",
+                        List.of(executable("npm"), hasLockfile ? "ci" : "install"),
+                        packageJson.getParent()
+                ));
                 commands.add(new VerificationCommand(
                         "npm build",
                         List.of(executable("npm"), "run", "build"),
@@ -152,6 +188,15 @@ public class PatchVerificationService {
                 detectRepositoryTypes(verificationRoot),
                 results
         );
+    }
+
+    private PatchVerificationResult saveAndReturn(Long taskId,
+                                                  Long patchRecordId,
+                                                  PatchVerificationResult result) {
+        if (patchVerificationRecordService != null) {
+            patchVerificationRecordService.saveVerificationResult(taskId, patchRecordId, result);
+        }
+        return result;
     }
 
     private List<String> detectRepositoryTypes(Path root) throws IOException {
@@ -196,7 +241,7 @@ public class PatchVerificationService {
         }
     }
 
-    private PatchVerificationCommandResult runCommand(String name, List<String> command, Path workingDirectory) {
+    private PatchVerificationCommandResult runCommand(String name, List<String> command, Path workingDirectory, Long taskId) {
         Path outputFile = null;
         try {
             outputFile = Files.createTempFile("codepilot-verify-", ".log");
@@ -205,7 +250,22 @@ public class PatchVerificationService {
                     .redirectErrorStream(true)
                     .redirectOutput(outputFile.toFile())
                     .start();
-            boolean finished = process.waitFor(COMMAND_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
+            long deadline = System.nanoTime() + commandTimeout().toNanos();
+            boolean finished = false;
+            while (System.nanoTime() < deadline) {
+                if (agentTaskCancellationService != null) {
+                    try {
+                        agentTaskCancellationService.throwIfCancelRequested(taskId);
+                    } catch (RuntimeException exception) {
+                        process.destroyForcibly();
+                        throw exception;
+                    }
+                }
+                if (process.waitFor(1, TimeUnit.SECONDS)) {
+                    finished = true;
+                    break;
+                }
+            }
             if (!finished) {
                 process.destroyForcibly();
             }
@@ -224,13 +284,16 @@ public class PatchVerificationService {
             return failedCommand(name, command, workingDirectory, buildErrorMessage(exception));
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
+            if (agentTaskCancellationService != null) {
+                agentTaskCancellationService.throwIfCancelRequested(taskId);
+            }
             return failedCommand(name, command, workingDirectory, "Command interrupted");
         } finally {
             if (outputFile != null) {
                 try {
                     Files.deleteIfExists(outputFile);
                 } catch (IOException ignored) {
-                    // 临时日志删除失败不影响验证结果。
+                    // Temporary log cleanup failure should not affect verification.
                 }
             }
         }
@@ -341,6 +404,24 @@ public class PatchVerificationService {
             case "npm" -> "npm.cmd";
             default -> name;
         };
+    }
+
+    private String mavenExecutable(Path root) {
+        Path wrapper = root.resolve(isWindows() ? "mvnw.cmd" : "mvnw");
+        if (Files.isRegularFile(wrapper)) {
+            return wrapper.toAbsolutePath().toString();
+        }
+        return executable("mvn");
+    }
+
+    private boolean hasNpmLockfile(Path directory) {
+        return Files.isRegularFile(directory.resolve("package-lock.json"))
+                || Files.isRegularFile(directory.resolve("npm-shrinkwrap.json"));
+    }
+
+    private Duration commandTimeout() {
+        int seconds = properties == null ? 300 : Math.max(properties.getCommandTimeoutSeconds(), 1);
+        return Duration.ofSeconds(seconds);
     }
 
     private boolean isWindows() {

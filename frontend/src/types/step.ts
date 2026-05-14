@@ -6,6 +6,7 @@ export type AgentStepType =
   | "ANALYZE_ISSUE"
   | "GENERATE_PATCH"
   | "VERIFY_PATCH"
+  | "REPAIR_PATCH"
   | "COMPLETE_RUN";
 
 export interface AgentStep {

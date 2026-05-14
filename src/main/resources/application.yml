@@ -15,6 +15,7 @@ spring:
         - classpath:db/schema/llm_api_key_config.sql
         - classpath:db/schema/notification_action_token.sql
         - classpath:db/schema/bot_action_code.sql
+        - classpath:db/schema/patch_verification_record.sql
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/codepilot?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
@@ -61,6 +62,9 @@ codepilot:
     root: ./data/workspace
   git:
     clone-timeout-seconds: 120
+  verification:
+    command-timeout-seconds: ${CODEPILOT_VERIFICATION_COMMAND_TIMEOUT_SECONDS:300}
+    max-repair-attempts: ${CODEPILOT_VERIFICATION_MAX_REPAIR_ATTEMPTS:3}
   github:
     base-url: https://github.com
     api-base-url: https://api.github.com

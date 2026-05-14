@@ -48,11 +48,17 @@ public class TaskEventController {
     }
 
     private boolean isTerminalStatus(String status) {
-        return "COMPLETED".equals(status) || "FAILED".equals(status);
+        return "COMPLETED".equals(status)
+                || "FAILED".equals(status)
+                || "VERIFY_FAILED".equals(status)
+                || "CANCELLED".equals(status);
     }
 
     private String resolvePhase(String status) {
-        if ("COMPLETED".equals(status) || "FAILED".equals(status)) {
+        if ("COMPLETED".equals(status)
+                || "FAILED".equals(status)
+                || "VERIFY_FAILED".equals(status)
+                || "CANCELLED".equals(status)) {
             return "COMPLETED";
         }
         if ("PENDING".equals(status)) {

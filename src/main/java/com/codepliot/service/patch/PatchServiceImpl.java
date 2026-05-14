@@ -82,7 +82,6 @@ public class PatchServiceImpl implements PatchService {
         patchRecord.setPrNumber(null);
         patchRecord.setPrBranch(null);
         persist(patchRecord);
-        eventPublisher.publishEvent(new PatchGeneratedEvent(taskId, patchRecord.getId(), true, null));
         return patchRecord;
     }
 

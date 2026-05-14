@@ -17,7 +17,8 @@ public class AgentTaskRecoveryInitializer implements ApplicationRunner {
             AgentTaskStatus.RETRIEVING.name(),
             AgentTaskStatus.ANALYZING.name(),
             AgentTaskStatus.GENERATING_PATCH.name(),
-            AgentTaskStatus.VERIFYING.name()
+            AgentTaskStatus.VERIFYING.name(),
+            AgentTaskStatus.REPAIRING_PATCH.name()
     );
 
     private final AgentTaskMapper agentTaskMapper;
@@ -31,6 +32,11 @@ public class AgentTaskRecoveryInitializer implements ApplicationRunner {
         agentTaskMapper.update(null, new LambdaUpdateWrapper<AgentTask>()
                 .in(AgentTask::getStatus, RUNNING_STATUSES)
                 .set(AgentTask::getStatus, AgentTaskStatus.FAILED.name())
-                .set(AgentTask::getErrorMessage, "应用重启或任务执行中断，请重新运行该任务"));
+                .set(AgentTask::getErrorMessage, "Application restarted while task was running. Please rerun the task."));
+        agentTaskMapper.update(null, new LambdaUpdateWrapper<AgentTask>()
+                .eq(AgentTask::getStatus, AgentTaskStatus.CANCEL_REQUESTED.name())
+                .set(AgentTask::getStatus, AgentTaskStatus.CANCELLED.name())
+                .set(AgentTask::getResultSummary, "Task cancelled during application restart")
+                .set(AgentTask::getErrorMessage, null));
     }
 }

@@ -21,6 +21,8 @@ const RUNNING_STATUSES = new Set([
   "ANALYZING",
   "GENERATING_PATCH",
   "VERIFYING",
+  "REPAIRING_PATCH",
+  "CANCEL_REQUESTED",
   "WAITING_CONFIRM",
 ]);
 
@@ -55,8 +57,17 @@ function getStatusMessage(taskStatus?: string | null, stepType?: string | null) 
   if (taskStatus === "COMPLETED") {
     return "任务已完成。";
   }
+  if (taskStatus === "CANCEL_REQUESTED") {
+    return "Task cancellation requested. Waiting for the current step to stop.";
+  }
+  if (taskStatus === "CANCELLED") {
+    return "Task cancelled.";
+  }
   if (taskStatus === "FAILED") {
     return "任务执行失败，请查看错误信息。";
+  }
+  if (taskStatus === "VERIFY_FAILED") {
+    return "Patch 自动验证失败，已阻止确认 PR。";
   }
   if (stepType) {
     return `${getStepTypeLabel(stepType)}正在执行。`;
@@ -92,8 +103,8 @@ export function RealtimeEventPanel({
   const completedEvent = visibleEvents.find((event) => event.phase === "COMPLETED");
 
   const isPending = (taskStatus ?? "PENDING") === "PENDING";
-  const isFailed = taskStatus === "FAILED";
-  const isCompleted = taskStatus === "COMPLETED" || taskStatus === "WAITING_CONFIRM";
+  const isFailed = taskStatus === "FAILED" || taskStatus === "VERIFY_FAILED";
+  const isCompleted = taskStatus === "COMPLETED" || taskStatus === "WAITING_CONFIRM" || taskStatus === "CANCELLED";
   const isRunning = RUNNING_STATUSES.has(taskStatus ?? "");
 
   const stages: StageViewModel[] = [

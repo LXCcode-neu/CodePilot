@@ -57,4 +57,18 @@ public class BotNotificationService {
             // Existing notification channels still provide the fallback delivery path.
         }
     }
+
+    public void repairFailed(UserRepoWatch watch, GitHubIssueEvent event, Long taskId, String reason) {
+        botActionCodeService.markFailed(taskId);
+        BotActionCode code = botActionCodeService.findByTaskId(taskId);
+        if (code == null || code.getChatId() == null || code.getChatId().isBlank()) {
+            return;
+        }
+        NotificationMessage message = notificationTemplateFactory.repairFailed(watch, event, taskId, reason);
+        try {
+            feishuBotClient.sendTextToChat(code.getChatId(), message.title() + "\n\n" + message.content());
+        } catch (RuntimeException ignored) {
+            // Existing notification channels still provide the fallback delivery path.
+        }
+    }
 }

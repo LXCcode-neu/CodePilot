@@ -208,6 +208,8 @@ Prepare before startup:
 - `GITHUB_CLIENT_SECRET` for GitHub OAuth authorization
 - `GITHUB_OAUTH_REDIRECT_URI` for the frontend callback page, for example `http://localhost:5173/github/callback`
 - `CODEPILOT_PUBLIC_BASE_URL` for externally reachable group robot action links, for example `https://codepilot.example.com`
+- `CODEPILOT_VERIFICATION_COMMAND_TIMEOUT_SECONDS` for each patch verification command timeout, default `300`
+- `CODEPILOT_VERIFICATION_MAX_REPAIR_ATTEMPTS` for automatic repair attempts after verification failure, default `3`
 - optional Feishu app bot configuration for mobile chat commands:
   - `FEISHU_BOT_ENABLED=true`
   - `FEISHU_APP_ID`
@@ -301,6 +303,18 @@ When repository watching and a notification channel are configured, new GitHub I
 - Pull request submission still uses server-side encrypted GitHub OAuth tokens. Tokens are never sent to the frontend or chat.
 - Before each agent run and PR submission, the local repository workspace is synced with the latest remote default branch.
 
+### Patch Verification Gate
+
+After a patch is generated, CodePilot applies it in an isolated verification workspace before allowing confirmation.
+
+- Maven repositories run `mvn test` or the repository Maven wrapper when available.
+- Node repositories run dependency installation first (`npm ci` when a lockfile exists, otherwise `npm install`) and then `npm run build`.
+- `git apply --check` and `git apply` must pass before project verification commands run.
+- If verification fails, the task moves to `VERIFY_FAILED`, PR confirmation is blocked, and the failure is pushed back through the configured notification path.
+- When verification fails, CodePilot asks the LLM to generate a corrected replacement patch and retries verification up to `CODEPILOT_VERIFICATION_MAX_REPAIR_ATTEMPTS`, default `3`.
+- If all repair attempts fail, the task moves to `VERIFY_FAILED`; a `VERIFY_FAILED` task can be rerun after the underlying issue is fixed or the agent is asked to try again.
+- Verification command results are stored in `patch_verification_record` with the task, patch, attempt number, command, exit code, timeout flag, and output summary.
+
 ### GitHub Account Authorization
 
 CodePilot now supports GitHub OAuth account authorization for importing repositories into the project list and for submitting pull requests with the connected GitHub identity.
@@ -337,7 +351,7 @@ The current frontend condenses SSE into three stages:
 
 - started
 - running
-- completed / failed
+- completed / failed / cancelled
 
 ### Agentic Code Search
 
@@ -351,11 +365,21 @@ Code search uses an agentic tool loop:
 
 ### Patch Confirmation
 
-- After patch generation, tasks now enter `WAITING_CONFIRM` instead of going directly to `COMPLETED`
+- After patch generation and successful automatic verification, tasks enter `WAITING_CONFIRM` instead of going directly to `COMPLETED`
 - The backend runs a rule-based patch safety check before manual confirmation
 - Manual confirmation endpoint:
   - `POST /api/tasks/{taskId}/confirm`
 - This MVP still does not auto-apply patches or create PRs
+
+### Task Cancellation And Rerun
+
+- Manual task cancellation endpoint:
+  - `POST /api/tasks/{taskId}/cancel`
+- Running tasks move through `CANCEL_REQUESTED` and then `CANCELLED` once the executor reaches a cancellation checkpoint.
+- The executor interrupts the registered worker thread so blocking LLM HTTP calls can exit earlier when the provider/client honors interruption.
+- Verification subprocesses are stopped when cancellation is requested.
+- `PENDING`, `FAILED`, `VERIFY_FAILED`, and `CANCELLED` tasks can be run again.
+- Before every rerun, old agent steps, patch records, and verification records for that task are deleted so the detail page starts from the new clone step instead of stacking historical runs.
 
 ### Deletion Behavior
 

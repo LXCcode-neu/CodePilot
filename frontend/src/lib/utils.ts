@@ -47,11 +47,11 @@ export function stringifyPretty(value: unknown) {
 }
 
 export function isRunningTask(status?: string | null) {
-  return ["CLONING", "RETRIEVING", "ANALYZING", "GENERATING_PATCH", "VERIFYING"].includes(
+  return ["CLONING", "RETRIEVING", "ANALYZING", "GENERATING_PATCH", "VERIFYING", "REPAIRING_PATCH", "CANCEL_REQUESTED"].includes(
     status ?? ""
   );
 }
 
 export function isFinishedTask(status?: string | null) {
-  return ["COMPLETED", "FAILED"].includes(status ?? "");
+  return ["COMPLETED", "FAILED", "VERIFY_FAILED", "CANCELLED"].includes(status ?? "");
 }

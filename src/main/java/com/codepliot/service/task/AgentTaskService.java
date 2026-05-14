@@ -15,6 +15,7 @@ import com.codepliot.repository.AgentStepMapper;
 import com.codepliot.repository.AgentTaskMapper;
 import com.codepliot.repository.PatchRecordMapper;
 import com.codepliot.repository.ProjectRepoMapper;
+import com.codepliot.service.PatchVerificationRecordService;
 import com.codepliot.service.ProjectLlmConfigService;
 import com.codepliot.service.sse.SseService;
 import com.codepliot.utils.SecurityUtils;
@@ -33,6 +34,7 @@ public class AgentTaskService {
     private final ProjectLlmConfigService projectLlmConfigService;
     private final TaskRunLockService taskRunLockService;
     private final SseService sseService;
+    private final PatchVerificationRecordService patchVerificationRecordService;
 
     public AgentTaskService(AgentTaskMapper agentTaskMapper,
                             AgentStepMapper agentStepMapper,
@@ -40,7 +42,8 @@ public class AgentTaskService {
                             ProjectRepoMapper projectRepoMapper,
                             ProjectLlmConfigService projectLlmConfigService,
                             TaskRunLockService taskRunLockService,
-                            SseService sseService) {
+                            SseService sseService,
+                            PatchVerificationRecordService patchVerificationRecordService) {
         this.agentTaskMapper = agentTaskMapper;
         this.agentStepMapper = agentStepMapper;
         this.patchRecordMapper = patchRecordMapper;
@@ -48,6 +51,7 @@ public class AgentTaskService {
         this.projectLlmConfigService = projectLlmConfigService;
         this.taskRunLockService = taskRunLockService;
         this.sseService = sseService;
+        this.patchVerificationRecordService = patchVerificationRecordService;
     }
 
     @Transactional
@@ -208,6 +212,7 @@ public class AgentTaskService {
 
         agentStepMapper.delete(new LambdaQueryWrapper<AgentStep>()
                 .in(AgentStep::getTaskId, taskIds));
+        patchVerificationRecordService.deleteByTaskIds(taskIds);
         patchRecordMapper.delete(new LambdaQueryWrapper<PatchRecord>()
                 .in(PatchRecord::getTaskId, taskIds));
         agentTaskMapper.delete(new LambdaQueryWrapper<AgentTask>()
@@ -247,7 +252,9 @@ public class AgentTaskService {
                 || AgentTaskStatus.RETRIEVING.name().equals(status)
                 || AgentTaskStatus.ANALYZING.name().equals(status)
                 || AgentTaskStatus.GENERATING_PATCH.name().equals(status)
-                || AgentTaskStatus.VERIFYING.name().equals(status);
+                || AgentTaskStatus.VERIFYING.name().equals(status)
+                || AgentTaskStatus.REPAIRING_PATCH.name().equals(status)
+                || AgentTaskStatus.CANCEL_REQUESTED.name().equals(status);
     }
 
     private record TaskLock(Long taskId, String lockValue) {

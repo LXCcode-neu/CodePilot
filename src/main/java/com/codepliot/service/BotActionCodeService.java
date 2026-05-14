@@ -101,6 +101,16 @@ public class BotActionCodeService {
     }
 
     @Transactional
+    public void markFailed(Long taskId) {
+        BotActionCode code = findByTaskId(taskId);
+        if (code == null) {
+            return;
+        }
+        code.setStatus(BotActionStatus.FAILED.name());
+        botActionCodeMapper.updateById(code);
+    }
+
+    @Transactional
     public void markPrCreated(BotActionCode code) {
         code.setStatus(BotActionStatus.PR_CREATED.name());
         botActionCodeMapper.updateById(code);

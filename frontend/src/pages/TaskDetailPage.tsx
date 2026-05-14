@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { LoaderCircle, PlayCircle, RefreshCcw, Trash2 } from "lucide-react";
+import { LoaderCircle, PlayCircle, RefreshCcw, StopCircle, Trash2 } from "lucide-react";
 import { confirmTaskPatch, getTaskPatch, submitTaskPullRequest } from "@/api/patch";
 import { getProject } from "@/api/project";
 import { createTaskEventSource, parseTaskEventMessage } from "@/api/sse";
 import { getTaskSteps } from "@/api/step";
-import { deleteTask, getTask, runTask } from "@/api/task";
+import { cancelTask, deleteTask, getTask, runTask } from "@/api/task";
 import { AgentStepTimeline } from "@/components/AgentStepTimeline";
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingBlock } from "@/components/LoadingBlock";
@@ -26,6 +26,8 @@ import type { AgentTask } from "@/types/task";
 const INVALID_TASK_ID = "无效的任务 ID";
 const LOAD_TASK_ERROR = "加载任务详情失败";
 const RUN_TASK_ERROR = "运行 Agent 失败";
+const CANCEL_TASK_ERROR = "Cancel task failed";
+const CANCEL_REQUESTED = "Task cancellation requested.";
 const LOAD_FAILED = "加载失败";
 const TASK_NOT_FOUND = "任务不存在";
 const TASK_NOT_FOUND_DESC = "请返回任务列表重新选择任务。";
@@ -60,8 +62,10 @@ export function TaskDetailPage() {
   const [steps, setSteps] = useState<AgentStep[]>([]);
   const [patch, setPatch] = useState<PatchRecord | null>(null);
   const [events, setEvents] = useState<TaskEventMessage[]>([]);
+  const [eventStreamVersion, setEventStreamVersion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [submittingPullRequest, setSubmittingPullRequest] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -99,7 +103,7 @@ export function TaskDetailPage() {
     setError("");
     const taskData = await loadTaskData();
     await loadStepsData();
-    if (taskData.status === "COMPLETED" || taskData.status === "WAITING_CONFIRM") {
+    if (taskData.status === "COMPLETED" || taskData.status === "WAITING_CONFIRM" || taskData.status === "VERIFY_FAILED") {
       await loadPatchData();
       return;
     }
@@ -116,7 +120,7 @@ export function TaskDetailPage() {
     loadAll()
       .catch((err) => setError(err instanceof Error ? err.message : LOAD_TASK_ERROR))
       .finally(() => setLoading(false));
-  }, [taskId]);
+  }, [taskId, eventStreamVersion]);
 
   useEffect(() => {
     if (!task || !isRunningTask(task.status)) {
@@ -158,7 +162,14 @@ export function TaskDetailPage() {
     return () => source?.close();
   }, [taskId]);
 
-  const canRun = useMemo(() => task?.status === "PENDING" || task?.status === "FAILED", [task?.status]);
+  const canRun = useMemo(
+    () => task?.status === "PENDING" || task?.status === "FAILED" || task?.status === "VERIFY_FAILED" || task?.status === "CANCELLED",
+    [task?.status]
+  );
+  const canCancel = useMemo(
+    () => Boolean(task && isRunningTask(task.status) && task.status !== "CANCEL_REQUESTED"),
+    [task]
+  );
   const canConfirm = useMemo(
     () => task?.status === "WAITING_CONFIRM" && Boolean(patch) && !patch?.confirmed,
     [patch, task?.status]
@@ -174,7 +185,8 @@ export function TaskDetailPage() {
     setError("");
     try {
       await runTask(taskId);
-      setEvents((prev) => [
+      setEventStreamVersion((value) => value + 1);
+      setEvents([
         {
           id: crypto.randomUUID(),
           time: new Date().toISOString(),
@@ -182,13 +194,39 @@ export function TaskDetailPage() {
           phase: "STARTED",
           message: RUN_REQUESTED,
         },
-        ...prev,
       ]);
       await loadAll();
     } catch (err) {
       setError(err instanceof Error ? err.message : RUN_TASK_ERROR);
     } finally {
       setRunning(false);
+    }
+  }
+
+  async function handleCancel() {
+    if (!taskId || !canCancel) {
+      return;
+    }
+
+    setCancelling(true);
+    setError("");
+    try {
+      await cancelTask(taskId);
+      setEvents((prev) => [
+        {
+          id: crypto.randomUUID(),
+          time: new Date().toISOString(),
+          status: "CANCEL_REQUESTED",
+          phase: "RUNNING",
+          message: CANCEL_REQUESTED,
+        },
+        ...prev,
+      ]);
+      await loadAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : CANCEL_TASK_ERROR);
+    } finally {
+      setCancelling(false);
     }
   }
 
@@ -288,21 +326,27 @@ export function TaskDetailPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={task.status} />
-          <Button variant="secondary" onClick={() => void loadAll()} disabled={running || confirming || submittingPullRequest || deleting}>
+          <Button variant="secondary" onClick={() => void loadAll()} disabled={running || cancelling || confirming || submittingPullRequest || deleting}>
             <RefreshCcw className="h-4 w-4" />
             {REFRESH_LABEL}
           </Button>
           {canConfirm ? (
-            <Button variant="secondary" onClick={handleConfirmPatch} disabled={confirming || running || submittingPullRequest || deleting}>
+            <Button variant="secondary" onClick={handleConfirmPatch} disabled={confirming || running || cancelling || submittingPullRequest || deleting}>
               {confirming ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
               {confirming ? CONFIRMING_LABEL : CONFIRM_LABEL}
             </Button>
           ) : null}
-          <Button variant="destructive" onClick={handleDelete} disabled={!canDelete || running || confirming || submittingPullRequest || deleting}>
+          {canCancel ? (
+            <Button variant="destructive" onClick={handleCancel} disabled={cancelling || running || confirming || submittingPullRequest || deleting}>
+              {cancelling ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <StopCircle className="h-4 w-4" />}
+              {cancelling ? "Cancelling..." : "Cancel"}
+            </Button>
+          ) : null}
+          <Button variant="destructive" onClick={handleDelete} disabled={!canDelete || running || cancelling || confirming || submittingPullRequest || deleting}>
             {deleting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
             {deleting ? DELETING_LABEL : DELETE_LABEL}
           </Button>
-          <Button onClick={handleRun} disabled={!canRun || running || confirming || submittingPullRequest || deleting}>
+          <Button onClick={handleRun} disabled={!canRun || running || cancelling || confirming || submittingPullRequest || deleting}>
             {running ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
             Run Agent
           </Button>

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.codepliot.config.PatchVerificationProperties;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -27,14 +28,16 @@ class PatchVerificationServiceTest {
                   }
                 }
                 """);
+        Files.writeString(tempDir.resolve("package-lock.json"), "{}");
 
-        PatchVerificationService service = new PatchVerificationService(new ObjectMapper());
+        PatchVerificationService service = new PatchVerificationService(new ObjectMapper(), new PatchVerificationProperties(), null, null);
         List<PatchVerificationService.VerificationCommand> commands = service.detectVerificationCommands(tempDir);
 
-        assertEquals(4, commands.size());
-        assertTrue(commands.stream().anyMatch(command -> "maven compile".equals(command.name())));
+        assertEquals(5, commands.size());
+        assertTrue(commands.stream().anyMatch(command -> "maven test".equals(command.name())));
         assertTrue(commands.stream().anyMatch(command -> "go test".equals(command.name())));
         assertTrue(commands.stream().anyMatch(command -> "python compileall".equals(command.name())));
+        assertTrue(commands.stream().anyMatch(command -> "npm ci".equals(command.name())));
         assertTrue(commands.stream().anyMatch(command -> "npm build".equals(command.name())));
     }
 
@@ -48,7 +51,7 @@ class PatchVerificationServiceTest {
                 }
                 """);
 
-        PatchVerificationService service = new PatchVerificationService(new ObjectMapper());
+        PatchVerificationService service = new PatchVerificationService(new ObjectMapper(), new PatchVerificationProperties(), null, null);
         List<PatchVerificationService.VerificationCommand> commands = service.detectVerificationCommands(tempDir);
 
         assertTrue(commands.isEmpty());

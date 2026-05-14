@@ -4,6 +4,7 @@ import com.codepliot.model.AgentTaskCreateRequest;
 import com.codepliot.model.AgentTaskVO;
 import com.codepliot.model.Result;
 import com.codepliot.service.agent.AgentRunService;
+import com.codepliot.service.agent.AgentTaskCancellationService;
 import com.codepliot.service.patch.PatchService;
 import com.codepliot.service.task.AgentTaskService;
 import jakarta.validation.Valid;
@@ -22,13 +23,16 @@ public class AgentTaskController {
 
     private final AgentTaskService agentTaskService;
     private final AgentRunService agentRunService;
+    private final AgentTaskCancellationService agentTaskCancellationService;
     private final PatchService patchService;
 
     public AgentTaskController(AgentTaskService agentTaskService,
                                AgentRunService agentRunService,
+                               AgentTaskCancellationService agentTaskCancellationService,
                                PatchService patchService) {
         this.agentTaskService = agentTaskService;
         this.agentRunService = agentRunService;
+        this.agentTaskCancellationService = agentTaskCancellationService;
         this.patchService = patchService;
     }
 
@@ -56,6 +60,11 @@ public class AgentTaskController {
     @PostMapping("/{taskId}/run")
     public Result<AgentTaskVO> run(@PathVariable Long taskId) {
         return Result.success("Agent task submitted", agentRunService.run(taskId));
+    }
+
+    @PostMapping("/{taskId}/cancel")
+    public Result<AgentTaskVO> cancel(@PathVariable Long taskId) {
+        return Result.success("Agent task cancellation requested", agentTaskCancellationService.requestCancel(taskId));
     }
 
     @PostMapping("/{taskId}/confirm")

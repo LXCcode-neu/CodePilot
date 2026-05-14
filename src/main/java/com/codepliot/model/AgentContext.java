@@ -22,6 +22,8 @@ public final class AgentContext {
     private String analysis;
     private PatchGenerateResult patchGenerateResult;
     private PatchSafetyCheckResult patchSafetyCheckResult;
+    private PatchVerificationResult patchVerificationResult;
+    private Long patchRecordId;
 
     /**
      * 创建 Agent 执行上下文。
@@ -59,6 +61,8 @@ public final class AgentContext {
         this.analysis = null;
         this.patchGenerateResult = null;
         this.patchSafetyCheckResult = null;
+        this.patchVerificationResult = null;
+        this.patchRecordId = null;
     }
 
     /**
@@ -149,6 +153,14 @@ public final class AgentContext {
         return patchGenerateResult;
     }
 
+    public PatchVerificationResult patchVerificationResult() {
+        return patchVerificationResult;
+    }
+
+    public Long patchRecordId() {
+        return patchRecordId;
+    }
+
     /**
      * 更新本地工作目录。
      */
@@ -177,10 +189,18 @@ public final class AgentContext {
         this.patchGenerateResult = patchGenerateResult;
     }
 
+    public void updatePatchRecordId(Long patchRecordId) {
+        this.patchRecordId = patchRecordId;
+    }
+
     /**
      * 更新 patch 安全检查结果。
      */
     public void updatePatchSafetyCheckResult(PatchSafetyCheckResult patchSafetyCheckResult) {
         this.patchSafetyCheckResult = patchSafetyCheckResult;
+    }
+
+    public void updatePatchVerificationResult(PatchVerificationResult patchVerificationResult) {
+        this.patchVerificationResult = patchVerificationResult;
     }
 }

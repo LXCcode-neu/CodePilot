@@ -20,3 +20,7 @@ export function deleteTask(id: string) {
 export function runTask(id: string) {
   return request.post<AgentTask>(`/api/tasks/${id}/run`);
 }
+
+export function cancelTask(id: string) {
+  return request.post<AgentTask>(`/api/tasks/${id}/cancel`);
+}

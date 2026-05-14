@@ -5,10 +5,12 @@ import com.codepliot.entity.AgentTask;
 import com.codepliot.entity.AgentTaskStatus;
 import com.codepliot.entity.ProjectLlmConfig;
 import com.codepliot.entity.ProjectRepo;
+import com.codepliot.exception.AgentTaskCancelledException;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.AgentContext;
 import com.codepliot.model.AgentExecutionDecision;
 import com.codepliot.model.ErrorCode;
+import com.codepliot.model.PatchGeneratedEvent;
 import com.codepliot.model.TaskEventMessage;
 import com.codepliot.policy.AgentExecutionPolicy;
 import com.codepliot.service.ProjectLlmConfigService;
@@ -24,14 +26,10 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-/**
- * Agent 执行器。
- *
- * <p>负责按顺序执行全部 AgentTool，并在执行过程中持续更新任务状态、步骤轨迹和 SSE 事件。
- */
 @Component
 public class AgentExecutor {
 
@@ -45,10 +43,10 @@ public class AgentExecutor {
     private final SseService sseService;
     private final AgentExecutionPolicy agentExecutionPolicy;
     private final ProjectLlmConfigService projectLlmConfigService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final AgentTaskCancellationService agentTaskCancellationService;
+    private final AgentTaskCancellationRegistry cancellationRegistry;
 
-    /**
-     * 创建 Agent 执行器。
-     */
     public AgentExecutor(AgentTaskService agentTaskService,
                          AgentStepService agentStepService,
                          ObjectMapper objectMapper,
@@ -56,7 +54,10 @@ public class AgentExecutor {
                          TaskRunLockService taskRunLockService,
                          SseService sseService,
                          AgentExecutionPolicy agentExecutionPolicy,
-                         ProjectLlmConfigService projectLlmConfigService) {
+                         ProjectLlmConfigService projectLlmConfigService,
+                         ApplicationEventPublisher eventPublisher,
+                         AgentTaskCancellationService agentTaskCancellationService,
+                         AgentTaskCancellationRegistry cancellationRegistry) {
         this.agentTaskService = agentTaskService;
         this.agentStepService = agentStepService;
         this.objectMapper = objectMapper;
@@ -65,17 +66,16 @@ public class AgentExecutor {
         this.sseService = sseService;
         this.agentExecutionPolicy = agentExecutionPolicy;
         this.projectLlmConfigService = projectLlmConfigService;
+        this.eventPublisher = eventPublisher;
+        this.agentTaskCancellationService = agentTaskCancellationService;
+        this.cancellationRegistry = cancellationRegistry;
     }
 
-    /**
-     * 在异步线程中执行任务。
-     *
-     * <p>这里统一兜底异常和锁释放，确保后台任务不会因为线程异常而丢失状态。
-     */
     @Async("agentTaskExecutor")
     public void executeAsync(AgentTask task, ProjectRepo projectRepo, String lockValue) {
+        cancellationRegistry.register(task.getId());
         try {
-            pushTaskEvent(task.getId(), task.getStatus(), "RUNNING", null, "任务已进入后台执行。");
+            pushTaskEvent(task.getId(), task.getStatus(), "RUNNING", null, "Agent task entered background execution");
             execute(task, projectRepo);
         } catch (RuntimeException exception) {
             log.error("Agent task async execution failed, taskId={}", task.getId(), exception);
@@ -84,35 +84,36 @@ public class AgentExecutor {
             log.error("Agent task async execution failed with unexpected throwable, taskId={}", task.getId(), throwable);
             completeWithFailure(task.getId(), throwable);
         } finally {
+            cancellationRegistry.unregister(task.getId());
+            Thread.interrupted();
             taskRunLockService.unlock(task.getId(), lockValue);
         }
     }
 
-    /**
-     * 按顺序执行当前任务的全部工具链。
-     */
     public void execute(AgentTask task, ProjectRepo projectRepo) {
         AgentContext context = buildContext(task, projectRepo);
         try {
             for (AgentTool agentTool : agentTools) {
+                agentTaskCancellationService.throwIfCancelRequested(context.taskId());
                 runTool(context, agentTool);
+                agentTaskCancellationService.throwIfCancelRequested(context.taskId());
             }
 
-            AgentExecutionDecision decision = agentExecutionPolicy.afterPatchGenerated(context.patchSafetyCheckResult());
+            AgentExecutionDecision decision = agentExecutionPolicy.afterPatchGenerated(
+                    context.patchSafetyCheckResult(),
+                    context.patchVerificationResult()
+            );
             agentTaskService.updateStatus(context.taskId(), decision.status(), decision.resultSummary(), null);
+            publishPatchOutcome(context, decision);
             pushTaskEvent(context.taskId(), decision.status().name(), "COMPLETED", null, decision.eventMessage());
             sseService.complete(context.taskId());
+        } catch (AgentTaskCancelledException exception) {
+            completeWithCancelled(context.taskId(), exception.getMessage());
         } catch (RuntimeException exception) {
-            agentTaskService.updateStatus(context.taskId(), AgentTaskStatus.FAILED, null, errorMessage(exception));
-            pushTaskEvent(context.taskId(), AgentTaskStatus.FAILED.name(), "COMPLETED", null, errorMessage(exception));
-            sseService.complete(context.taskId());
-            throw exception;
+            completeWithFailure(context.taskId(), exception);
         }
     }
 
-    /**
-     * 构建本次运行使用的上下文对象。
-     */
     private AgentContext buildContext(AgentTask task, ProjectRepo projectRepo) {
         ProjectLlmConfig llmConfig = projectLlmConfigService.requireProjectConfig(task.getProjectId(), task.getUserId());
         return new AgentContext(
@@ -128,11 +129,6 @@ public class AgentExecutor {
         );
     }
 
-    /**
-     * 执行单个工具步骤。
-     *
-     * <p>步骤开始、成功、失败三个节点都会同步写入步骤表，并推送对应 SSE 事件。
-     */
     private void runTool(AgentContext context, AgentTool agentTool) {
         agentTaskService.updateStatus(context.taskId(), agentTool.taskStatus());
         Long stepId = agentStepService.startStep(
@@ -146,7 +142,7 @@ public class AgentExecutor {
                 agentTool.taskStatus().name(),
                 "RUNNING",
                 agentTool.stepType().name(),
-                agentTool.stepName() + " 开始执行"
+                agentTool.stepName() + " started"
         );
 
         try {
@@ -161,18 +157,60 @@ public class AgentExecutor {
                     agentTool.taskStatus().name(),
                     "RUNNING",
                     agentTool.stepType().name(),
-                    agentTool.stepName() + " 执行成功"
+                    agentTool.stepName() + " succeeded"
             );
+        } catch (AgentTaskCancelledException exception) {
+            failStepIfPossible(stepId, exception);
+            pushTaskEvent(
+                    context.taskId(),
+                    AgentTaskStatus.CANCEL_REQUESTED.name(),
+                    "RUNNING",
+                    agentTool.stepType().name(),
+                    agentTool.stepName() + " cancelled"
+            );
+            throw exception;
         } catch (RuntimeException exception) {
+            try {
+                agentTaskCancellationService.throwIfCancelRequested(context.taskId());
+            } catch (AgentTaskCancelledException cancellationException) {
+                failStepIfPossible(stepId, cancellationException);
+                pushTaskEvent(
+                        context.taskId(),
+                        AgentTaskStatus.CANCEL_REQUESTED.name(),
+                        "RUNNING",
+                        agentTool.stepType().name(),
+                        agentTool.stepName() + " cancelled"
+                );
+                throw cancellationException;
+            }
             failStepIfPossible(stepId, exception);
             pushTaskEvent(
                     context.taskId(),
                     AgentTaskStatus.FAILED.name(),
                     "RUNNING",
                     agentTool.stepType().name(),
-                    agentTool.stepName() + " 执行失败：" + errorMessage(exception)
+                    agentTool.stepName() + " failed: " + errorMessage(exception)
             );
             throw exception;
+        }
+    }
+
+    private void publishPatchOutcome(AgentContext context, AgentExecutionDecision decision) {
+        Long patchRecordId = context.patchRecordId();
+        if (patchRecordId == null) {
+            return;
+        }
+        if (AgentTaskStatus.WAITING_CONFIRM.equals(decision.status())) {
+            eventPublisher.publishEvent(new PatchGeneratedEvent(context.taskId(), patchRecordId, true, null));
+            return;
+        }
+        if (AgentTaskStatus.VERIFY_FAILED.equals(decision.status())) {
+            eventPublisher.publishEvent(new PatchGeneratedEvent(
+                    context.taskId(),
+                    patchRecordId,
+                    false,
+                    decision.resultSummary()
+            ));
         }
     }
 
@@ -189,9 +227,6 @@ public class AgentExecutor {
         }
     }
 
-    /**
-     * 生成步骤输入快照，便于排查每一步拿到的上下文。
-     */
     private Map<String, Object> stepInput(AgentContext context, AgentStepType stepType) {
         Map<String, Object> input = new LinkedHashMap<>();
         input.put("taskId", context.taskId());
@@ -206,9 +241,6 @@ public class AgentExecutor {
         return input;
     }
 
-    /**
-     * 生成步骤输出快照，便于在任务详情页中直接展示结果。
-     */
     private Map<String, Object> stepOutput(AgentContext context, AgentStepType stepType, ToolResult result) {
         Map<String, Object> output = new LinkedHashMap<>();
         output.put("taskId", context.taskId());
@@ -219,9 +251,6 @@ public class AgentExecutor {
         return output;
     }
 
-    /**
-     * 将步骤数据序列化为 JSON 字符串。
-     */
     private String toJson(Map<String, Object> value) {
         try {
             return objectMapper.writeValueAsString(value);
@@ -230,9 +259,6 @@ public class AgentExecutor {
         }
     }
 
-    /**
-     * 提取适合展示给前端和日志的错误信息。
-     */
     private String errorMessage(Throwable throwable) {
         if (throwable.getMessage() == null || throwable.getMessage().isBlank()) {
             return throwable.getClass().getSimpleName();
@@ -247,9 +273,10 @@ public class AgentExecutor {
         sseService.complete(taskId);
     }
 
-    /**
-     * 推送任务级事件。
-     */
+    private void completeWithCancelled(Long taskId, String message) {
+        agentTaskCancellationService.markCancelled(taskId, message);
+    }
+
     private void pushTaskEvent(Long taskId, String taskStatus, String phase, String stepType, String message) {
         sseService.push(new TaskEventMessage(
                 taskId,

@@ -1,6 +1,8 @@
 package com.codepliot.service.llm;
 
 import com.codepliot.model.RetrievedCodeChunk;
+import com.codepliot.model.PatchVerificationCommandResult;
+import com.codepliot.model.PatchVerificationResult;
 import java.util.List;
 import org.springframework.stereotype.Component;
 /**
@@ -39,6 +41,54 @@ public String buildUserPrompt(String issueTitle,
 
         appendChunks(builder, retrievedChunks);
         return builder.toString();
+    }
+
+public String buildRepairUserPrompt(String issueTitle,
+                                    String issueDescription,
+                                    String analysis,
+                                    List<RetrievedCodeChunk> retrievedChunks,
+                                    String previousPatch,
+                                    PatchVerificationResult verificationResult,
+                                    int attemptNo,
+                                    int maxAttempts) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(buildUserPrompt(issueTitle, issueDescription, analysis, retrievedChunks))
+                .append("\n\n")
+                .append("The previous patch failed automatic verification. Generate a corrected replacement patch.\n")
+                .append("This is repair attempt ")
+                .append(attemptNo)
+                .append(" of ")
+                .append(maxAttempts)
+                .append(".\n")
+                .append("Return the same strict JSON shape with exactly analysis, solution, patch, and risk.\n")
+                .append("Do not explain outside JSON. The patch field must be a complete replacement unified diff, not an incremental diff on top of the failed patch.\n\n")
+                .append("Previous patch:\n")
+                .append(nullToEmpty(previousPatch))
+                .append("\n\nVerification summary:\n")
+                .append(verificationResult == null ? "" : nullToEmpty(verificationResult.summary()))
+                .append("\n\nFailed/related command output:\n");
+        appendVerificationCommands(builder, verificationResult);
+        return builder.toString();
+    }
+
+private void appendVerificationCommands(StringBuilder builder, PatchVerificationResult verificationResult) {
+        if (verificationResult == null || verificationResult.commands().isEmpty()) {
+            builder.append("- No command output was captured.\n");
+            return;
+        }
+        int index = 1;
+        for (PatchVerificationCommandResult command : verificationResult.commands()) {
+            builder.append('\n')
+                    .append("[verification command ").append(index++).append("]\n")
+                    .append("name: ").append(nullToEmpty(command.name())).append('\n')
+                    .append("command: ").append(nullToEmpty(command.command())).append('\n')
+                    .append("workingDirectory: ").append(nullToEmpty(command.workingDirectory())).append('\n')
+                    .append("exitCode: ").append(command.exitCode()).append('\n')
+                    .append("passed: ").append(command.passed()).append('\n')
+                    .append("timedOut: ").append(command.timedOut()).append('\n')
+                    .append("outputSummary:\n")
+                    .append(nullToEmpty(command.outputSummary())).append('\n');
+        }
     }
 /**
  * 执行 appendChunks 相关逻辑。

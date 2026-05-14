@@ -214,6 +214,7 @@ public class GitHubIssueEventService {
                 event.getUserId(),
                 notificationTemplateFactory.repairFailed(watch, event, taskId, reason)
         );
+        botNotificationService.repairFailed(watch, event, taskId, reason);
     }
 
     private GitHubIssueEvent requireOwnedEvent(Long id) {
