@@ -26,8 +26,8 @@ import type { AgentTask } from "@/types/task";
 const INVALID_TASK_ID = "无效的任务 ID";
 const LOAD_TASK_ERROR = "加载任务详情失败";
 const RUN_TASK_ERROR = "运行 Agent 失败";
-const CANCEL_TASK_ERROR = "Cancel task failed";
-const CANCEL_REQUESTED = "Task cancellation requested.";
+const CANCEL_TASK_ERROR = "取消任务失败";
+const CANCEL_REQUESTED = "已提交取消任务请求。";
 const LOAD_FAILED = "加载失败";
 const TASK_NOT_FOUND = "任务不存在";
 const TASK_NOT_FOUND_DESC = "请返回任务列表重新选择任务。";
@@ -45,7 +45,7 @@ const DELETE_CONFIRM_MESSAGE = "确定删除这个任务吗？删除后对应的
 const DELETE_ERROR = "删除任务失败";
 const TASK_INFO_TITLE = "任务信息";
 const PROJECT_LABEL = "关联仓库";
-const MODEL_LABEL = "Model";
+const MODEL_LABEL = "模型";
 const CREATED_AT_LABEL = "创建时间";
 const UPDATED_AT_LABEL = "最近更新时间";
 const SUMMARY_LABEL = "结果摘要";
@@ -320,7 +320,7 @@ export function TaskDetailPage() {
     <div className="space-y-8">
       <section className="flex flex-col gap-5 rounded-[28px] border border-border bg-slate-900 px-8 py-8 text-white lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-3">
-          <p className="text-sm uppercase tracking-[0.24em] text-slate-300">Task Detail</p>
+          <p className="text-sm uppercase tracking-[0.24em] text-slate-300">任务详情</p>
           <h1 className="text-3xl font-extrabold">{task.issueTitle}</h1>
           <p className="max-w-3xl text-sm leading-7 text-slate-300">{task.issueDescription}</p>
         </div>
@@ -339,7 +339,7 @@ export function TaskDetailPage() {
           {canCancel ? (
             <Button variant="destructive" onClick={handleCancel} disabled={cancelling || running || confirming || submittingPullRequest || deleting}>
               {cancelling ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <StopCircle className="h-4 w-4" />}
-              {cancelling ? "Cancelling..." : "Cancel"}
+              {cancelling ? "取消中" : "取消任务"}
             </Button>
           ) : null}
           <Button variant="destructive" onClick={handleDelete} disabled={!canDelete || running || cancelling || confirming || submittingPullRequest || deleting}>
@@ -348,7 +348,7 @@ export function TaskDetailPage() {
           </Button>
           <Button onClick={handleRun} disabled={!canRun || running || cancelling || confirming || submittingPullRequest || deleting}>
             {running ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
-            Run Agent
+            运行 Agent
           </Button>
         </div>
       </section>
@@ -367,7 +367,7 @@ export function TaskDetailPage() {
           <CardContent className="grid gap-4 text-sm text-slate-600">
             <div>
               <p className="text-xs uppercase tracking-wide text-slate-400">{PROJECT_LABEL}</p>
-              <p className="mt-1 font-semibold text-slate-900">{project?.repoName || `Project #${task.projectId}`}</p>
+              <p className="mt-1 font-semibold text-slate-900">{project?.repoName || `项目 #${task.projectId}`}</p>
               <p className="mt-1 break-all text-xs text-slate-500">{project?.repoUrl || "--"}</p>
             </div>
             <Separator />

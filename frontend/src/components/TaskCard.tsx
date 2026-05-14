@@ -18,7 +18,7 @@ export function TaskCard({ task, repoName, onDelete, deleting = false }: TaskCar
     <Card className="transition hover:-translate-y-0.5">
       <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{repoName || `Project #${task.projectId}`}</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{repoName || `项目 #${task.projectId}`}</p>
           <CardTitle className="text-base">{task.issueTitle}</CardTitle>
         </div>
         <StatusBadge status={task.status} />

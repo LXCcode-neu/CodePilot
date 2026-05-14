@@ -58,7 +58,7 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
             <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
               <div className="space-y-2">
                 <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-slate-400">
-                  <span>Step {index + 1}</span>
+                  <span>步骤 {index + 1}</span>
                   <span>{step.stepType}</span>
                 </div>
                 <CardTitle className="text-base">{getStepDisplayName(step.stepType, step.stepName)}</CardTitle>
@@ -78,7 +78,7 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
               <Separator />
               <Button variant="ghost" size="sm" onClick={() => setActiveStep(step)}>
                 <FileJson2 className="h-4 w-4" />
-                查看 input / output
+                查看输入 / 输出
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </CardContent>
@@ -97,10 +97,10 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
           </DialogHeader>
           <Tabs defaultValue="input">
             <TabsList>
-              <TabsTrigger value="input">Input</TabsTrigger>
-              <TabsTrigger value="output">Output</TabsTrigger>
-              {isPatchOutput(activeStep, details.parsedOutput) ? <TabsTrigger value="diff">Readable Diff</TabsTrigger> : null}
-              {isPatchOutput(activeStep, details.parsedOutput) ? <TabsTrigger value="pr">PR Draft</TabsTrigger> : null}
+              <TabsTrigger value="input">输入</TabsTrigger>
+              <TabsTrigger value="output">输出</TabsTrigger>
+              {isPatchOutput(activeStep, details.parsedOutput) ? <TabsTrigger value="diff">可读 Diff</TabsTrigger> : null}
+              {isPatchOutput(activeStep, details.parsedOutput) ? <TabsTrigger value="pr">PR 草稿</TabsTrigger> : null}
             </TabsList>
             <TabsContent value="input">
               <ScrollArea className="h-72 rounded-2xl border border-border bg-slate-950 p-4 text-sm text-slate-100">

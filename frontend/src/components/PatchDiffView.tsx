@@ -12,7 +12,7 @@ export function PatchStats({ fileChanges }: { fileChanges: PatchFileChange[] }) 
 
   return (
     <div className="flex flex-wrap gap-2 text-xs">
-      <Badge variant="outline">{fileChanges.length} files</Badge>
+      <Badge variant="outline">{fileChanges.length} 个文件</Badge>
       <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700" variant="outline">
         +{added}
       </Badge>
@@ -27,7 +27,7 @@ export function PatchDiffView({ fileChanges, rawPatch }: { fileChanges: PatchFil
   if (!fileChanges.length) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
-        No structured diff was found. The raw patch is still available below.
+        未找到结构化 diff，可在下方查看原始 Patch。
         {rawPatch ? (
           <pre className="mt-4 max-h-72 overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-slate-100">
             {rawPatch}
@@ -103,7 +103,7 @@ export function PullRequestPreviewCard({ pullRequest }: { pullRequest?: PullRequ
   if (!pullRequest) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
-        No PR preview is available yet.
+        暂无 PR 预览。
       </div>
     );
   }
@@ -120,12 +120,12 @@ export function PullRequestPreviewCard({ pullRequest }: { pullRequest?: PullRequ
             <p className="text-xs leading-6 text-slate-300">{pullRequest.status}</p>
           </div>
           <Badge className={pullRequest.ready ? "bg-emerald-500 text-white" : "bg-amber-500 text-white"}>
-            {pullRequest.ready ? "Ready draft" : "Not ready"}
+            {pullRequest.ready ? "草稿可用" : "尚未就绪"}
           </Badge>
         </div>
         <div className="grid gap-2 text-xs text-slate-200 md:grid-cols-3">
-          <span className="rounded-xl bg-white/10 px-3 py-2">Branch: {pullRequest.branchName}</span>
-          <span className="rounded-xl bg-white/10 px-3 py-2">{pullRequest.changedFiles} files</span>
+          <span className="rounded-xl bg-white/10 px-3 py-2">分支: {pullRequest.branchName}</span>
+          <span className="rounded-xl bg-white/10 px-3 py-2">{pullRequest.changedFiles} 个文件</span>
           <span className="rounded-xl bg-white/10 px-3 py-2">
             +{pullRequest.addedLines} / -{pullRequest.removedLines}
           </span>
@@ -135,7 +135,7 @@ export function PullRequestPreviewCard({ pullRequest }: { pullRequest?: PullRequ
         <div>
           <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
             <Plus className="h-3.5 w-3.5" />
-            Commit message
+            Commit 信息
           </p>
           <div className="rounded-xl bg-slate-100 px-3 py-2 font-mono text-sm text-slate-800">
             {pullRequest.commitMessage}
@@ -144,7 +144,7 @@ export function PullRequestPreviewCard({ pullRequest }: { pullRequest?: PullRequ
         <div>
           <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
             <ScrollText className="h-3.5 w-3.5" />
-            PR body
+            PR 内容
           </p>
           <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
             {pullRequest.body}
@@ -157,7 +157,7 @@ export function PullRequestPreviewCard({ pullRequest }: { pullRequest?: PullRequ
           onClick={() => void navigator.clipboard?.writeText(`${pullRequest.title}\n\n${pullRequest.body}`)}
         >
           <Copy className="h-4 w-4" />
-          Copy PR draft
+          复制 PR 草稿
         </Button>
       </CardContent>
     </Card>

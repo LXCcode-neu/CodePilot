@@ -1,13 +1,13 @@
 import type { AgentStepType } from "@/types/step";
 
 const STEP_TYPE_LABELS: Record<AgentStepType, string> = {
-  CLONE_REPOSITORY: "Clone repository",
-  SEARCH_RELEVANT_CODE: "Search code",
-  ANALYZE_ISSUE: "Analyze issue",
-  GENERATE_PATCH: "Generate patch",
-  VERIFY_PATCH: "Verify patch",
-  REPAIR_PATCH: "Repair patch",
-  COMPLETE_RUN: "Complete run",
+  CLONE_REPOSITORY: "克隆仓库",
+  SEARCH_RELEVANT_CODE: "检索相关代码",
+  ANALYZE_ISSUE: "分析 Issue",
+  GENERATE_PATCH: "生成 Patch",
+  VERIFY_PATCH: "验证 Patch",
+  REPAIR_PATCH: "修复 Patch",
+  COMPLETE_RUN: "完成执行",
 };
 
 function normalizeStepType(stepType?: string | null) {
@@ -26,7 +26,7 @@ export function getStepTypeLabel(stepType?: string | null) {
   const normalizedStepType = normalizeStepType(stepType);
 
   if (!normalizedStepType) {
-    return "Unknown step";
+    return "未知步骤";
   }
 
   return STEP_TYPE_LABELS[normalizedStepType as AgentStepType] ?? normalizedStepType;

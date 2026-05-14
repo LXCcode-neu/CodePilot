@@ -8,6 +8,15 @@ import { buildPullRequestPreview, parseUnifiedDiff } from "@/lib/patch-diff";
 import { formatDateTime } from "@/lib/utils";
 import type { PatchRecord } from "@/types/patch";
 
+const TAB_LABELS: Record<string, string> = {
+  diff: "Diff",
+  pr: "PR 草稿",
+  analysis: "分析",
+  solution: "方案",
+  risk: "风险",
+  raw: "原始 Patch",
+};
+
 function Section({ value }: { value?: string | null }) {
   if (!value) {
     return <p className="text-sm leading-7 text-slate-500">暂无内容</p>;
@@ -62,7 +71,7 @@ export function PatchViewer({
                 value={tab}
                 className="border border-border bg-slate-100 capitalize data-[state=active]:bg-slate-900 data-[state=active]:text-white"
               >
-                {tab === "pr" ? "PR Draft" : tab}
+                {TAB_LABELS[tab] ?? tab}
               </TabsTrigger>
             ))}
           </TabsList>

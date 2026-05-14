@@ -58,10 +58,10 @@ function getStatusMessage(taskStatus?: string | null, stepType?: string | null) 
     return "任务已完成。";
   }
   if (taskStatus === "CANCEL_REQUESTED") {
-    return "Task cancellation requested. Waiting for the current step to stop.";
+    return "已请求取消任务，正在等待当前步骤停止。";
   }
   if (taskStatus === "CANCELLED") {
-    return "Task cancelled.";
+    return "任务已取消。";
   }
   if (taskStatus === "FAILED") {
     return "任务执行失败，请查看错误信息。";

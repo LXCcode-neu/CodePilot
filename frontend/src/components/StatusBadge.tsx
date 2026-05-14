@@ -19,6 +19,25 @@ const statusStyles: Record<string, string> = {
   SUCCESS: "border-emerald-200 bg-emerald-50 text-emerald-700",
 };
 
+const statusLabels: Record<string, string> = {
+  PENDING: "待执行",
+  CLONING: "克隆中",
+  RETRIEVING: "检索中",
+  ANALYZING: "分析中",
+  GENERATING_PATCH: "生成 Patch 中",
+  VERIFYING: "验证中",
+  REPAIRING_PATCH: "修复 Patch 中",
+  CANCEL_REQUESTED: "取消中",
+  CANCELLED: "已取消",
+  VERIFY_FAILED: "验证失败",
+  WAITING_CONFIRM: "待确认",
+  COMPLETED: "已完成",
+  FAILED: "失败",
+  RUNNING: "运行中",
+  SUCCESS: "成功",
+  UNKNOWN: "未知",
+};
+
 export function StatusBadge({ status }: { status?: string | null }) {
   const value = status || "UNKNOWN";
   return (
@@ -26,7 +45,7 @@ export function StatusBadge({ status }: { status?: string | null }) {
       variant="outline"
       className={cn("border-transparent text-[11px] uppercase tracking-wide", statusStyles[value] ?? "bg-slate-100 text-slate-600")}
     >
-      {value}
+      {statusLabels[value] ?? value}
     </Badge>
   );
 }
