@@ -56,7 +56,12 @@ public class PullRequestSubmitService {
 
     @Transactional
     public PullRequestSubmitResult submit(Long taskId) {
-        AgentTask task = requireOwnedTask(taskId);
+        return submit(taskId, SecurityUtils.getCurrentUserId());
+    }
+
+    @Transactional
+    public PullRequestSubmitResult submit(Long taskId, Long userId) {
+        AgentTask task = requireOwnedTask(taskId, userId);
         ProjectRepo projectRepo = requireOwnedProject(task.getProjectId(), task.getUserId());
         PatchRecord patchRecord = requirePatchRecord(taskId);
         validateSubmittable(task.getUserId(), patchRecord);
@@ -65,11 +70,8 @@ public class PullRequestSubmitService {
                 "Connect GitHub before submitting a pull request"
         );
 
-        String repositoryPath = projectRepo.getLocalPath();
-        if (repositoryPath == null || repositoryPath.isBlank() || !Files.isDirectory(Path.of(repositoryPath))) {
-            repositoryPath = gitService.cloneRepository(projectRepo.getId());
-            projectRepo = projectRepoMapper.selectById(projectRepo.getId());
-        }
+        String repositoryPath = gitService.syncRepository(projectRepo.getId());
+        projectRepo = projectRepoMapper.selectById(projectRepo.getId());
 
         PullRequestPreview preview = PatchRecordVO.from(patchRecord).pullRequest();
         GitHubRepoRef repoRef = parseRepoRef(projectRepo.getRepoUrl());
@@ -194,7 +196,10 @@ public class PullRequestSubmitService {
     }
 
     private AgentTask requireOwnedTask(Long taskId) {
-        Long currentUserId = SecurityUtils.getCurrentUserId();
+        return requireOwnedTask(taskId, SecurityUtils.getCurrentUserId());
+    }
+
+    private AgentTask requireOwnedTask(Long taskId, Long currentUserId) {
         AgentTask agentTask = agentTaskMapper.selectOne(new LambdaQueryWrapper<AgentTask>()
                 .eq(AgentTask::getId, taskId)
                 .eq(AgentTask::getUserId, currentUserId)

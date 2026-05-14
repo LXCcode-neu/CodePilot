@@ -1,17 +1,15 @@
 package com.codepliot.service;
 
 import com.codepliot.config.AppProperties;
+import com.codepliot.entity.BotActionCode;
 import com.codepliot.entity.GitHubIssueEvent;
 import com.codepliot.entity.PatchRecord;
 import com.codepliot.entity.UserRepoWatch;
-import com.codepliot.model.NotificationAction;
-import com.codepliot.model.NotificationActionType;
 import com.codepliot.model.NotificationEventType;
 import com.codepliot.model.NotificationMessage;
 import com.codepliot.model.PatchFileChange;
 import com.codepliot.model.PatchRecordVO;
 import com.codepliot.model.PullRequestPreview;
-import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,47 +17,29 @@ public class NotificationTemplateFactory {
 
     private static final int MAX_TEXT_LENGTH = 3200;
 
-    private final NotificationActionTokenService notificationActionTokenService;
+    private final BotActionCodeService botActionCodeService;
     private final AppProperties appProperties;
 
-    public NotificationTemplateFactory(NotificationActionTokenService notificationActionTokenService,
+    public NotificationTemplateFactory(BotActionCodeService botActionCodeService,
                                        AppProperties appProperties) {
-        this.notificationActionTokenService = notificationActionTokenService;
+        this.botActionCodeService = botActionCodeService;
         this.appProperties = appProperties;
     }
 
     public NotificationMessage newIssue(UserRepoWatch watch, GitHubIssueEvent event) {
-        String runToken = notificationActionTokenService.createIssueActionToken(
-                event.getUserId(),
-                event.getId(),
-                NotificationActionType.RUN_FIX
-        );
-        String ignoreToken = notificationActionTokenService.createIssueActionToken(
-                event.getUserId(),
-                event.getId(),
-                NotificationActionType.IGNORE
-        );
-
+        BotActionCode code = botActionCodeService.findOrCreateForIssue(event.getUserId(), event.getId());
         return new NotificationMessage(
                 "CodePilot 发现新的 GitHub Issue",
                 watch.getOwner() + "/" + watch.getRepoName()
                         + " #" + event.getIssueNumber()
                         + "\n" + event.getIssueTitle()
-                        + "\n\n请在群消息里选择是否执行自动修复。",
+                        + "\n\n操作码：" + code.getActionCode()
+                        + "\n\n手机端直接在群里回复："
+                        + "\n修复 " + code.getActionCode()
+                        + "\n忽略 " + code.getActionCode()
+                        + "\n状态 " + code.getActionCode(),
                 NotificationEventType.NEW_ISSUE,
-                event.getIssueUrl(),
-                List.of(
-                        new NotificationAction(
-                                "修复",
-                                NotificationActionType.RUN_FIX,
-                                appProperties.buildUrl("/notification-actions/" + runToken + "/run")
-                        ),
-                        new NotificationAction(
-                                "忽略",
-                                NotificationActionType.IGNORE,
-                                appProperties.buildUrl("/notification-actions/" + ignoreToken + "/ignore")
-                        )
-                )
+                event.getIssueUrl()
         );
     }
 
@@ -81,7 +61,7 @@ public class NotificationTemplateFactory {
                         + " #" + event.getIssueNumber()
                         + "\n任务 ID：" + taskId
                         + "\nPatch ID：" + patchId
-                        + "\n\n请在 CodePilot 中查看完整 Diff 并确认后再提交 PR。",
+                        + "\n\n请在群里回复“确认PR 操作码”来提交 PR，或打开 CodePilot 查看完整 Diff。",
                 NotificationEventType.PATCH_READY,
                 appProperties.buildUrl("/tasks/" + taskId)
         );
@@ -90,15 +70,19 @@ public class NotificationTemplateFactory {
     public NotificationMessage patchReady(UserRepoWatch watch, GitHubIssueEvent event, PatchRecord patchRecord) {
         PatchRecordVO patch = PatchRecordVO.from(patchRecord);
         PullRequestPreview pullRequest = patch.pullRequest();
-        Long taskId = patch.taskId();
+        BotActionCode code = botActionCodeService.findByTaskId(patch.taskId());
+        String actionCode = code == null ? "CP-未知" : code.getActionCode();
         String content = truncate(
                 watch.getOwner() + "/" + watch.getRepoName()
                         + " #" + event.getIssueNumber()
-                        + "\n任务 ID：" + taskId
+                        + "\n任务 ID：" + patch.taskId()
                         + "\nPatch ID：" + patch.id()
+                        + "\n操作码：" + actionCode
                         + "\n\nDiff 摘要：\n" + buildDiffSummary(patch)
                         + "\n\nPR Draft：\n" + buildPullRequestDraft(pullRequest)
-                        + "\n\n请在 CodePilot 中查看完整 Diff，确认后再提交 PR。",
+                        + "\n\n手机端直接在群里回复："
+                        + "\n确认PR " + actionCode
+                        + "\n状态 " + actionCode,
                 MAX_TEXT_LENGTH
         );
 
@@ -106,7 +90,7 @@ public class NotificationTemplateFactory {
                 "CodePilot 已生成修复 Diff 和 PR Draft",
                 content,
                 NotificationEventType.PATCH_READY,
-                appProperties.buildUrl("/tasks/" + taskId)
+                appProperties.buildUrl("/tasks/" + patch.taskId())
         );
     }
 

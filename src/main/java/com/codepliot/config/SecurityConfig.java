@@ -52,6 +52,7 @@ public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/bot/events/feishu").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )

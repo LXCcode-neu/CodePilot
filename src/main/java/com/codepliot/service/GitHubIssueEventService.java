@@ -36,6 +36,7 @@ public class GitHubIssueEventService {
     private final PatchRecordMapper patchRecordMapper;
     private final NotificationService notificationService;
     private final NotificationTemplateFactory notificationTemplateFactory;
+    private final BotNotificationService botNotificationService;
     private final AgentTaskService agentTaskService;
     private final AgentRunService agentRunService;
 
@@ -44,6 +45,7 @@ public class GitHubIssueEventService {
                                    PatchRecordMapper patchRecordMapper,
                                    NotificationService notificationService,
                                    NotificationTemplateFactory notificationTemplateFactory,
+                                   BotNotificationService botNotificationService,
                                    AgentTaskService agentTaskService,
                                    AgentRunService agentRunService) {
         this.gitHubIssueEventMapper = gitHubIssueEventMapper;
@@ -51,6 +53,7 @@ public class GitHubIssueEventService {
         this.patchRecordMapper = patchRecordMapper;
         this.notificationService = notificationService;
         this.notificationTemplateFactory = notificationTemplateFactory;
+        this.botNotificationService = botNotificationService;
         this.agentTaskService = agentTaskService;
         this.agentRunService = agentRunService;
     }
@@ -89,7 +92,8 @@ public class GitHubIssueEventService {
                 watch.getUserId(),
                 notificationTemplateFactory.newIssue(watch, event)
         );
-        if (notified) {
+        boolean botNotified = botNotificationService.newIssue(watch, event);
+        if (notified || botNotified) {
             event.setStatus(STATUS_NOTIFIED);
             event.setNotifiedAt(LocalDateTime.now());
             gitHubIssueEventMapper.updateById(event);
@@ -192,6 +196,9 @@ public class GitHubIssueEventService {
                         ? notificationTemplateFactory.patchReady(watch, event, taskId, patchId)
                         : notificationTemplateFactory.patchReady(watch, event, patchRecord)
         );
+        if (patchRecord != null) {
+            botNotificationService.patchReady(watch, event, patchRecord);
+        }
     }
 
     @Transactional

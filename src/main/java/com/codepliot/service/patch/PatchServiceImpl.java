@@ -127,7 +127,13 @@ public class PatchServiceImpl implements PatchService {
     @Override
     @Transactional
     public AgentTaskVO confirmTaskPatch(Long taskId) {
-        AgentTask agentTask = requireOwnedTask(taskId);
+        return confirmTaskPatch(taskId, SecurityUtils.getCurrentUserId());
+    }
+
+    @Override
+    @Transactional
+    public AgentTaskVO confirmTaskPatch(Long taskId, Long userId) {
+        AgentTask agentTask = requireOwnedTask(taskId, userId);
         if (!AgentTaskStatus.WAITING_CONFIRM.name().equals(agentTask.getStatus())) {
             throw new BusinessException(ErrorCode.PATCH_CONFIRM_NOT_ALLOWED, "Current task is not waiting for confirmation");
         }
@@ -187,7 +193,10 @@ public class PatchServiceImpl implements PatchService {
      * 校验任务是否属于当前用户。
      */
     private AgentTask requireOwnedTask(Long taskId) {
-        Long currentUserId = SecurityUtils.getCurrentUserId();
+        return requireOwnedTask(taskId, SecurityUtils.getCurrentUserId());
+    }
+
+    private AgentTask requireOwnedTask(Long taskId, Long currentUserId) {
         AgentTask agentTask = agentTaskMapper.selectOne(new LambdaQueryWrapper<AgentTask>()
                 .eq(AgentTask::getId, taskId)
                 .eq(AgentTask::getUserId, currentUserId)

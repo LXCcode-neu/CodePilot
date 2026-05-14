@@ -9,7 +9,9 @@ import com.codepliot.service.GitHubAuthService;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,7 @@ public class GitService {
         Path repositoryPath = gitWorkspaceService.getRepositoryPath(projectId);
 
         if (gitWorkspaceService.hasGitDirectory(projectId)) {
+            syncRepository(projectRepo, repositoryPath);
             return updateLocalPath(projectRepo, repositoryPath);
         }
 
@@ -61,6 +64,62 @@ public class GitService {
             gitWorkspaceService.deleteRepositoryWorkspace(projectId);
             throw new BusinessException(ErrorCode.INTERNAL_ERROR,
                     "Failed to clone GitHub repository: " + buildErrorMessage(ex));
+        }
+    }
+
+    public String syncRepository(Long projectId) {
+        ProjectRepo projectRepo = requireProjectRepo(projectId);
+        Path repositoryPath = gitWorkspaceService.getRepositoryPath(projectId);
+        if (!gitWorkspaceService.hasGitDirectory(projectId)) {
+            return cloneRepository(projectId);
+        }
+        syncRepository(projectRepo, repositoryPath);
+        return updateLocalPath(projectRepo, repositoryPath);
+    }
+
+    private void syncRepository(ProjectRepo projectRepo, Path repositoryPath) {
+        try (Git git = Git.open(repositoryPath.toFile())) {
+            String baseBranch = resolveBaseBranch(projectRepo, git.getRepository());
+            fetchOrigin(git, projectRepo.getUserId());
+            checkoutBaseBranch(git, git.getRepository(), baseBranch);
+            git.reset().setMode(ResetCommand.ResetType.HARD).setRef("origin/" + baseBranch).call();
+            git.clean().setCleanDirectories(true).setIgnore(false).call();
+        } catch (Exception ex) {
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR,
+                    "Failed to sync GitHub repository: " + buildErrorMessage(ex));
+        }
+    }
+
+    private void fetchOrigin(Git git, Long userId) throws GitAPIException {
+        var fetchCommand = git.fetch().setRemote("origin");
+        String accessToken = gitHubAuthService.resolveAccessTokenForUser(userId);
+        if (accessToken != null && !accessToken.isBlank()) {
+            fetchCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(accessToken.trim(), "x-oauth-basic"));
+        }
+        fetchCommand.call();
+    }
+
+    private void checkoutBaseBranch(Git git, Repository repository, String baseBranch) throws Exception {
+        if (repository.findRef(baseBranch) == null) {
+            git.checkout()
+                    .setCreateBranch(true)
+                    .setName(baseBranch)
+                    .setStartPoint("origin/" + baseBranch)
+                    .call();
+        } else {
+            git.checkout().setName(baseBranch).call();
+        }
+    }
+
+    private String resolveBaseBranch(ProjectRepo projectRepo, Repository repository) {
+        if (projectRepo.getDefaultBranch() != null && !projectRepo.getDefaultBranch().isBlank()) {
+            return projectRepo.getDefaultBranch().trim();
+        }
+        try {
+            String branch = repository.getBranch();
+            return branch == null || branch.isBlank() ? "main" : branch;
+        } catch (Exception exception) {
+            return "main";
         }
     }
 

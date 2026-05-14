@@ -159,6 +159,7 @@ Those rules should live in a separate document, for example:
 15. Global or project-level LLM API keys may be stored in the database only after server-side encryption. Never return plaintext API keys to the frontend; return only masked key metadata.
 16. GitHub OAuth access tokens may be stored only after server-side encryption. Never return plaintext GitHub access tokens to the frontend.
 17. Notification approval links must use server-generated one-time tokens. Store only token hashes, expire tokens, and never expose webhook URLs or secret tokens outside server-side configuration.
+18. Chat-based bot approvals must use short server-side action codes. Bind action codes to the originating chat after first use, expire them, and keep platform app secrets server-side only.
 
 ### Default Interpretation
 

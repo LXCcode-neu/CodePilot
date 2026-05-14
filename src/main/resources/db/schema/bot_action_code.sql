@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS bot_action_code (
+  id BIGINT NOT NULL COMMENT 'MyBatis-Plus ASSIGN_ID',
+  user_id BIGINT NOT NULL,
+  issue_event_id BIGINT NOT NULL,
+  task_id BIGINT DEFAULT NULL,
+  patch_id BIGINT DEFAULT NULL,
+  channel_type VARCHAR(32) NOT NULL,
+  chat_id VARCHAR(128) DEFAULT NULL,
+  action_code VARCHAR(32) NOT NULL,
+  status VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+  last_message_id VARCHAR(128) DEFAULT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_bot_action_code (action_code),
+  KEY idx_bot_action_code_issue (issue_event_id),
+  KEY idx_bot_action_code_task (task_id),
+  KEY idx_bot_action_code_chat (channel_type, chat_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

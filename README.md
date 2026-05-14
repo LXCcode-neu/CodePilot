@@ -165,6 +165,7 @@ This repository contains:
 - patch record persistence, safety review, and manual confirmation
 - group robot notification approval links for GitHub Issue auto-fix or ignore decisions
 - repair-result group notifications with diff summary and PR draft preview
+- Feishu app bot message commands for mobile approval: `修复 CP-xxxxx`, `忽略 CP-xxxxx`, `状态 CP-xxxxx`, `确认PR CP-xxxxx`
 - task deletion and cascading cleanup when deleting a project repository
 - Redis-backed task run lock
 - Spring Async background execution
@@ -207,6 +208,13 @@ Prepare before startup:
 - `GITHUB_CLIENT_SECRET` for GitHub OAuth authorization
 - `GITHUB_OAUTH_REDIRECT_URI` for the frontend callback page, for example `http://localhost:5173/github/callback`
 - `CODEPILOT_PUBLIC_BASE_URL` for externally reachable group robot action links, for example `https://codepilot.example.com`
+- optional Feishu app bot configuration for mobile chat commands:
+  - `FEISHU_BOT_ENABLED=true`
+  - `FEISHU_APP_ID`
+  - `FEISHU_APP_SECRET`
+  - `FEISHU_VERIFICATION_TOKEN`
+  - `FEISHU_ENCRYPT_KEY`
+  - `FEISHU_DEFAULT_CHAT_ID` if you want the Feishu app bot to send the first Issue notification without relying on a webhook channel
 
 LLM configuration:
 
@@ -275,18 +283,23 @@ java -jar target/codepilot-0.0.1-SNAPSHOT.jar
 
 ### Issue Auto-Fix Group Approval
 
-When repository watching and a notification channel are configured, new GitHub Issues can be pushed to Feishu or WeCom group robots with one-time approval links.
+When repository watching and a notification channel are configured, new GitHub Issues can be pushed to Feishu or WeCom group robots with an operation code.
 
 - New Issue notification includes:
-  - `修复`: opens a confirmation page and starts the existing Agent task flow after confirmation
-  - `忽略`: opens a confirmation page and marks the Issue event ignored after confirmation
-- Action links are backed by `notification_action_token`; only token hashes are stored, tokens expire after 24 hours, and each token can be used once.
+  - an action code like `CP-8K2F`
+  - mobile chat commands such as `修复 CP-8K2F`, `忽略 CP-8K2F`, and `状态 CP-8K2F`
+- Feishu app bot event callback endpoint:
+  - `POST /api/bot/events/feishu`
+- Action codes are stored in `bot_action_code`, expire after 24 hours, and are bound to the first chat that uses the code.
 - After patch generation, CodePilot sends a group notification containing:
   - changed-file summary
   - added/removed line counts
   - PR draft title, branch, commit message, and body preview
-  - a link back to the task for full diff review and manual PR submission
-- Set `CODEPILOT_PUBLIC_BASE_URL` to the public URL users can open from the group chat. If it is not set, generated links default to `http://localhost:8080`.
+  - commands such as `确认PR CP-8K2F` and `状态 CP-8K2F`
+- The Feishu app bot can reply directly in the same chat when `FEISHU_APP_ID` and `FEISHU_APP_SECRET` are configured.
+- If `FEISHU_DEFAULT_CHAT_ID` is configured, the Feishu app bot also sends the initial Issue notification to that chat. Otherwise, keep using the existing notification channel webhook for the first notification.
+- Pull request submission still uses server-side encrypted GitHub OAuth tokens. Tokens are never sent to the frontend or chat.
+- Before each agent run and PR submission, the local repository workspace is synced with the latest remote default branch.
 
 ### GitHub Account Authorization
 

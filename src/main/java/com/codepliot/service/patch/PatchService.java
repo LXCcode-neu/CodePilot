@@ -33,4 +33,6 @@ public interface PatchService {
      * 确认任务对应的 patch，并推进任务到已完成状态。
      */
     AgentTaskVO confirmTaskPatch(Long taskId);
+
+    AgentTaskVO confirmTaskPatch(Long taskId, Long userId);
 }

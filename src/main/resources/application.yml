@@ -14,6 +14,7 @@ spring:
         - classpath:db/schema/project_llm_config.sql
         - classpath:db/schema/llm_api_key_config.sql
         - classpath:db/schema/notification_action_token.sql
+        - classpath:db/schema/bot_action_code.sql
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/codepilot?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
@@ -47,6 +48,15 @@ security:
 codepilot:
   app:
     public-base-url: ${CODEPILOT_PUBLIC_BASE_URL:http://localhost:8080}
+  bot:
+    feishu:
+      enabled: ${FEISHU_BOT_ENABLED:false}
+      base-url: ${FEISHU_OPEN_API_BASE_URL:https://open.feishu.cn}
+      app-id: ${FEISHU_APP_ID:}
+      app-secret: ${FEISHU_APP_SECRET:}
+      verification-token: ${FEISHU_VERIFICATION_TOKEN:}
+      encrypt-key: ${FEISHU_ENCRYPT_KEY:}
+      default-chat-id: ${FEISHU_DEFAULT_CHAT_ID:}
   workspace:
     root: ./data/workspace
   git:

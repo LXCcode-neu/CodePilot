@@ -275,5 +275,10 @@ class AgentSearchIntegrationTest {
         public AgentTaskVO confirmTaskPatch(Long taskId) {
             return null;
         }
+
+        @Override
+        public AgentTaskVO confirmTaskPatch(Long taskId, Long userId) {
+            return null;
+        }
     }
 }
