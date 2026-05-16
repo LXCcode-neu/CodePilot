@@ -15,6 +15,7 @@ import com.codepliot.model.PullRequestSubmitResult;
 import com.codepliot.repository.AgentTaskMapper;
 import com.codepliot.repository.PatchRecordMapper;
 import com.codepliot.repository.ProjectRepoMapper;
+import com.codepliot.service.agent.PatchTextNormalizer;
 import com.codepliot.service.auth.GitHubAuthService;
 import com.codepliot.service.git.GitService;
 import com.codepliot.utils.SecurityUtils;
@@ -23,8 +24,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.stereotype.Service;
@@ -39,19 +43,22 @@ public class PullRequestSubmitService {
     private final GitService gitService;
     private final GitHubPullRequestClient gitHubPullRequestClient;
     private final GitHubAuthService gitHubAuthService;
+    private final PatchTextNormalizer patchTextNormalizer;
 
     public PullRequestSubmitService(AgentTaskMapper agentTaskMapper,
                                     ProjectRepoMapper projectRepoMapper,
                                     PatchRecordMapper patchRecordMapper,
                                     GitService gitService,
                                     GitHubPullRequestClient gitHubPullRequestClient,
-                                    GitHubAuthService gitHubAuthService) {
+                                    GitHubAuthService gitHubAuthService,
+                                    PatchTextNormalizer patchTextNormalizer) {
         this.agentTaskMapper = agentTaskMapper;
         this.projectRepoMapper = projectRepoMapper;
         this.patchRecordMapper = patchRecordMapper;
         this.gitService = gitService;
         this.gitHubPullRequestClient = gitHubPullRequestClient;
         this.gitHubAuthService = gitHubAuthService;
+        this.patchTextNormalizer = patchTextNormalizer;
     }
 
     @Transactional
@@ -82,13 +89,14 @@ public class PullRequestSubmitService {
         String pullRequestHead = tokenUser.equalsIgnoreCase(repoRef.owner())
                 ? branchName
                 : tokenUser + ":" + branchName;
+        String normalizedPatch = patchTextNormalizer.normalize(patchRecord.getPatch());
 
         pushPatchBranch(
                 repositoryPath,
                 baseBranch,
                 branchName,
                 pushRepository.cloneUrl(),
-                patchRecord.getPatch(),
+                normalizedPatch,
                 preview.commitMessage(),
                 accessToken
         );
@@ -108,6 +116,7 @@ public class PullRequestSubmitService {
         patchRecord.setPrUrl(pullRequest.htmlUrl());
         patchRecord.setPrNumber(pullRequest.number());
         patchRecord.setPrBranch(branchName);
+        patchRecord.setPatch(normalizedPatch);
         patchRecordMapper.updateById(patchRecord);
 
         return new PullRequestSubmitResult(taskId, pullRequest.number(), pullRequest.htmlUrl(), branchName, submittedAt);
@@ -150,9 +159,7 @@ public class PullRequestSubmitService {
                 git.branchDelete().setBranchNames(branchName).setForce(true).call();
             }
             git.checkout().setCreateBranch(true).setName(branchName).call();
-            git.apply()
-                    .setPatch(new ByteArrayInputStream(patch.getBytes(StandardCharsets.UTF_8)))
-                    .call();
+            applyPatch(repositoryPath, git, patch);
             if (git.status().call().isClean()) {
                 throw new BusinessException(ErrorCode.PATCH_PR_NOT_ALLOWED, "Patch did not change any files");
             }
@@ -166,33 +173,160 @@ public class PullRequestSubmitService {
         } catch (BusinessException exception) {
             throw exception;
         } catch (Exception exception) {
-            throw new BusinessException(ErrorCode.INTERNAL_ERROR, "Failed to submit pull request branch: " + errorMessage(exception));
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR, "提交 Pull Request 分支失败: " + errorMessage(exception));
         }
     }
 
+    private void applyPatch(String repositoryPath, Git git, String patch) throws Exception {
+        String normalizedPatch = patchTextNormalizer.normalize(patch);
+        try {
+            applyPatchWithGitCli(repositoryPath, normalizedPatch);
+        } catch (GitCliUnavailableException exception) {
+            git.apply()
+                    .setPatch(new ByteArrayInputStream(normalizedPatch.getBytes(StandardCharsets.UTF_8)))
+                    .call();
+        }
+    }
+
+    private void applyPatchWithGitCli(String repositoryPath, String patch) throws Exception {
+        Path patchFile = Files.createTempFile("codepilot-pr-", ".patch");
+        try {
+            Files.writeString(patchFile, patch, StandardCharsets.UTF_8);
+            GitCommandResult checkResult = runGitCommand(
+                    repositoryPath,
+                    List.of("git", "apply", "--check", "--recount", patchFile.toString())
+            );
+            if (!checkResult.success()) {
+                GitCommandResult threeWayResult = runGitCommand(
+                        repositoryPath,
+                        List.of("git", "apply", "--3way", "--recount", patchFile.toString())
+                );
+                if (threeWayResult.success()) {
+                    return;
+                }
+                throw new BusinessException(
+                        ErrorCode.INTERNAL_ERROR,
+                        "Patch 已过期，无法应用到当前最新代码，请重新运行任务生成新的 Patch。Git 输出: "
+                                + abbreviate(checkResult.output())
+                );
+            }
+            GitCommandResult applyResult = runGitCommand(
+                    repositoryPath,
+                    List.of("git", "apply", "--recount", patchFile.toString())
+            );
+            if (!applyResult.success()) {
+                throw new BusinessException(ErrorCode.INTERNAL_ERROR, "应用 Patch 失败: " + abbreviate(applyResult.output()));
+            }
+        } catch (java.io.IOException exception) {
+            throw new GitCliUnavailableException(exception);
+        } finally {
+            Files.deleteIfExists(patchFile);
+        }
+    }
+
+    private GitCommandResult runGitCommand(String repositoryPath, List<String> command) {
+        try {
+            Process process = new ProcessBuilder(command)
+                    .directory(Path.of(repositoryPath).toFile())
+                    .redirectErrorStream(true)
+                    .start();
+            boolean finished = process.waitFor(60, TimeUnit.SECONDS);
+            String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8).trim();
+            if (!finished) {
+                process.destroyForcibly();
+                return new GitCommandResult(false, "Git 命令执行超时");
+            }
+            return new GitCommandResult(process.exitValue() == 0, output);
+        } catch (java.io.IOException exception) {
+            throw new GitCliUnavailableException(exception);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            return new GitCommandResult(false, "Git 命令被中断");
+        }
+    }
+
+    private String abbreviate(String value) {
+        if (value == null || value.isBlank()) {
+            return "git apply returned a non-zero exit code";
+        }
+        return value.length() <= 1200 ? value : value.substring(0, 1200) + "...";
+    }
+
     private void checkoutBaseBranch(Git git, Repository repository, String baseBranch) throws Exception {
+        String remoteRef = remoteTrackingRef(baseBranch);
         if (repository.findRef(baseBranch) == null) {
             git.checkout()
                     .setCreateBranch(true)
                     .setName(baseBranch)
-                    .setStartPoint("origin/" + baseBranch)
+                    .setStartPoint(remoteRef)
                     .call();
         } else {
             git.checkout().setName(baseBranch).call();
         }
-        git.reset().setMode(ResetCommand.ResetType.HARD).setRef("origin/" + baseBranch).call();
+        git.reset().setMode(ResetCommand.ResetType.HARD).setRef(remoteRef).call();
     }
 
     private String resolveBaseBranch(ProjectRepo projectRepo, String repositoryPath) {
         if (projectRepo.getDefaultBranch() != null && !projectRepo.getDefaultBranch().isBlank()) {
-            return projectRepo.getDefaultBranch().trim();
+            return normalizeBranchName(projectRepo.getDefaultBranch());
         }
         try (Git git = Git.open(Path.of(repositoryPath).toFile())) {
-            String branch = git.getRepository().getBranch();
-            return branch == null || branch.isBlank() ? "main" : branch;
+            Repository repository = git.getRepository();
+            String originHeadBranch = resolveOriginHeadBranch(repository);
+            if (originHeadBranch != null) {
+                return originHeadBranch;
+            }
+            if (hasRemoteBranch(repository, "main")) {
+                return "main";
+            }
+            if (hasRemoteBranch(repository, "master")) {
+                return "master";
+            }
+            return "main";
         } catch (Exception exception) {
             return "main";
         }
+    }
+
+    private String resolveOriginHeadBranch(Repository repository) {
+        try {
+            Ref originHead = repository.exactRef("refs/remotes/origin/HEAD");
+            if (originHead == null) {
+                return null;
+            }
+            Ref target = originHead.isSymbolic() ? originHead.getTarget() : originHead;
+            return normalizeBranchName(target.getName());
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+
+    private boolean hasRemoteBranch(Repository repository, String branchName) {
+        try {
+            return repository.exactRef(remoteTrackingRef(branchName)) != null;
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    private String remoteTrackingRef(String branchName) {
+        return "refs/remotes/origin/" + normalizeBranchName(branchName);
+    }
+
+    private String normalizeBranchName(String branchName) {
+        String normalized = branchName == null ? "" : branchName.trim();
+        String remotePrefix = "refs/remotes/origin/";
+        String localPrefix = "refs/heads/";
+        if (normalized.startsWith(remotePrefix)) {
+            return normalized.substring(remotePrefix.length());
+        }
+        if (normalized.startsWith("origin/")) {
+            return normalized.substring("origin/".length());
+        }
+        if (normalized.startsWith(localPrefix)) {
+            return normalized.substring(localPrefix.length());
+        }
+        return normalized.isBlank() ? "main" : normalized;
     }
 
     private AgentTask requireOwnedTask(Long taskId) {
@@ -254,6 +388,16 @@ public class PullRequestSubmitService {
         return exception.getMessage() == null || exception.getMessage().isBlank()
                 ? exception.getClass().getSimpleName()
                 : exception.getMessage();
+    }
+
+    private static class GitCliUnavailableException extends RuntimeException {
+
+        GitCliUnavailableException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    private record GitCommandResult(boolean success, String output) {
     }
 
     private record GitHubRepoRef(String owner, String repo) {

@@ -44,20 +44,20 @@ export function ProjectCard({
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-400">Local Path</p>
+            <p className="text-xs uppercase tracking-wide text-slate-400">本地路径</p>
             <p className="mt-1 break-all text-slate-700">{project.localPath || "--"}</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-400">Default Branch</p>
+            <p className="text-xs uppercase tracking-wide text-slate-400">默认分支</p>
             <p className="mt-1 text-slate-700">{project.defaultBranch || "--"}</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <ProjectSentryConfigDialog project={project} />
-        <Button variant="destructive" size="sm" onClick={() => onDelete(project.id)} disabled={deleting}>
-          <Trash2 className="h-4 w-4" />
-          删除仓库
-        </Button>
+          <Button variant="destructive" size="sm" onClick={() => onDelete(project.id)} disabled={deleting}>
+            <Trash2 className="h-4 w-4" />
+            删除仓库
+          </Button>
         </div>
       </CardContent>
     </Card>

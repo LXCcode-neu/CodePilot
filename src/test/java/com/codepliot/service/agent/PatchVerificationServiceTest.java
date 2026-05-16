@@ -30,7 +30,9 @@ class PatchVerificationServiceTest {
                 """);
         Files.writeString(tempDir.resolve("package-lock.json"), "{}");
 
-        PatchVerificationService service = new PatchVerificationService(new ObjectMapper(), new PatchVerificationProperties(), null, null);
+        PatchVerificationProperties properties = new PatchVerificationProperties();
+        properties.setAutoDetectCommandsEnabled(true);
+        PatchVerificationService service = new PatchVerificationService(new ObjectMapper(), properties, null, null);
         List<PatchVerificationService.VerificationCommand> commands = service.detectVerificationCommands(tempDir);
 
         assertEquals(5, commands.size());
@@ -50,6 +52,37 @@ class PatchVerificationServiceTest {
                   }
                 }
                 """);
+
+        PatchVerificationProperties properties = new PatchVerificationProperties();
+        properties.setAutoDetectCommandsEnabled(true);
+        PatchVerificationService service = new PatchVerificationService(new ObjectMapper(), properties, null, null);
+        List<PatchVerificationService.VerificationCommand> commands = service.detectVerificationCommands(tempDir);
+
+        assertTrue(commands.isEmpty());
+    }
+
+    @Test
+    void detectVerificationCommandsUsesConfiguredCommandsByDefault() throws Exception {
+        Files.createDirectories(tempDir.resolve("frontend"));
+
+        PatchVerificationProperties.Command command = new PatchVerificationProperties.Command();
+        command.setName("frontend typecheck");
+        command.setCommand("npm run build");
+        command.setWorkingDirectory("frontend");
+        PatchVerificationProperties properties = new PatchVerificationProperties();
+        properties.setCommands(List.of(command));
+
+        PatchVerificationService service = new PatchVerificationService(new ObjectMapper(), properties, null, null);
+        List<PatchVerificationService.VerificationCommand> commands = service.detectVerificationCommands(tempDir);
+
+        assertEquals(1, commands.size());
+        assertEquals("frontend typecheck", commands.get(0).name());
+        assertEquals(tempDir.resolve("frontend"), commands.get(0).workingDirectory());
+    }
+
+    @Test
+    void detectVerificationCommandsDoesNotAutoDetectByDefault() throws Exception {
+        Files.writeString(tempDir.resolve("pom.xml"), "<project />");
 
         PatchVerificationService service = new PatchVerificationService(new ObjectMapper(), new PatchVerificationProperties(), null, null);
         List<PatchVerificationService.VerificationCommand> commands = service.detectVerificationCommands(tempDir);

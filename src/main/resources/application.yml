@@ -68,6 +68,8 @@ codepilot:
   verification:
     command-timeout-seconds: ${CODEPILOT_VERIFICATION_COMMAND_TIMEOUT_SECONDS:300}
     max-repair-attempts: ${CODEPILOT_VERIFICATION_MAX_REPAIR_ATTEMPTS:3}
+    auto-detect-commands-enabled: ${CODEPILOT_VERIFICATION_AUTO_DETECT_COMMANDS_ENABLED:false}
+    commands: []
   patch-review:
     enabled: ${CODEPILOT_PATCH_REVIEW_ENABLED:true}
     min-score: ${CODEPILOT_PATCH_REVIEW_MIN_SCORE:70}

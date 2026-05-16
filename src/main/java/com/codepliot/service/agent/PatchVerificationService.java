@@ -134,6 +134,10 @@ public class PatchVerificationService {
 
     List<VerificationCommand> detectVerificationCommands(Path root) throws IOException {
         List<VerificationCommand> commands = new ArrayList<>();
+        commands.addAll(configuredVerificationCommands(root));
+        if (properties == null || !properties.isAutoDetectCommandsEnabled()) {
+            return commands;
+        }
         if (Files.isRegularFile(root.resolve("pom.xml"))) {
             commands.add(new VerificationCommand(
                     "maven test",
@@ -173,6 +177,47 @@ public class PatchVerificationService {
             }
         }
         return commands;
+    }
+
+    private List<VerificationCommand> configuredVerificationCommands(Path root) {
+        if (properties == null || properties.getCommands() == null || properties.getCommands().isEmpty()) {
+            return List.of();
+        }
+        List<VerificationCommand> commands = new ArrayList<>();
+        for (PatchVerificationProperties.Command configuredCommand : properties.getCommands()) {
+            if (configuredCommand == null || configuredCommand.getCommand() == null || configuredCommand.getCommand().isBlank()) {
+                continue;
+            }
+            Path workingDirectory = resolveCommandWorkingDirectory(root, configuredCommand.getWorkingDirectory());
+            String name = configuredCommand.getName() == null || configuredCommand.getName().isBlank()
+                    ? configuredCommand.getCommand()
+                    : configuredCommand.getName();
+            commands.add(new VerificationCommand(
+                    name,
+                    shellCommand(configuredCommand.getCommand()),
+                    workingDirectory
+            ));
+        }
+        return commands;
+    }
+
+    private Path resolveCommandWorkingDirectory(Path root, String workingDirectory) {
+        String value = workingDirectory == null || workingDirectory.isBlank() ? "." : workingDirectory;
+        Path resolved = root.resolve(value).normalize();
+        if (!resolved.startsWith(root)) {
+            throw new IllegalArgumentException("verification command workingDirectory must stay inside repository: " + value);
+        }
+        if (!Files.isDirectory(resolved)) {
+            throw new IllegalArgumentException("verification command workingDirectory does not exist: " + value);
+        }
+        return resolved;
+    }
+
+    private List<String> shellCommand(String command) {
+        if (isWindows()) {
+            return List.of("cmd.exe", "/c", command);
+        }
+        return List.of("sh", "-c", command);
     }
 
     private PatchVerificationResult buildResult(boolean patchApplicable,

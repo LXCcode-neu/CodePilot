@@ -94,37 +94,35 @@ export function buildPullRequestPreview(
   const touchedFiles = fileChanges.map((file) => file.filePath);
   const id = taskId ?? "unknown";
   const ready = Boolean(patch?.trim()) && fileChanges.length > 0;
-  const title = firstSentence(solution, `CodePilot patch for task ${id}`);
+  const title = firstSentence(solution, `CodePilot 修复任务 ${id}`);
   const body = [
-    "## Summary",
-    solution?.trim() || "No solution summary provided.",
+    "## 摘要",
+    solution?.trim() || "暂无修复方案摘要。",
     "",
-    "## Analysis",
-    analysis?.trim() || "No analysis provided.",
+    "## 问题分析",
+    analysis?.trim() || "暂无问题分析。",
     "",
-    "## Risk",
-    risk?.trim() || "No risk notes provided.",
+    "## 风险说明",
+    risk?.trim() || "暂无风险说明。",
     "",
-    "## Changes",
-    `- Files changed: ${fileChanges.length}`,
-    `- Added lines: ${addedLines}`,
-    `- Removed lines: ${removedLines}`,
+    "## 变更范围",
+    `- 变更文件数: ${fileChanges.length}`,
+    `- 新增行数: ${addedLines}`,
+    `- 删除行数: ${removedLines}`,
     ...touchedFiles.map((file) => `- \`${file}\``),
   ].join("\n");
 
   return {
     title,
     branchName: `codepilot/task-${id}`,
-    commitMessage: firstSentence(solution, `Apply CodePilot patch for task ${id}`),
+    commitMessage: firstSentence(solution, `应用 CodePilot 任务 ${id} 的修复`),
     body,
     changedFiles: fileChanges.length,
     addedLines,
     removedLines,
     touchedFiles,
     ready,
-    status: ready
-      ? "Draft PR preview generated. Remote PR creation is not configured yet."
-      : "Patch is empty or not a valid unified diff; PR preview is not ready.",
+    status: ready ? "PR 草稿预览已生成。" : "Patch 为空或不是有效的 unified diff，PR 预览尚未就绪。",
   };
 }
 
@@ -140,6 +138,6 @@ function firstSentence(value: string | null | undefined, fallback: string) {
     return fallback;
   }
   const normalized = value.trim().replace(/\s+/g, " ");
-  const match = normalized.match(/^(.{1,90}?)([。.]|$)/);
+  const match = normalized.match(/^(.{1,90}?)([。.!！？?]|$)/);
   return match?.[1] ? `${match[1]}${match[2] && match[2] !== "" ? match[2] : ""}` : normalized.slice(0, 90);
 }

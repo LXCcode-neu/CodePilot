@@ -265,6 +265,7 @@ public class SentryAlertService {
                 AgentTaskStatus.GENERATING_PATCH.name(),
                 AgentTaskStatus.VERIFYING.name(),
                 AgentTaskStatus.REPAIRING_PATCH.name(),
+                AgentTaskStatus.REVIEWING_PATCH.name(),
                 AgentTaskStatus.WAITING_CONFIRM.name(),
                 AgentTaskStatus.CANCEL_REQUESTED.name()
         ).contains(status);

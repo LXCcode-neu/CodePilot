@@ -224,6 +224,7 @@ Prepare before startup:
 - `CODEPILOT_PUBLIC_BASE_URL` for externally reachable group robot action links, for example `https://codepilot.example.com`
 - `CODEPILOT_VERIFICATION_COMMAND_TIMEOUT_SECONDS` for each patch verification command timeout, default `300`
 - `CODEPILOT_VERIFICATION_MAX_REPAIR_ATTEMPTS` for automatic repair attempts after verification failure, default `3`
+- `CODEPILOT_VERIFICATION_AUTO_DETECT_COMMANDS_ENABLED` enables Maven/Go/Python/Node command auto-detection, default `false`
 - optional AI Patch Review gate configuration:
   - `CODEPILOT_PATCH_REVIEW_ENABLED`, default `true`
   - `CODEPILOT_PATCH_REVIEW_MIN_SCORE`, default `70`
@@ -364,6 +365,7 @@ Sentry setup:
 
 When repository watching and a notification channel are configured, new GitHub Issues can be pushed to Feishu or WeCom group robots with an operation code.
 
+- New GitHub Issues discovered by polling are also created as `PENDING` tasks in the task list; approving or running the issue reuses that task instead of creating a second one.
 - New Issue notification includes:
   - an action code like `CP-8K2F`
   - mobile chat commands such as `修复 CP-8K2F`, `忽略 CP-8K2F`, and `状态 CP-8K2F`
@@ -384,9 +386,10 @@ When repository watching and a notification channel are configured, new GitHub I
 
 After a patch is generated, CodePilot applies it in an isolated verification workspace before allowing confirmation.
 
-- Maven repositories run `mvn test` or the repository Maven wrapper when available.
-- Node repositories run dependency installation first (`npm ci` when a lockfile exists, otherwise `npm install`) and then `npm run build`.
-- `git apply --check` and `git apply` must pass before project verification commands run.
+- `git apply --check` and `git apply` always run and must pass.
+- Maven/Go/Python/Node verification commands are not auto-detected by default because many repositories need databases, Redis, secrets, or project-specific setup.
+- Set `CODEPILOT_VERIFICATION_AUTO_DETECT_COMMANDS_ENABLED=true` to restore automatic command detection.
+- Prefer explicit `codepilot.verification.commands` entries for stable project checks, for example a command name, shell command, and repository-relative working directory.
 - If verification fails, the task moves to `VERIFY_FAILED`, PR confirmation is blocked, and the failure is pushed back through the configured notification path.
 - When verification fails, CodePilot asks the LLM to generate a corrected replacement patch and retries verification up to `CODEPILOT_VERIFICATION_MAX_REPAIR_ATTEMPTS`, default `3`.
 - If all repair attempts fail, the task moves to `VERIFY_FAILED`; a `VERIFY_FAILED` task can be rerun after the underlying issue is fixed or the agent is asked to try again.

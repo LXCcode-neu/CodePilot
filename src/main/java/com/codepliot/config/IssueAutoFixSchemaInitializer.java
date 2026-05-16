@@ -146,6 +146,9 @@ public class IssueAutoFixSchemaInitializer implements ApplicationRunner {
                     jdbcTemplate.execute(column.getValue());
                 }
             }
+            if (!indexExists("agent_task", "idx_agent_task_source")) {
+                jdbcTemplate.execute("ALTER TABLE agent_task ADD KEY idx_agent_task_source (source_type, source_id)");
+            }
         }
     }
 
@@ -175,6 +178,22 @@ public class IssueAutoFixSchemaInitializer implements ApplicationRunner {
                 Integer.class,
                 tableName,
                 columnName
+        );
+        return count != null && count > 0;
+    }
+
+    private boolean indexExists(String tableName, String indexName) {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                        SELECT COUNT(*)
+                        FROM information_schema.STATISTICS
+                        WHERE TABLE_SCHEMA = DATABASE()
+                          AND TABLE_NAME = ?
+                          AND INDEX_NAME = ?
+                        """,
+                Integer.class,
+                tableName,
+                indexName
         );
         return count != null && count > 0;
     }

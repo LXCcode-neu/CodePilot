@@ -6,6 +6,7 @@ export type AgentTaskStatus =
   | "GENERATING_PATCH"
   | "VERIFYING"
   | "REPAIRING_PATCH"
+  | "REVIEWING_PATCH"
   | "CANCEL_REQUESTED"
   | "CANCELLED"
   | "VERIFY_FAILED"
@@ -25,6 +26,8 @@ export interface AgentTask {
   llmProvider?: string | null;
   llmModelName?: string | null;
   llmDisplayName?: string | null;
+  sourceType?: "MANUAL" | "GITHUB_ISSUE" | "SENTRY_ALERT" | string | null;
+  sourceId?: string | number | null;
   createdAt: string;
   updatedAt: string;
 }

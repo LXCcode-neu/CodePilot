@@ -50,10 +50,7 @@ export function LlmConfigPage() {
     setLoading(true);
     setError("");
     try {
-      const [availableProviders, keys] = await Promise.all([
-        getLlmProviders(),
-        listLlmApiKeys(),
-      ]);
+      const [availableProviders, keys] = await Promise.all([getLlmProviders(), listLlmApiKeys()]);
       setProviders(availableProviders);
       setApiKeys(keys);
       primeForm(availableProviders);
@@ -151,7 +148,7 @@ export function LlmConfigPage() {
       setDeleteTarget(null);
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Delete API Key failed");
+      setError(err instanceof Error ? err.message : "删除 API Key 失败");
     } finally {
       setDeletingId(null);
     }
@@ -160,9 +157,9 @@ export function LlmConfigPage() {
   return (
     <div className="space-y-8">
       <section className="space-y-4">
-        <h1 className="text-3xl font-bold text-slate-900">API keys</h1>
+        <h1 className="text-3xl font-bold text-slate-900">API Key 管理</h1>
         <p className="max-w-5xl text-sm leading-7 text-slate-600">
-          列表内是你的全部 API Key。API Key 仅在创建时提交，保存后只显示脱敏信息；选择“应用”后，后续任务会使用该配置。
+          这里展示全部 API Key 配置。API Key 只在创建时提交，保存后仅显示脱敏信息；选择“应用”后，后续任务会使用该配置。
         </p>
       </section>
 
@@ -202,12 +199,7 @@ export function LlmConfigPage() {
                             应用中
                           </span>
                         ) : (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleApply(item.id)}
-                            disabled={applyingId === item.id}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => handleApply(item.id)} disabled={applyingId === item.id}>
                             {applyingId === item.id ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                             应用
                           </Button>
@@ -250,7 +242,7 @@ export function LlmConfigPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>创建 API Key</DialogTitle>
-            <DialogDescription>选择供应商后，请手动填写请求地址、模型名称与 API Key。</DialogDescription>
+            <DialogDescription>选择供应商后，请填写请求地址、模型名称与 API Key。</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -318,7 +310,7 @@ export function LlmConfigPage() {
           <DialogHeader>
             <DialogTitle>删除 API Key</DialogTitle>
             <DialogDescription>
-              删除后无法恢复。{deleteTarget?.active ? "当前 key 正在应用中，删除后会自动应用剩余最新的一条 key。" : ""}
+              删除后无法恢复。{deleteTarget?.active ? "当前 Key 正在应用中，删除后会自动应用剩余最新的一条 Key。" : ""}
             </DialogDescription>
           </DialogHeader>
 

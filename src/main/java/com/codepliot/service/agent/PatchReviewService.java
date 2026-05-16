@@ -32,12 +32,12 @@ public class PatchReviewService {
 
     public PatchReviewResult review(AgentContext context) {
         if (!properties.isEnabled()) {
-            PatchReviewResult result = PatchReviewResult.skipped("AI patch review is disabled.");
+            PatchReviewResult result = PatchReviewResult.skipped("AI 代码审查已关闭。");
             patchReviewRecordService.saveReviewResult(context.taskId(), context.patchRecordId(), context.llmRuntimeConfig(), result);
             return result;
         }
         if (context.patchVerificationResult() == null || !context.patchVerificationResult().passed()) {
-            PatchReviewResult result = PatchReviewResult.skipped("AI patch review skipped because automatic verification did not pass.");
+            PatchReviewResult result = PatchReviewResult.skipped("自动验证未通过，已跳过 AI 代码审查。");
             patchReviewRecordService.saveReviewResult(context.taskId(), context.patchRecordId(), context.llmRuntimeConfig(), result);
             return result;
         }
@@ -59,7 +59,7 @@ public class PatchReviewService {
         try {
             parsed = PatchReviewResult.fromRawOutput(objectMapper, rawOutput);
         } catch (IllegalArgumentException exception) {
-            parsed = PatchReviewResult.failed("AI patch review response could not be parsed. PR confirmation is blocked.", rawOutput);
+            parsed = PatchReviewResult.failed("AI 代码审查结果解析失败，已阻止 PR 确认。", rawOutput);
         }
         PatchReviewResult gated = applyGate(parsed);
         patchReviewRecordService.saveReviewResult(context.taskId(), context.patchRecordId(), context.llmRuntimeConfig(), gated);
@@ -75,13 +75,13 @@ public class PatchReviewService {
         }
         String summary = result.summary();
         if (summary == null || summary.isBlank()) {
-            summary = "AI patch review blocked this patch.";
+            summary = "AI 代码审查阻止了这个 Patch。";
         }
         if (scoreBlocked) {
-            summary = summary + " Score is below the configured threshold.";
+            summary = summary + " 质量评分低于配置阈值。";
         }
         if (highRiskBlocked) {
-            summary = summary + " High risk patches are blocked by configuration.";
+            summary = summary + " 当前配置会阻止高风险 Patch。";
         }
         return new PatchReviewResult(
                 result.skipped(),

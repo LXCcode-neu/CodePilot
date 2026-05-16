@@ -15,22 +15,22 @@ public class AgentExecutionPolicy {
                                                       PatchReviewResult reviewResult) {
         if (verificationResult != null && !verificationResult.passed()) {
             String summary = nullToFallback(verificationResult.summary(),
-                    "Patch automatic verification failed. PR confirmation is blocked.");
+                    "Patch 自动验证失败，已阻止 PR 确认。");
             return new AgentExecutionDecision(AgentTaskStatus.VERIFY_FAILED, summary, summary);
         }
 
         if (reviewResult != null && !reviewResult.passed()) {
             String summary = nullToFallback(reviewResult.summary(),
-                    "AI Patch Review failed. PR confirmation is blocked.");
+                    "AI 代码审查失败，已阻止 PR 确认。");
             return new AgentExecutionDecision(AgentTaskStatus.VERIFY_FAILED, summary, summary);
         }
 
-        String summary = "Patch generated and verified. Waiting for manual confirmation.";
+        String summary = "Patch 已生成并通过验证，等待人工确认。";
         if (reviewResult != null && "MEDIUM".equalsIgnoreCase(reviewResult.riskLevel())) {
-            summary = "Patch passed verification and AI Review with medium-risk notes. Waiting for manual confirmation.";
+            summary = "Patch 已通过验证和 AI 审查，但存在中风险提示，等待人工确认。";
         }
         if (safetyCheckResult != null && safetyCheckResult.requiresAttention()) {
-            summary = "Patch generated with safety notes. Waiting for manual confirmation.";
+            summary = "Patch 已生成，但存在安全提示，等待人工确认。";
         }
         return new AgentExecutionDecision(
                 AgentTaskStatus.WAITING_CONFIRM,
@@ -41,9 +41,9 @@ public class AgentExecutionPolicy {
 
     public AgentExecutionDecision afterUserConfirmed() {
         return new AgentExecutionDecision(
-                AgentTaskStatus.COMPLETED,
-                "Patch manually confirmed.",
-                "Task confirmed and ready for the next workflow."
+            AgentTaskStatus.COMPLETED,
+            "Patch 已人工确认。",
+            "任务已确认，可以进入后续流程。"
         );
     }
 

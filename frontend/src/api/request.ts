@@ -36,7 +36,7 @@ client.interceptors.response.use(
       if (payload.code === 401) {
         redirectToLogin();
       }
-      return Promise.reject(new Error(payload.message || "Request failed"));
+      return Promise.reject(new Error(payload.message || "请求失败"));
     }
     return response.data;
   },
@@ -45,7 +45,7 @@ client.interceptors.response.use(
       redirectToLogin();
     }
     return Promise.reject(
-      new Error(error.response?.data?.message || error.message || "Network error")
+      new Error(error.response?.data?.message || error.message || "网络异常")
     );
   }
 );

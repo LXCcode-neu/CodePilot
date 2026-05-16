@@ -91,6 +91,16 @@ public class GitHubIssueEventService {
         event.setNotifiedAt(null);
         gitHubIssueEventMapper.insert(event);
 
+        AgentTaskVO task = agentTaskService.createFromGitHubIssue(
+                watch.getUserId(),
+                watch.getProjectRepoId(),
+                event.getId(),
+                event.getIssueTitle(),
+                buildIssueDescription(event)
+        );
+        event.setAgentTaskId(task.id());
+        gitHubIssueEventMapper.updateById(event);
+
         boolean notified = notificationService.sendToUser(
                 watch.getUserId(),
                 notificationTemplateFactory.newIssue(watch, event)
@@ -135,8 +145,7 @@ public class GitHubIssueEventService {
     }
 
     private void ignoreEvent(GitHubIssueEvent event) {
-        if (event.getAgentTaskId() != null || STATUS_RUNNING.equals(event.getStatus())
-                || STATUS_PATCH_READY.equals(event.getStatus())) {
+        if (STATUS_RUNNING.equals(event.getStatus()) || STATUS_PATCH_READY.equals(event.getStatus())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "GitHub issue event cannot be ignored in current status");
         }
         event.setStatus(STATUS_IGNORED);
@@ -154,33 +163,34 @@ public class GitHubIssueEventService {
     }
 
     private GitHubIssueEventRunResult runEvent(GitHubIssueEvent event, Long userId) {
-        if (event.getAgentTaskId() != null) {
-            return new GitHubIssueEventRunResult(event.getAgentTaskId(), event.getStatus());
-        }
         if (!STATUS_NEW.equals(event.getStatus()) && !STATUS_NOTIFIED.equals(event.getStatus())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "GitHub issue event cannot be run in current status");
         }
 
         UserRepoWatch watch = requireWatch(event.getRepoWatchId());
-        AgentTaskVO task = agentTaskService.createFromGitHubIssue(
-                userId,
-                event.getProjectRepoId(),
-                event.getId(),
-                event.getIssueTitle(),
-                buildIssueDescription(event)
-        );
-        event.setAgentTaskId(task.id());
+        Long taskId = event.getAgentTaskId();
+        if (taskId == null) {
+            AgentTaskVO task = agentTaskService.createFromGitHubIssue(
+                    userId,
+                    event.getProjectRepoId(),
+                    event.getId(),
+                    event.getIssueTitle(),
+                    buildIssueDescription(event)
+            );
+            taskId = task.id();
+            event.setAgentTaskId(taskId);
+        }
         event.setStatus(STATUS_RUNNING);
         gitHubIssueEventMapper.updateById(event);
-        notificationService.sendToUser(event.getUserId(), notificationTemplateFactory.repairStarted(watch, event, task.id()));
+        notificationService.sendToUser(event.getUserId(), notificationTemplateFactory.repairStarted(watch, event, taskId));
 
         try {
-            agentRunService.run(task.id(), userId);
+            agentRunService.run(taskId, userId);
         } catch (RuntimeException exception) {
-            markFailed(task.id(), exception.getMessage());
+            markFailed(taskId, exception.getMessage());
             throw exception;
         }
-        return new GitHubIssueEventRunResult(task.id(), STATUS_RUNNING);
+        return new GitHubIssueEventRunResult(taskId, STATUS_RUNNING);
     }
 
     @Transactional

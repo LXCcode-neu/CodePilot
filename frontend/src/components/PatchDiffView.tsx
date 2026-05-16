@@ -14,10 +14,10 @@ export function PatchStats({ fileChanges }: { fileChanges: PatchFileChange[] }) 
     <div className="flex flex-wrap gap-2 text-xs">
       <Badge variant="outline">{fileChanges.length} 个文件</Badge>
       <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700" variant="outline">
-        +{added}
+        新增 {added}
       </Badge>
       <Badge className="border-rose-200 bg-rose-50 text-rose-700" variant="outline">
-        -{removed}
+        删除 {removed}
       </Badge>
     </div>
   );
@@ -27,7 +27,7 @@ export function PatchDiffView({ fileChanges, rawPatch }: { fileChanges: PatchFil
   if (!fileChanges.length) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
-        未找到结构化 diff，可在下方查看原始 Patch。
+        未找到结构化 Diff，可在下方查看原始 Patch。
         {rawPatch ? (
           <pre className="mt-4 max-h-72 overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-slate-100">
             {rawPatch}
@@ -50,10 +50,10 @@ export function PatchDiffView({ fileChanges, rawPatch }: { fileChanges: PatchFil
               </CardTitle>
               <div className="flex gap-2 text-xs">
                 <span className="rounded-full bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
-                  +{file.addedLines}
+                  新增 {file.addedLines}
                 </span>
                 <span className="rounded-full bg-rose-50 px-2 py-1 font-semibold text-rose-700">
-                  -{file.removedLines}
+                  删除 {file.removedLines}
                 </span>
               </div>
             </div>
@@ -127,7 +127,7 @@ export function PullRequestPreviewCard({ pullRequest }: { pullRequest?: PullRequ
           <span className="rounded-xl bg-white/10 px-3 py-2">分支: {pullRequest.branchName}</span>
           <span className="rounded-xl bg-white/10 px-3 py-2">{pullRequest.changedFiles} 个文件</span>
           <span className="rounded-xl bg-white/10 px-3 py-2">
-            +{pullRequest.addedLines} / -{pullRequest.removedLines}
+            新增 {pullRequest.addedLines} / 删除 {pullRequest.removedLines}
           </span>
         </div>
       </CardHeader>

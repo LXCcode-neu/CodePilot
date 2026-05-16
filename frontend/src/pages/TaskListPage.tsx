@@ -12,19 +12,20 @@ import type { AgentTask } from "@/types/task";
 
 const filterOptions: Array<{ label: string; value: string }> = [
   { label: "全部状态", value: "ALL" },
-  { label: "PENDING", value: "PENDING" },
-  { label: "CLONING", value: "CLONING" },
-  { label: "RETRIEVING", value: "RETRIEVING" },
-  { label: "ANALYZING", value: "ANALYZING" },
-  { label: "GENERATING_PATCH", value: "GENERATING_PATCH" },
-  { label: "VERIFYING", value: "VERIFYING" },
-  { label: "REPAIRING_PATCH", value: "REPAIRING_PATCH" },
-  { label: "CANCEL_REQUESTED", value: "CANCEL_REQUESTED" },
-  { label: "CANCELLED", value: "CANCELLED" },
-  { label: "VERIFY_FAILED", value: "VERIFY_FAILED" },
-  { label: "WAITING_CONFIRM", value: "WAITING_CONFIRM" },
-  { label: "COMPLETED", value: "COMPLETED" },
-  { label: "FAILED", value: "FAILED" },
+  { label: "待执行", value: "PENDING" },
+  { label: "克隆中", value: "CLONING" },
+  { label: "检索中", value: "RETRIEVING" },
+  { label: "分析中", value: "ANALYZING" },
+  { label: "生成 Patch 中", value: "GENERATING_PATCH" },
+  { label: "验证中", value: "VERIFYING" },
+  { label: "修复 Patch 中", value: "REPAIRING_PATCH" },
+  { label: "AI 审查中", value: "REVIEWING_PATCH" },
+  { label: "取消中", value: "CANCEL_REQUESTED" },
+  { label: "已取消", value: "CANCELLED" },
+  { label: "验证失败", value: "VERIFY_FAILED" },
+  { label: "待确认", value: "WAITING_CONFIRM" },
+  { label: "已完成", value: "COMPLETED" },
+  { label: "失败", value: "FAILED" },
 ];
 
 const DELETE_CONFIRM_MESSAGE = "确定删除这个任务吗？删除后对应的执行步骤和 Patch 记录也会一起删除。";
@@ -96,9 +97,7 @@ export function TaskListPage() {
         </div>
       </section>
 
-      {error ? (
-        <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</div>
-      ) : null}
+      {error ? <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</div> : null}
 
       {loading ? (
         <LoadingBlock lines={6} />

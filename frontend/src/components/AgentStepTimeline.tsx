@@ -17,7 +17,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { buildPullRequestPreview, parseUnifiedDiff } from "@/lib/patch-diff";
 import { getStepDisplayName, getStepTypeLabel, isVisibleStepType } from "@/lib/task-display";
-import { formatDateTime, parseJsonString, stringifyPretty } from "@/lib/utils";
+import { formatDateTime, parseJsonString, stringifyDisplay } from "@/lib/utils";
 import type { PatchFileChange, PullRequestPreview } from "@/types/patch";
 import type { AgentStep } from "@/types/step";
 
@@ -40,8 +40,8 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
 
     const parsedOutput = parseJsonString<StepOutput>(activeStep.output);
     return {
-      input: stringifyPretty(parseJsonString(activeStep.input) ?? activeStep.input ?? ""),
-      output: stringifyPretty(parsedOutput ?? activeStep.output ?? ""),
+      input: stringifyDisplay(parseJsonString(activeStep.input) ?? activeStep.input ?? ""),
+      output: stringifyDisplay(parsedOutput ?? activeStep.output ?? ""),
       parsedOutput,
     };
   }, [activeStep]);
@@ -57,9 +57,9 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
           <Card key={step.id} className="shadow-none">
             <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
               <div className="space-y-2">
-                <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-slate-400">
-                  <span>步骤 {index + 1}</span>
-                  <span>{step.stepType}</span>
+                <div className="flex flex-wrap items-center gap-3 text-xs tracking-wide text-slate-400">
+                  <span>{`步骤 ${index + 1}`}</span>
+                  <span>{getStepTypeLabel(step.stepType)}</span>
                 </div>
                 <CardTitle className="text-base">{getStepDisplayName(step.stepType, step.stepName)}</CardTitle>
               </div>
@@ -78,7 +78,7 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
               <Separator />
               <Button variant="ghost" size="sm" onClick={() => setActiveStep(step)}>
                 <FileJson2 className="h-4 w-4" />
-                查看输入 / 输出
+                查看 input / output
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </CardContent>
@@ -97,8 +97,8 @@ export function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
           </DialogHeader>
           <Tabs defaultValue="input">
             <TabsList>
-              <TabsTrigger value="input">输入</TabsTrigger>
-              <TabsTrigger value="output">输出</TabsTrigger>
+              <TabsTrigger value="input">input</TabsTrigger>
+              <TabsTrigger value="output">output</TabsTrigger>
               {isPatchOutput(activeStep, details.parsedOutput) ? <TabsTrigger value="diff">可读 Diff</TabsTrigger> : null}
               {isPatchOutput(activeStep, details.parsedOutput) ? <TabsTrigger value="pr">PR 草稿</TabsTrigger> : null}
             </TabsList>

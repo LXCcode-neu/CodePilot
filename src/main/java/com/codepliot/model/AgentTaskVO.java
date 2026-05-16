@@ -17,6 +17,8 @@ public record AgentTaskVO(
         String llmProvider,
         String llmModelName,
         String llmDisplayName,
+        String sourceType,
+        Long sourceId,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
@@ -36,6 +38,8 @@ public static AgentTaskVO from(AgentTask agentTask) {
                 agentTask.getLlmProvider(),
                 agentTask.getLlmModelName(),
                 agentTask.getLlmDisplayName(),
+                agentTask.getSourceType(),
+                agentTask.getSourceId(),
                 agentTask.getCreatedAt(),
                 agentTask.getUpdatedAt()
         );

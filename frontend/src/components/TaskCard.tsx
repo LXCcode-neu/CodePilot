@@ -14,11 +14,20 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, repoName, onDelete, deleting = false }: TaskCardProps) {
+  const sourceLabel = getSourceLabel(task.sourceType);
+
   return (
     <Card className="transition hover:-translate-y-0.5">
       <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{repoName || `项目 #${task.projectId}`}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{repoName || `项目 #${task.projectId}`}</p>
+            {sourceLabel ? (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">
+                {sourceLabel}
+              </span>
+            ) : null}
+          </div>
           <CardTitle className="text-base">{task.issueTitle}</CardTitle>
         </div>
         <StatusBadge status={task.status} />
@@ -48,4 +57,17 @@ export function TaskCard({ task, repoName, onDelete, deleting = false }: TaskCar
       </CardContent>
     </Card>
   );
+}
+
+function getSourceLabel(sourceType?: string | null) {
+  if (sourceType === "GITHUB_ISSUE") {
+    return "GitHub Issue";
+  }
+  if (sourceType === "SENTRY_ALERT") {
+    return "Sentry 告警";
+  }
+  if (sourceType === "MANUAL") {
+    return "手动创建";
+  }
+  return null;
 }

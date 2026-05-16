@@ -28,6 +28,7 @@ const statusLabels: Record<string, string> = {
   GENERATING_PATCH: "生成 Patch 中",
   VERIFYING: "验证中",
   REPAIRING_PATCH: "修复 Patch 中",
+  REVIEWING_PATCH: "AI 审查中",
   CANCEL_REQUESTED: "取消中",
   CANCELLED: "已取消",
   VERIFY_FAILED: "验证失败",
@@ -44,7 +45,7 @@ export function StatusBadge({ status }: { status?: string | null }) {
   return (
     <Badge
       variant="outline"
-      className={cn("border-transparent text-[11px] uppercase tracking-wide", statusStyles[value] ?? "bg-slate-100 text-slate-600")}
+      className={cn("border-transparent text-[11px] tracking-wide", statusStyles[value] ?? "bg-slate-100 text-slate-600")}
     >
       {statusLabels[value] ?? value}
     </Badge>

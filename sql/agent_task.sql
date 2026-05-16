@@ -12,9 +12,12 @@ CREATE TABLE agent_task (
   llm_provider VARCHAR(32) DEFAULT NULL,
   llm_model_name VARCHAR(128) DEFAULT NULL,
   llm_display_name VARCHAR(128) DEFAULT NULL,
+  source_type VARCHAR(32) DEFAULT 'MANUAL',
+  source_id BIGINT DEFAULT NULL,
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL,
   PRIMARY KEY (id),
   KEY idx_agent_task_user_id (user_id),
-  KEY idx_agent_task_project_id (project_id)
+  KEY idx_agent_task_project_id (project_id),
+  KEY idx_agent_task_source (source_type, source_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

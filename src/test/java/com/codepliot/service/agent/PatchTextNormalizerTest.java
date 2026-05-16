@@ -26,6 +26,28 @@ class PatchTextNormalizerTest {
     }
 
     @Test
+    void rewritesHunkCountsWhenBodyHasOneMoreContextLine() {
+        String patch = String.join("\n",
+                "--- a/src/main/java/com/example/Demo.java",
+                "+++ b/src/main/java/com/example/Demo.java",
+                "@@ -62,6 +62,6 @@",
+                "     int a = 1;",
+                "     int b = 2;",
+                "-    int c = 3;",
+                "+    int c = 4;",
+                "     int d = 5;",
+                "     int e = 6;",
+                "     int f = 7;",
+                "     int g = 8;",
+                ""
+        );
+
+        String normalized = normalizer.normalize(patch);
+
+        assertTrue(normalized.contains("@@ -62,7 +62,7 @@"));
+    }
+
+    @Test
     void normalizedPatchCanPassGitApplyCheck() throws Exception {
         Path file = tempDir.resolve("src/main/java/com/hmdp/service/impl/UserServiceImpl.java");
         Files.createDirectories(file.getParent());

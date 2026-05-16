@@ -11,6 +11,7 @@ import { LlmConfigPage } from "@/pages/LlmConfigPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { ProjectListPage } from "@/pages/ProjectListPage";
 import { RegisterPage } from "@/pages/RegisterPage";
+import { SentryIntegrationPage } from "@/pages/SentryIntegrationPage";
 import { TaskDetailPage } from "@/pages/TaskDetailPage";
 import { TaskListPage } from "@/pages/TaskListPage";
 import { hasToken } from "@/lib/token";
@@ -47,6 +48,7 @@ export const router = createBrowserRouter([
           { path: "/github/callback", element: <GitHubCallbackPage /> },
           { path: "/github-issues", element: <GitHubIssuePage /> },
           { path: "/issue-automation", element: <IssueAutomationPage /> },
+          { path: "/sentry", element: <SentryIntegrationPage /> },
           { path: "/projects", element: <ProjectListPage /> },
           { path: "/llm-config", element: <LlmConfigPage /> },
           { path: "/tasks", element: <TaskListPage /> },

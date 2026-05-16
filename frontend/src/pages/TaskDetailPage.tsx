@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoaderCircle, PlayCircle, RefreshCcw, StopCircle, Trash2 } from "lucide-react";
 import { confirmTaskPatch, getTaskPatch, getTaskPatchReview, submitTaskPullRequest } from "@/api/patch";
@@ -27,7 +27,7 @@ const INVALID_TASK_ID = "无效的任务 ID";
 const LOAD_TASK_ERROR = "加载任务详情失败";
 const RUN_TASK_ERROR = "运行 Agent 失败";
 const CANCEL_TASK_ERROR = "取消任务失败";
-const CANCEL_REQUESTED = "已提交取消任务请求。";
+const CANCEL_REQUESTED_MESSAGE = "已提交取消任务请求。";
 const LOAD_FAILED = "加载失败";
 const TASK_NOT_FOUND = "任务不存在";
 const TASK_NOT_FOUND_DESC = "请返回任务列表重新选择任务。";
@@ -51,6 +51,21 @@ const UPDATED_AT_LABEL = "最近更新时间";
 const SUMMARY_LABEL = "结果摘要";
 const EMPTY_SUMMARY = "任务尚未产出摘要。";
 const TIMELINE_TITLE = "执行轨迹";
+
+const RISK_LEVEL_LABELS: Record<string, string> = {
+  LOW: "低风险",
+  MEDIUM: "中风险",
+  HIGH: "高风险",
+  CRITICAL: "严重风险",
+};
+
+const SEVERITY_LABELS: Record<string, string> = {
+  INFO: "提示",
+  LOW: "低",
+  MEDIUM: "中",
+  HIGH: "高",
+  CRITICAL: "严重",
+};
 
 export function TaskDetailPage() {
   const navigate = useNavigate();
@@ -234,7 +249,7 @@ export function TaskDetailPage() {
           time: new Date().toISOString(),
           status: "CANCEL_REQUESTED",
           phase: "RUNNING",
-          message: CANCEL_REQUESTED,
+          message: CANCEL_REQUESTED_MESSAGE,
         },
         ...prev,
       ]);
@@ -419,37 +434,40 @@ export function TaskDetailPage() {
           {patchReview ? (
             <Card>
               <CardHeader>
-                <CardTitle className="section-title">AI Patch Review</CardTitle>
+                <CardTitle className="section-title">AI 代码审查</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm text-slate-700">
                 <div className="grid gap-3 md:grid-cols-3">
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-slate-400">Result</p>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">审查结果</p>
                     <p className={patchReview.passed ? "mt-1 font-semibold text-emerald-700" : "mt-1 font-semibold text-red-700"}>
-                      {patchReview.passed ? "PASSED" : "FAILED"}
+                      {patchReview.passed ? "通过" : "未通过"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-slate-400">Score</p>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">质量评分</p>
                     <p className="mt-1 font-semibold text-slate-900">{patchReview.score ?? "--"}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-slate-400">Risk</p>
-                    <p className="mt-1 font-semibold text-slate-900">{patchReview.riskLevel || "--"}</p>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">风险等级</p>
+                    <p className="mt-1 font-semibold text-slate-900">
+                      {patchReview.riskLevel ? RISK_LEVEL_LABELS[patchReview.riskLevel] ?? patchReview.riskLevel : "--"}
+                    </p>
                   </div>
                 </div>
                 <Separator />
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-400">Summary</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-400">审查摘要</p>
                   <p className="mt-1 whitespace-pre-wrap leading-7">{patchReview.summary || "--"}</p>
                 </div>
                 {reviewFindings.length ? (
                   <div className="space-y-2">
-                    <p className="text-xs uppercase tracking-wide text-slate-400">Findings</p>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">发现的问题</p>
                     {reviewFindings.map((finding, index) => (
                       <div key={`${finding.filePath || "finding"}-${index}`} className="rounded-lg border border-slate-200 px-3 py-2">
                         <p className="font-semibold text-slate-900">
-                          {finding.severity || "INFO"} {finding.filePath ? `· ${finding.filePath}` : ""}
+                          {SEVERITY_LABELS[finding.severity ?? "INFO"] ?? finding.severity ?? "提示"}
+                          {finding.filePath ? ` · ${finding.filePath}` : ""}
                         </p>
                         <p className="mt-1 leading-6">{finding.message || "--"}</p>
                       </div>
@@ -458,7 +476,7 @@ export function TaskDetailPage() {
                 ) : null}
                 {reviewRecommendations.length ? (
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-slate-400">Recommendations</p>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">改进建议</p>
                     <ul className="mt-2 list-disc space-y-1 pl-5">
                       {reviewRecommendations.map((item, index) => (
                         <li key={`${item}-${index}`}>{item}</li>

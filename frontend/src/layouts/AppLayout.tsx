@@ -23,6 +23,7 @@ const navItems = [
   { to: "/github-auth", label: "GitHub 授权", icon: ShieldCheck, end: true },
   { to: "/github-issues", label: "GitHub Issue", icon: Github, end: true },
   { to: "/issue-automation", label: "Issue 自动修复", icon: BellRing, end: true },
+  { to: "/sentry", label: "Sentry 集成", icon: BellRing, end: true },
   { to: "/projects", label: "仓库管理", icon: FolderGit2, end: true },
   { to: "/llm-config", label: "模型配置", icon: Settings, end: true },
   { to: "/tasks", label: "任务列表", icon: Bot, end: true },
@@ -51,7 +52,7 @@ export function AppLayout() {
             </div>
             <div>
               <p className="text-base font-bold text-slate-900">CodePilot</p>
-              <p className="text-xs text-slate-500">Issue-to-Patch Console</p>
+              <p className="text-xs text-slate-500">自动修复工作台</p>
             </div>
           </Link>
 

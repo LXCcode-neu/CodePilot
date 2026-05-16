@@ -14,10 +14,11 @@ public class PatchReviewPromptBuilder {
 
     public String buildSystemPrompt() {
         return """
-                You are a senior code reviewer inside CodePilot.
-                Review the generated patch after deterministic verification has passed.
-                Focus on correctness, minimality, maintainability, security, and repository constraints.
-                Return only a JSON object. Do not wrap it in markdown.
+                你是 CodePilot 内部的一名资深代码审查员。
+                你需要在确定性验证通过后审查生成的 Patch。
+                重点关注正确性、最小改动、可维护性、安全性和仓库约束。
+                只能返回一个合法 JSON 对象，不要使用 Markdown 包裹。
+                除 riskLevel 和 severity 这类枚举值必须使用英文枚举外，summary、findings.message、recommendations 必须使用简体中文。
                 """;
     }
 
@@ -28,31 +29,36 @@ public class PatchReviewPromptBuilder {
                                   PatchGenerateResult patchGenerateResult,
                                   PatchVerificationResult verificationResult) {
         StringBuilder builder = new StringBuilder();
-        builder.append("Review this patch as an AI code review gate.\n\n")
-                .append("Decision rules:\n")
-                .append("- passed must be false if the patch likely fails to fix the issue, introduces high-risk behavior, leaks secrets, violates repository architecture, or makes unrelated changes.\n")
-                .append("- score must be 0-100.\n")
-                .append("- riskLevel must be LOW, MEDIUM, or HIGH.\n")
-                .append("- Return MEDIUM risk for issues that need human attention but do not block confirmation.\n")
-                .append("- Return HIGH risk for issues that should block PR confirmation.\n\n")
-                .append("Check these criteria:\n")
-                .append("1. Fixes the original issue or Sentry alert root cause.\n")
-                .append("2. Keeps the patch minimal and focused.\n")
-                .append("3. Avoids unrelated refactors or broad behavior changes.\n")
-                .append("4. Preserves package layout, layering, and existing style.\n")
-                .append("5. Does not introduce unsupported dependencies, frameworks, middleware, or frontend stacks.\n")
-                .append("6. Does not expose tokens, API keys, webhook secrets, OAuth tokens, or plaintext credentials.\n")
-                .append("7. Does not weaken auth, encryption, notification approval, verification, or PR confirmation gates.\n")
-                .append("8. Handles obvious null, concurrency, transaction, and boundary risks.\n")
-                .append("9. Names and code structure are clear enough for maintainers.\n\n")
-                .append("Required JSON schema:\n")
+        builder.append("请把这个 Patch 当作 AI 代码审查门槛进行审查。\n\n")
+                .append("输出语言要求：\n")
+                .append("- summary 必须使用简体中文。\n")
+                .append("- findings 数组中每个 message 必须使用简体中文。\n")
+                .append("- recommendations 数组中每一项必须使用简体中文。\n")
+                .append("- riskLevel 只能使用 LOW、MEDIUM、HIGH。\n")
+                .append("- findings.severity 只能使用 INFO、LOW、MEDIUM、HIGH、CRITICAL。\n\n")
+                .append("决策规则：\n")
+                .append("- 如果 Patch 很可能没有修复问题、引入高风险行为、泄露密钥、违反仓库架构或包含无关改动，passed 必须为 false。\n")
+                .append("- score 必须是 0-100。\n")
+                .append("- 需要人工注意但不阻塞确认的问题，riskLevel 使用 MEDIUM。\n")
+                .append("- 应阻塞 PR 确认的问题，riskLevel 使用 HIGH。\n\n")
+                .append("审查标准：\n")
+                .append("1. 是否修复原始 Issue 或 Sentry 告警根因。\n")
+                .append("2. Patch 是否最小、聚焦。\n")
+                .append("3. 是否避免无关重构或大范围行为变化。\n")
+                .append("4. 是否保留包结构、分层边界和现有风格。\n")
+                .append("5. 是否没有引入不支持的依赖、框架、中间件或前端技术栈。\n")
+                .append("6. 是否没有暴露 token、API key、webhook secret、OAuth token 或明文凭据。\n")
+                .append("7. 是否没有削弱认证、加密、通知审批、验证或 PR 确认门槛。\n")
+                .append("8. 是否处理明显的空值、并发、事务和边界风险。\n")
+                .append("9. 命名和代码结构是否足够清晰。\n\n")
+                .append("必须返回以下 JSON 结构：\n")
                 .append("{\n")
                 .append("  \"passed\": true,\n")
                 .append("  \"score\": 86,\n")
                 .append("  \"riskLevel\": \"LOW\",\n")
-                .append("  \"summary\": \"Concise review conclusion.\",\n")
-                .append("  \"findings\": [{\"severity\":\"LOW\",\"filePath\":\"path/or/null\",\"message\":\"finding\"}],\n")
-                .append("  \"recommendations\": [\"manual follow-up if any\"]\n")
+                .append("  \"summary\": \"Patch 改动聚焦，能够修复问题，未发现阻塞风险。\",\n")
+                .append("  \"findings\": [{\"severity\":\"LOW\",\"filePath\":\"path/or/null\",\"message\":\"这里写中文问题描述\"}],\n")
+                .append("  \"recommendations\": [\"这里写中文后续建议\"]\n")
                 .append("}\n\n")
                 .append("Issue title:\n").append(nullToEmpty(issueTitle)).append("\n\n")
                 .append("Issue description:\n").append(truncate(issueDescription)).append("\n\n")

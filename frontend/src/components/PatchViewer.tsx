@@ -9,12 +9,12 @@ import { formatDateTime } from "@/lib/utils";
 import type { PatchRecord } from "@/types/patch";
 
 const TAB_LABELS: Record<string, string> = {
-  diff: "Diff",
+  diff: "变更 Diff",
   pr: "PR 草稿",
-  analysis: "分析",
-  solution: "方案",
-  risk: "风险",
-  raw: "原始 Patch",
+  analysis: "问题分析",
+  solution: "修复方案",
+  risk: "风险说明",
+  raw: "原始输出",
 };
 
 function Section({ value }: { value?: string | null }) {
@@ -41,7 +41,7 @@ export function PatchViewer({
           <CardTitle className="text-base">Patch 结果</CardTitle>
         </CardHeader>
         <CardContent>
-          <EmptyState title="还没有 Patch 内容" description="任务进入 Patch 阶段后，这里会展示分析、方案、可读 diff 和 PR 草稿。" />
+          <EmptyState title="还没有 Patch 内容" description="任务进入 Patch 阶段后，这里会展示分析、方案、可读 Diff 和 PR 草稿。" />
         </CardContent>
       </Card>
     );
@@ -69,7 +69,7 @@ export function PatchViewer({
               <TabsTrigger
                 key={tab}
                 value={tab}
-                className="border border-border bg-slate-100 capitalize data-[state=active]:bg-slate-900 data-[state=active]:text-white"
+                className="border border-border bg-slate-100 data-[state=active]:bg-slate-900 data-[state=active]:text-white"
               >
                 {TAB_LABELS[tab] ?? tab}
               </TabsTrigger>
@@ -92,7 +92,7 @@ export function PatchViewer({
           </TabsContent>
           <TabsContent value="raw" className="mt-4">
             <pre className="max-h-[520px] overflow-auto whitespace-pre rounded-2xl bg-slate-950 p-4 text-sm text-slate-100">
-              {patch.patch || patch.rawOutput || "暂无 raw patch 内容"}
+              {patch.patch || patch.rawOutput || "暂无原始输出内容"}
             </pre>
           </TabsContent>
         </Tabs>

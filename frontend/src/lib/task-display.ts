@@ -1,12 +1,13 @@
 import type { AgentStepType } from "@/types/step";
 
-const STEP_TYPE_LABELS: Record<AgentStepType, string> = {
+const STEP_TYPE_LABELS: Record<AgentStepType | string, string> = {
   CLONE_REPOSITORY: "克隆仓库",
   SEARCH_RELEVANT_CODE: "检索相关代码",
-  ANALYZE_ISSUE: "分析 Issue",
+  ANALYZE_ISSUE: "分析问题",
   GENERATE_PATCH: "生成 Patch",
   VERIFY_PATCH: "验证 Patch",
   REPAIR_PATCH: "修复 Patch",
+  REVIEW_PATCH: "AI 代码审查",
   COMPLETE_RUN: "完成执行",
 };
 
@@ -29,14 +30,14 @@ export function getStepTypeLabel(stepType?: string | null) {
     return "未知步骤";
   }
 
-  return STEP_TYPE_LABELS[normalizedStepType as AgentStepType] ?? normalizedStepType;
+  return STEP_TYPE_LABELS[normalizedStepType] ?? normalizedStepType;
 }
 
 export function getStepDisplayName(stepType?: string | null, stepName?: string | null) {
   const normalizedStepType = normalizeStepType(stepType);
 
   if (normalizedStepType in STEP_TYPE_LABELS) {
-    return STEP_TYPE_LABELS[normalizedStepType as AgentStepType];
+    return STEP_TYPE_LABELS[normalizedStepType];
   }
 
   return stepName?.trim() || getStepTypeLabel(stepType);

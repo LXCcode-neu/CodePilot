@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.stereotype.Service;
@@ -79,14 +80,14 @@ public class GitService {
 
     private void syncRepository(ProjectRepo projectRepo, Path repositoryPath) {
         try (Git git = Git.open(repositoryPath.toFile())) {
-            String baseBranch = resolveBaseBranch(projectRepo, git.getRepository());
             fetchOrigin(git, projectRepo.getUserId());
+            String baseBranch = resolveBaseBranch(projectRepo, git.getRepository());
             checkoutBaseBranch(git, git.getRepository(), baseBranch);
-            git.reset().setMode(ResetCommand.ResetType.HARD).setRef("origin/" + baseBranch).call();
+            git.reset().setMode(ResetCommand.ResetType.HARD).setRef(remoteTrackingRef(baseBranch)).call();
             git.clean().setCleanDirectories(true).setIgnore(false).call();
         } catch (Exception ex) {
             throw new BusinessException(ErrorCode.INTERNAL_ERROR,
-                    "Failed to sync GitHub repository: " + buildErrorMessage(ex));
+                    "同步 GitHub 仓库失败: " + buildErrorMessage(ex));
         }
     }
 
@@ -100,11 +101,12 @@ public class GitService {
     }
 
     private void checkoutBaseBranch(Git git, Repository repository, String baseBranch) throws Exception {
+        String remoteRef = remoteTrackingRef(baseBranch);
         if (repository.findRef(baseBranch) == null) {
             git.checkout()
                     .setCreateBranch(true)
                     .setName(baseBranch)
-                    .setStartPoint("origin/" + baseBranch)
+                    .setStartPoint(remoteRef)
                     .call();
         } else {
             git.checkout().setName(baseBranch).call();
@@ -113,14 +115,60 @@ public class GitService {
 
     private String resolveBaseBranch(ProjectRepo projectRepo, Repository repository) {
         if (projectRepo.getDefaultBranch() != null && !projectRepo.getDefaultBranch().isBlank()) {
-            return projectRepo.getDefaultBranch().trim();
+            return normalizeBranchName(projectRepo.getDefaultBranch());
         }
-        try {
-            String branch = repository.getBranch();
-            return branch == null || branch.isBlank() ? "main" : branch;
-        } catch (Exception exception) {
+        String originHeadBranch = resolveOriginHeadBranch(repository);
+        if (originHeadBranch != null) {
+            return originHeadBranch;
+        }
+        if (hasRemoteBranch(repository, "main")) {
             return "main";
         }
+        if (hasRemoteBranch(repository, "master")) {
+            return "master";
+        }
+        return "main";
+    }
+
+    private String resolveOriginHeadBranch(Repository repository) {
+        try {
+            Ref originHead = repository.exactRef("refs/remotes/origin/HEAD");
+            if (originHead == null) {
+                return null;
+            }
+            Ref target = originHead.isSymbolic() ? originHead.getTarget() : originHead;
+            return normalizeBranchName(target.getName());
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+
+    private boolean hasRemoteBranch(Repository repository, String branchName) {
+        try {
+            return repository.exactRef(remoteTrackingRef(branchName)) != null;
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    private String remoteTrackingRef(String branchName) {
+        return "refs/remotes/origin/" + normalizeBranchName(branchName);
+    }
+
+    private String normalizeBranchName(String branchName) {
+        String normalized = branchName == null ? "" : branchName.trim();
+        String remotePrefix = "refs/remotes/origin/";
+        String localPrefix = "refs/heads/";
+        if (normalized.startsWith(remotePrefix)) {
+            return normalized.substring(remotePrefix.length());
+        }
+        if (normalized.startsWith("origin/")) {
+            return normalized.substring("origin/".length());
+        }
+        if (normalized.startsWith(localPrefix)) {
+            return normalized.substring(localPrefix.length());
+        }
+        return normalized.isBlank() ? "main" : normalized;
     }
 
     private ProjectRepo requireProjectRepo(Long projectId) {
