@@ -4,7 +4,7 @@ import com.codepliot.model.LlmApiKeyCreateRequest;
 import com.codepliot.model.LlmApiKeyVO;
 import com.codepliot.model.LlmConfigTestResult;
 import com.codepliot.model.Result;
-import com.codepliot.service.LlmApiKeyConfigService;
+import com.codepliot.service.llm.LlmApiKeyConfigService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;

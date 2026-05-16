@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.patch;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;

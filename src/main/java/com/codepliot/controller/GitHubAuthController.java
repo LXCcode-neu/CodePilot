@@ -5,7 +5,7 @@ import com.codepliot.model.GitHubAuthUrlVO;
 import com.codepliot.model.GitHubAuthorizedRepoVO;
 import com.codepliot.model.GitHubConnectRequest;
 import com.codepliot.model.Result;
-import com.codepliot.service.GitHubAuthService;
+import com.codepliot.service.auth.GitHubAuthService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;

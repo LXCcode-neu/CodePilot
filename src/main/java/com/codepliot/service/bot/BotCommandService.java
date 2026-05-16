@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.bot;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.codepliot.client.FeishuBotClient;
@@ -14,6 +14,7 @@ import com.codepliot.model.GitHubIssueEventRunResult;
 import com.codepliot.model.PullRequestSubmitResult;
 import com.codepliot.repository.AgentTaskMapper;
 import com.codepliot.repository.PatchRecordMapper;
+import com.codepliot.service.githubIssue.GitHubIssueEventService;
 import com.codepliot.service.patch.PatchService;
 import com.codepliot.service.patch.PullRequestSubmitService;
 import java.util.Optional;

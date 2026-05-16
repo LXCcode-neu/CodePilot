@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.notification;
 
 import com.codepliot.client.FeishuBotClient;
 import com.codepliot.config.BotProperties;
@@ -7,6 +7,7 @@ import com.codepliot.entity.GitHubIssueEvent;
 import com.codepliot.entity.PatchRecord;
 import com.codepliot.entity.UserRepoWatch;
 import com.codepliot.model.NotificationMessage;
+import com.codepliot.service.bot.BotActionCodeService;
 import org.springframework.stereotype.Service;
 
 @Service

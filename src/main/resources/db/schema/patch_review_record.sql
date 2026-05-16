@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS patch_review_record (
+  id BIGINT NOT NULL COMMENT 'MyBatis-Plus ASSIGN_ID',
+  task_id BIGINT NOT NULL,
+  patch_record_id BIGINT DEFAULT NULL,
+  reviewer_provider VARCHAR(64) DEFAULT NULL,
+  reviewer_model_name VARCHAR(128) DEFAULT NULL,
+  passed TINYINT(1) NOT NULL DEFAULT 0,
+  score INT NOT NULL DEFAULT 0,
+  risk_level VARCHAR(32) NOT NULL DEFAULT 'MEDIUM',
+  summary TEXT DEFAULT NULL,
+  findings MEDIUMTEXT DEFAULT NULL,
+  recommendations MEDIUMTEXT DEFAULT NULL,
+  raw_response MEDIUMTEXT DEFAULT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  PRIMARY KEY (id),
+  KEY idx_patch_review_record_task (task_id),
+  KEY idx_patch_review_record_patch (patch_record_id),
+  KEY idx_patch_review_record_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

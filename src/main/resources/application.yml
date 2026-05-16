@@ -18,6 +18,7 @@ spring:
         - classpath:db/schema/patch_verification_record.sql
         - classpath:db/schema/sentry_alert_event.sql
         - classpath:db/schema/sentry_project_mapping.sql
+        - classpath:db/schema/patch_review_record.sql
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/codepilot?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
@@ -67,6 +68,10 @@ codepilot:
   verification:
     command-timeout-seconds: ${CODEPILOT_VERIFICATION_COMMAND_TIMEOUT_SECONDS:300}
     max-repair-attempts: ${CODEPILOT_VERIFICATION_MAX_REPAIR_ATTEMPTS:3}
+  patch-review:
+    enabled: ${CODEPILOT_PATCH_REVIEW_ENABLED:true}
+    min-score: ${CODEPILOT_PATCH_REVIEW_MIN_SCORE:70}
+    fail-on-high-risk: ${CODEPILOT_PATCH_REVIEW_FAIL_ON_HIGH_RISK:true}
   github:
     base-url: https://github.com
     api-base-url: https://api.github.com

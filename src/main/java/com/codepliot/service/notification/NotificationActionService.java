@@ -1,10 +1,11 @@
-package com.codepliot.service;
+package com.codepliot.service.notification;
 
 import com.codepliot.config.AppProperties;
 import com.codepliot.entity.NotificationActionToken;
 import com.codepliot.model.GitHubIssueEventRunResult;
 import com.codepliot.model.NotificationActionExecutionResult;
 import com.codepliot.model.NotificationActionType;
+import com.codepliot.service.githubIssue.GitHubIssueEventService;
 import org.springframework.stereotype.Service;
 
 @Service

@@ -1,6 +1,6 @@
 package com.codepliot.controller;
 
-import com.codepliot.service.FeishuBotEventService;
+import com.codepliot.service.bot.FeishuBotEventService;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;

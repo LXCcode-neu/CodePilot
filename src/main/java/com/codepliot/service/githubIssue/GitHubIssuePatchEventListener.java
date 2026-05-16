@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.githubIssue;
 
 import com.codepliot.model.PatchGeneratedEvent;
 import org.springframework.context.event.EventListener;

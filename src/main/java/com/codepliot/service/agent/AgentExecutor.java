@@ -13,7 +13,7 @@ import com.codepliot.model.ErrorCode;
 import com.codepliot.model.PatchGeneratedEvent;
 import com.codepliot.model.TaskEventMessage;
 import com.codepliot.policy.AgentExecutionPolicy;
-import com.codepliot.service.ProjectLlmConfigService;
+import com.codepliot.service.llm.ProjectLlmConfigService;
 import com.codepliot.service.sse.SseService;
 import com.codepliot.service.task.AgentStepService;
 import com.codepliot.service.task.AgentTaskService;
@@ -101,7 +101,8 @@ public class AgentExecutor {
 
             AgentExecutionDecision decision = agentExecutionPolicy.afterPatchGenerated(
                     context.patchSafetyCheckResult(),
-                    context.patchVerificationResult()
+                    context.patchVerificationResult(),
+                    context.patchReviewResult()
             );
             agentTaskService.updateStatus(context.taskId(), decision.status(), decision.resultSummary(), null);
             publishPatchOutcome(context, decision);

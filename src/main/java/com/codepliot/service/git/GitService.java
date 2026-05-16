@@ -5,7 +5,7 @@ import com.codepliot.entity.ProjectRepo;
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.ErrorCode;
 import com.codepliot.repository.ProjectRepoMapper;
-import com.codepliot.service.GitHubAuthService;
+import com.codepliot.service.auth.GitHubAuthService;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.eclipse.jgit.api.Git;

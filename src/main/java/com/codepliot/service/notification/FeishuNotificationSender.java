@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.notification;
 
 import com.codepliot.model.NotificationChannelType;
 import com.codepliot.model.NotificationMessage;
@@ -7,17 +7,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
-public class WeComNotificationSender implements NotificationSender {
+public class FeishuNotificationSender implements NotificationSender {
 
     private final RestClient restClient;
 
-    public WeComNotificationSender(RestClient.Builder restClientBuilder) {
+    public FeishuNotificationSender(RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder.build();
     }
 
     @Override
     public NotificationChannelType type() {
-        return NotificationChannelType.WE_COM;
+        return NotificationChannelType.FEISHU;
     }
 
     @Override
@@ -25,8 +25,8 @@ public class WeComNotificationSender implements NotificationSender {
         restClient.post()
                 .uri(webhookUrl)
                 .body(Map.of(
-                        "msgtype", "text",
-                        "text", Map.of("content", buildText(message))
+                        "msg_type", "text",
+                        "content", Map.of("text", buildText(message))
                 ))
                 .retrieve()
                 .toBodilessEntity();

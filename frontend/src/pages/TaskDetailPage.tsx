@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoaderCircle, PlayCircle, RefreshCcw, StopCircle, Trash2 } from "lucide-react";
-import { confirmTaskPatch, getTaskPatch, submitTaskPullRequest } from "@/api/patch";
+import { confirmTaskPatch, getTaskPatch, getTaskPatchReview, submitTaskPullRequest } from "@/api/patch";
 import { getProject } from "@/api/project";
 import { createTaskEventSource, parseTaskEventMessage } from "@/api/sse";
 import { getTaskSteps } from "@/api/step";
@@ -15,10 +15,10 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { formatDateTime, isRunningTask } from "@/lib/utils";
+import { formatDateTime, isRunningTask, parseJsonString } from "@/lib/utils";
 import { getToken } from "@/lib/token";
 import type { TaskEventMessage } from "@/types/common";
-import type { PatchRecord } from "@/types/patch";
+import type { PatchRecord, PatchReviewRecord } from "@/types/patch";
 import type { ProjectRepo } from "@/types/project";
 import type { AgentStep } from "@/types/step";
 import type { AgentTask } from "@/types/task";
@@ -61,6 +61,7 @@ export function TaskDetailPage() {
   const [project, setProject] = useState<ProjectRepo | null>(null);
   const [steps, setSteps] = useState<AgentStep[]>([]);
   const [patch, setPatch] = useState<PatchRecord | null>(null);
+  const [patchReview, setPatchReview] = useState<PatchReviewRecord | null>(null);
   const [events, setEvents] = useState<TaskEventMessage[]>([]);
   const [eventStreamVersion, setEventStreamVersion] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -97,6 +98,12 @@ export function TaskDetailPage() {
     } catch {
       setPatch(null);
     }
+    try {
+      const reviewData = await getTaskPatchReview(taskId);
+      setPatchReview(reviewData);
+    } catch {
+      setPatchReview(null);
+    }
   }
 
   async function loadAll() {
@@ -108,6 +115,7 @@ export function TaskDetailPage() {
       return;
     }
     setPatch(null);
+    setPatchReview(null);
   }
 
   useEffect(() => {
@@ -175,6 +183,14 @@ export function TaskDetailPage() {
     [patch, task?.status]
   );
   const canDelete = useMemo(() => (task ? !isRunningTask(task.status) : false), [task]);
+  const reviewFindings = useMemo(
+    () => parseJsonString<Array<{ severity?: string; filePath?: string; message?: string }>>(patchReview?.findings) ?? [],
+    [patchReview?.findings]
+  );
+  const reviewRecommendations = useMemo(
+    () => parseJsonString<string[]>(patchReview?.recommendations) ?? [],
+    [patchReview?.recommendations]
+  );
 
   async function handleRun() {
     if (!taskId) {
@@ -400,6 +416,62 @@ export function TaskDetailPage() {
 
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="space-y-6">
+          {patchReview ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="section-title">AI Patch Review</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm text-slate-700">
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Result</p>
+                    <p className={patchReview.passed ? "mt-1 font-semibold text-emerald-700" : "mt-1 font-semibold text-red-700"}>
+                      {patchReview.passed ? "PASSED" : "FAILED"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Score</p>
+                    <p className="mt-1 font-semibold text-slate-900">{patchReview.score ?? "--"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Risk</p>
+                    <p className="mt-1 font-semibold text-slate-900">{patchReview.riskLevel || "--"}</p>
+                  </div>
+                </div>
+                <Separator />
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400">Summary</p>
+                  <p className="mt-1 whitespace-pre-wrap leading-7">{patchReview.summary || "--"}</p>
+                </div>
+                {reviewFindings.length ? (
+                  <div className="space-y-2">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Findings</p>
+                    {reviewFindings.map((finding, index) => (
+                      <div key={`${finding.filePath || "finding"}-${index}`} className="rounded-lg border border-slate-200 px-3 py-2">
+                        <p className="font-semibold text-slate-900">
+                          {finding.severity || "INFO"} {finding.filePath ? `· ${finding.filePath}` : ""}
+                        </p>
+                        <p className="mt-1 leading-6">{finding.message || "--"}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                {reviewRecommendations.length ? (
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Recommendations</p>
+                    <ul className="mt-2 list-disc space-y-1 pl-5">
+                      {reviewRecommendations.map((item, index) => (
+                        <li key={`${item}-${index}`}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                <p className="text-xs text-slate-400">
+                  {patchReview.reviewerProvider || "--"} / {patchReview.reviewerModelName || "--"} · {formatDateTime(patchReview.createdAt)}
+                </p>
+              </CardContent>
+            </Card>
+          ) : null}
           <Card>
             <CardHeader>
               <CardTitle className="section-title">{TIMELINE_TITLE}</CardTitle>

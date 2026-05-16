@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.llm;
 
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.ErrorCode;

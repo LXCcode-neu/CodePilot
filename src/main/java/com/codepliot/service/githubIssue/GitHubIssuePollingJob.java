@@ -1,10 +1,11 @@
-package com.codepliot.service;
+package com.codepliot.service.githubIssue;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.codepliot.client.GitHubIssueClient;
 import com.codepliot.entity.UserRepoWatch;
 import com.codepliot.model.GitHubIssueVO;
 import com.codepliot.repository.UserRepoWatchMapper;
+import com.codepliot.service.auth.GitHubAuthService;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.slf4j.Logger;

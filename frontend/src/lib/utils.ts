@@ -47,9 +47,16 @@ export function stringifyPretty(value: unknown) {
 }
 
 export function isRunningTask(status?: string | null) {
-  return ["CLONING", "RETRIEVING", "ANALYZING", "GENERATING_PATCH", "VERIFYING", "REPAIRING_PATCH", "CANCEL_REQUESTED"].includes(
-    status ?? ""
-  );
+  return [
+    "CLONING",
+    "RETRIEVING",
+    "ANALYZING",
+    "GENERATING_PATCH",
+    "VERIFYING",
+    "REPAIRING_PATCH",
+    "REVIEWING_PATCH",
+    "CANCEL_REQUESTED",
+  ].includes(status ?? "");
 }
 
 export function isFinishedTask(status?: string | null) {

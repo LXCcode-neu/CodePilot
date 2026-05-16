@@ -15,7 +15,7 @@ import com.codepliot.model.PullRequestSubmitResult;
 import com.codepliot.repository.AgentTaskMapper;
 import com.codepliot.repository.PatchRecordMapper;
 import com.codepliot.repository.ProjectRepoMapper;
-import com.codepliot.service.GitHubAuthService;
+import com.codepliot.service.auth.GitHubAuthService;
 import com.codepliot.service.git.GitService;
 import com.codepliot.utils.SecurityUtils;
 import java.io.ByteArrayInputStream;

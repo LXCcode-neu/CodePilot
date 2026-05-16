@@ -3,7 +3,7 @@ package com.codepliot.controller;
 import com.codepliot.model.GitHubIssueEventRunResult;
 import com.codepliot.model.GitHubIssueEventVO;
 import com.codepliot.model.Result;
-import com.codepliot.service.GitHubIssueEventService;
+import com.codepliot.service.githubIssue.GitHubIssueEventService;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

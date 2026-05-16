@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.notification;
 
 import com.codepliot.config.AppProperties;
 import com.codepliot.entity.BotActionCode;
@@ -10,6 +10,7 @@ import com.codepliot.model.NotificationMessage;
 import com.codepliot.model.PatchFileChange;
 import com.codepliot.model.PatchRecordVO;
 import com.codepliot.model.PullRequestPreview;
+import com.codepliot.service.bot.BotActionCodeService;
 import org.springframework.stereotype.Component;
 
 @Component

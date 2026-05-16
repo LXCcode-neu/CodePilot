@@ -5,7 +5,7 @@ import com.codepliot.exception.BusinessException;
 import com.codepliot.model.ErrorCode;
 import com.codepliot.model.Result;
 import com.codepliot.model.SentryAlertTaskCreateResult;
-import com.codepliot.service.SentryAlertService;
+import com.codepliot.service.sentry.SentryAlertService;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

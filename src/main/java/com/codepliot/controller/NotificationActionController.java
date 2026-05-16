@@ -2,7 +2,7 @@ package com.codepliot.controller;
 
 import com.codepliot.exception.BusinessException;
 import com.codepliot.model.NotificationActionExecutionResult;
-import com.codepliot.service.NotificationActionService;
+import com.codepliot.service.notification.NotificationActionService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

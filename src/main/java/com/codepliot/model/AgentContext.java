@@ -23,6 +23,7 @@ public final class AgentContext {
     private PatchGenerateResult patchGenerateResult;
     private PatchSafetyCheckResult patchSafetyCheckResult;
     private PatchVerificationResult patchVerificationResult;
+    private PatchReviewResult patchReviewResult;
     private Long patchRecordId;
 
     /**
@@ -62,6 +63,7 @@ public final class AgentContext {
         this.patchGenerateResult = null;
         this.patchSafetyCheckResult = null;
         this.patchVerificationResult = null;
+        this.patchReviewResult = null;
         this.patchRecordId = null;
     }
 
@@ -157,6 +159,10 @@ public final class AgentContext {
         return patchVerificationResult;
     }
 
+    public PatchReviewResult patchReviewResult() {
+        return patchReviewResult;
+    }
+
     public Long patchRecordId() {
         return patchRecordId;
     }
@@ -202,5 +208,9 @@ public final class AgentContext {
 
     public void updatePatchVerificationResult(PatchVerificationResult patchVerificationResult) {
         this.patchVerificationResult = patchVerificationResult;
+    }
+
+    public void updatePatchReviewResult(PatchReviewResult patchReviewResult) {
+        this.patchReviewResult = patchReviewResult;
     }
 }

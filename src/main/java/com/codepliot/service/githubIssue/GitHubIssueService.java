@@ -10,7 +10,7 @@ import com.codepliot.model.ErrorCode;
 import com.codepliot.model.GitHubIssuePageVO;
 import com.codepliot.model.GitHubIssueVO;
 import com.codepliot.repository.ProjectRepoMapper;
-import com.codepliot.service.GitHubAuthService;
+import com.codepliot.service.auth.GitHubAuthService;
 import com.codepliot.service.task.AgentTaskService;
 import com.codepliot.utils.SecurityUtils;
 import org.springframework.stereotype.Service;

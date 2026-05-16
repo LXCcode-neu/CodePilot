@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.githubIssue;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.codepliot.entity.GitHubIssueEvent;
@@ -14,6 +14,9 @@ import com.codepliot.repository.GitHubIssueEventMapper;
 import com.codepliot.repository.PatchRecordMapper;
 import com.codepliot.repository.UserRepoWatchMapper;
 import com.codepliot.service.agent.AgentRunService;
+import com.codepliot.service.notification.BotNotificationService;
+import com.codepliot.service.notification.NotificationService;
+import com.codepliot.service.notification.NotificationTemplateFactory;
 import com.codepliot.service.task.AgentTaskService;
 import com.codepliot.utils.SecurityUtils;
 import java.time.LocalDateTime;

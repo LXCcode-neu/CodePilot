@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.notification;
 
 import com.codepliot.model.NotificationChannelType;
 import com.codepliot.model.NotificationMessage;

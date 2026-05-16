@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.sentry;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.codepliot.entity.ProjectRepo;

@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.bot;
 
 import com.codepliot.model.BotCommand;
 import com.codepliot.model.BotCommandType;

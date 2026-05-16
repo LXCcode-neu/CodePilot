@@ -137,7 +137,7 @@ Those rules should live in a separate document, for example:
 5. Do not generate frontend code unless the user explicitly asks for it or the task clearly targets the `frontend/` module.
 6. Do not fake completed business logic.
 7. Keep all Java packages under the `com.codepliot` namespace.
-8. The backend now uses a **flat top-level package layout**. Do not keep creating domain subpackages under each main layer; prefer semantic class names instead:
+8. The backend keeps a **top-level layer layout**, with service classes grouped into service subpackages by responsibility. Do not create domain subpackages under non-service layers unless explicitly requested:
    - `config`
    - `controller`
    - `entity`
@@ -150,7 +150,7 @@ Those rules should live in a separate document, for example:
    - `client`
    - `utils`
    - `frontend`
-9. Express business meaning through class names such as `AuthController`, `ProjectRepoService`, `AgenticCodeSearchService`, or `PatchGenerateResult`.
+9. Put service classes into the closest existing service subpackage when possible, such as `service.agent`, `service.auth`, `service.bot`, `service.githubIssue`, `service.llm`, `service.notification`, `service.patch`, `service.project`, `service.sentry`, `service.sse`, or `service.task`. Create a new service subpackage only when no existing responsibility fits.
 10. Unless explicitly requested, do not introduce unrelated new business flows beyond the current project scope.
 11. If project structure, tech choices, development boundaries, or startup instructions change, update both `README.md` and this file.
 12. Keep database access in `repository` and business orchestration in `service`.
@@ -166,6 +166,8 @@ Those rules should live in a separate document, for example:
 22. Sentry alert webhook integration must keep Sentry auth tokens and webhook tokens server-side only. Webhook requests must be authenticated before creating repair tasks.
 23. Sentry alert auto-fix tasks must reuse the existing AgentTask execution and verification flow instead of bypassing `WAITING_CONFIRM` or automatic verification.
 24. Project-level Sentry mappings should be user-configurable through CodePilot frontend/backend APIs and persisted in the repository/service layer; do not require ordinary users to edit source code or application YAML for each project mapping.
+25. AI Patch Review must run after deterministic patch verification passes and before `WAITING_CONFIRM`. Failed or unparsable review results must block PR confirmation by moving the task to `VERIFY_FAILED`.
+26. AI Patch Review results must be persisted through repository/service layers and shown through backend APIs so UI, notification, and retry flows can inspect the review evidence.
 
 ### Default Interpretation
 

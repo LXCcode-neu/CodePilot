@@ -29,6 +29,23 @@ export interface PullRequestSubmitResult {
   submittedAt: string;
 }
 
+export interface PatchReviewRecord {
+  id?: string | number | null;
+  taskId?: string | number | null;
+  patchRecordId?: string | number | null;
+  reviewerProvider?: string | null;
+  reviewerModelName?: string | null;
+  passed?: boolean | null;
+  score?: number | null;
+  riskLevel?: string | null;
+  summary?: string | null;
+  findings?: string | null;
+  recommendations?: string | null;
+  rawResponse?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
 export type PatchLineType = "added" | "removed" | "context";
 
 export interface PatchDiffLine {

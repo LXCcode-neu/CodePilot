@@ -15,8 +15,9 @@ import com.codepliot.repository.AgentStepMapper;
 import com.codepliot.repository.AgentTaskMapper;
 import com.codepliot.repository.PatchRecordMapper;
 import com.codepliot.repository.ProjectRepoMapper;
-import com.codepliot.service.PatchVerificationRecordService;
-import com.codepliot.service.ProjectLlmConfigService;
+import com.codepliot.service.patch.PatchReviewRecordService;
+import com.codepliot.service.patch.PatchVerificationRecordService;
+import com.codepliot.service.llm.ProjectLlmConfigService;
 import com.codepliot.service.sse.SseService;
 import com.codepliot.utils.SecurityUtils;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class AgentTaskService {
     private final TaskRunLockService taskRunLockService;
     private final SseService sseService;
     private final PatchVerificationRecordService patchVerificationRecordService;
+    private final PatchReviewRecordService patchReviewRecordService;
 
     public AgentTaskService(AgentTaskMapper agentTaskMapper,
                             AgentStepMapper agentStepMapper,
@@ -43,7 +45,8 @@ public class AgentTaskService {
                             ProjectLlmConfigService projectLlmConfigService,
                             TaskRunLockService taskRunLockService,
                             SseService sseService,
-                            PatchVerificationRecordService patchVerificationRecordService) {
+                            PatchVerificationRecordService patchVerificationRecordService,
+                            PatchReviewRecordService patchReviewRecordService) {
         this.agentTaskMapper = agentTaskMapper;
         this.agentStepMapper = agentStepMapper;
         this.patchRecordMapper = patchRecordMapper;
@@ -52,6 +55,7 @@ public class AgentTaskService {
         this.taskRunLockService = taskRunLockService;
         this.sseService = sseService;
         this.patchVerificationRecordService = patchVerificationRecordService;
+        this.patchReviewRecordService = patchReviewRecordService;
     }
 
     @Transactional
@@ -239,6 +243,7 @@ public class AgentTaskService {
         agentStepMapper.delete(new LambdaQueryWrapper<AgentStep>()
                 .in(AgentStep::getTaskId, taskIds));
         patchVerificationRecordService.deleteByTaskIds(taskIds);
+        patchReviewRecordService.deleteByTaskIds(taskIds);
         patchRecordMapper.delete(new LambdaQueryWrapper<PatchRecord>()
                 .in(PatchRecord::getTaskId, taskIds));
         agentTaskMapper.delete(new LambdaQueryWrapper<AgentTask>()
@@ -280,6 +285,7 @@ public class AgentTaskService {
                 || AgentTaskStatus.GENERATING_PATCH.name().equals(status)
                 || AgentTaskStatus.VERIFYING.name().equals(status)
                 || AgentTaskStatus.REPAIRING_PATCH.name().equals(status)
+                || AgentTaskStatus.REVIEWING_PATCH.name().equals(status)
                 || AgentTaskStatus.CANCEL_REQUESTED.name().equals(status);
     }
 

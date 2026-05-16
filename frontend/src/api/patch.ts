@@ -1,6 +1,6 @@
 import { request } from "@/api/request";
 import { buildPullRequestPreview, parseUnifiedDiff } from "@/lib/patch-diff";
-import type { PatchRecord, PullRequestSubmitResult } from "@/types/patch";
+import type { PatchRecord, PatchReviewRecord, PullRequestSubmitResult } from "@/types/patch";
 
 function pickString(record: Record<string, unknown>, key: string) {
   const value = record[key];
@@ -61,6 +61,10 @@ function normalizePatch(data: unknown): PatchRecord {
 export async function getTaskPatch(taskId: string) {
   const data = await request.get<unknown>(`/api/tasks/${taskId}/patch`);
   return normalizePatch(data);
+}
+
+export function getTaskPatchReview(taskId: string) {
+  return request.get<PatchReviewRecord | null>(`/api/tasks/${taskId}/patch/review`);
 }
 
 export function confirmTaskPatch(taskId: string) {

@@ -4,7 +4,7 @@ import com.codepliot.model.EnabledUpdateRequest;
 import com.codepliot.model.Result;
 import com.codepliot.model.UserRepoWatchCreateRequest;
 import com.codepliot.model.UserRepoWatchVO;
-import com.codepliot.service.UserRepoWatchService;
+import com.codepliot.service.githubIssue.UserRepoWatchService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;

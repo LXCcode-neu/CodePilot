@@ -6,7 +6,7 @@ import com.codepliot.model.LlmProviderVO;
 import com.codepliot.model.ProjectLlmConfigSaveRequest;
 import com.codepliot.model.ProjectLlmConfigVO;
 import com.codepliot.model.Result;
-import com.codepliot.service.ProjectLlmConfigService;
+import com.codepliot.service.llm.ProjectLlmConfigService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;

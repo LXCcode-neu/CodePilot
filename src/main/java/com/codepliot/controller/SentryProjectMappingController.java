@@ -3,7 +3,7 @@ package com.codepliot.controller;
 import com.codepliot.model.Result;
 import com.codepliot.model.SentryProjectMappingSaveRequest;
 import com.codepliot.model.SentryProjectMappingVO;
-import com.codepliot.service.SentryProjectMappingService;
+import com.codepliot.service.sentry.SentryProjectMappingService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -4,7 +4,7 @@ import com.codepliot.config.PatchVerificationProperties;
 import com.codepliot.exception.AgentTaskCancelledException;
 import com.codepliot.model.PatchVerificationCommandResult;
 import com.codepliot.model.PatchVerificationResult;
-import com.codepliot.service.PatchVerificationRecordService;
+import com.codepliot.service.patch.PatchVerificationRecordService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;

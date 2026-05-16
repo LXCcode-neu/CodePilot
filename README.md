@@ -163,6 +163,7 @@ This repository contains:
 - global LLM API key list management with encrypted API key storage, active-key switching, and optional per-project overrides
 - LLM analysis and patch generation abstraction
 - patch record persistence, safety review, and manual confirmation
+- AI Patch Review gate after deterministic patch verification
 - group robot notification approval links for GitHub Issue auto-fix or ignore decisions
 - repair-result group notifications with diff summary and PR draft preview
 - Sentry alert webhook intake that can create and auto-run repair tasks
@@ -174,7 +175,7 @@ This repository contains:
 
 ### Backend Package Layout
 
-The backend now uses a flat top-level layer layout. There are no additional business subpackages under each main layer; class names are used to convey the domain meaning:
+The backend keeps the main layers at the top level. The `service` layer is grouped by responsibility so domain workflows do not pile up in one package:
 
 ```text
 src/main/java/com/codepliot
@@ -187,6 +188,18 @@ src/main/java/com/codepliot
 ├── model
 ├── repository
 ├── service
+│   ├── agent
+│   ├── auth
+│   ├── bot
+│   ├── git
+│   ├── githubIssue
+│   ├── llm
+│   ├── notification
+│   ├── patch
+│   ├── project
+│   ├── sentry
+│   ├── sse
+│   └── task
 └── utils
 ```
 
@@ -211,6 +224,10 @@ Prepare before startup:
 - `CODEPILOT_PUBLIC_BASE_URL` for externally reachable group robot action links, for example `https://codepilot.example.com`
 - `CODEPILOT_VERIFICATION_COMMAND_TIMEOUT_SECONDS` for each patch verification command timeout, default `300`
 - `CODEPILOT_VERIFICATION_MAX_REPAIR_ATTEMPTS` for automatic repair attempts after verification failure, default `3`
+- optional AI Patch Review gate configuration:
+  - `CODEPILOT_PATCH_REVIEW_ENABLED`, default `true`
+  - `CODEPILOT_PATCH_REVIEW_MIN_SCORE`, default `70`
+  - `CODEPILOT_PATCH_REVIEW_FAIL_ON_HIGH_RISK`, default `true`
 - optional Sentry alert auto-fix configuration:
   - `CODEPILOT_SENTRY_ENABLED=true`
   - `CODEPILOT_SENTRY_WEBHOOK_TOKEN` for authenticating Sentry webhook calls
@@ -374,6 +391,20 @@ After a patch is generated, CodePilot applies it in an isolated verification wor
 - When verification fails, CodePilot asks the LLM to generate a corrected replacement patch and retries verification up to `CODEPILOT_VERIFICATION_MAX_REPAIR_ATTEMPTS`, default `3`.
 - If all repair attempts fail, the task moves to `VERIFY_FAILED`; a `VERIFY_FAILED` task can be rerun after the underlying issue is fixed or the agent is asked to try again.
 - Verification command results are stored in `patch_verification_record` with the task, patch, attempt number, command, exit code, timeout flag, and output summary.
+
+### AI Patch Review Gate
+
+After deterministic verification passes, CodePilot runs an LLM-based code review before a task can enter `WAITING_CONFIRM`.
+
+- The review runs in the `REVIEWING_PATCH` task status.
+- The review checks whether the patch is focused, clear, safe, aligned with the issue or Sentry alert, and compliant with repository constraints.
+- The LLM must return structured JSON with `passed`, `score`, `riskLevel`, `summary`, `findings`, and `recommendations`.
+- Results are stored in `patch_review_record`.
+- If the review response cannot be parsed, the review is treated as failed.
+- If `score < CODEPILOT_PATCH_REVIEW_MIN_SCORE`, PR confirmation is blocked.
+- If `riskLevel=HIGH` and `CODEPILOT_PATCH_REVIEW_FAIL_ON_HIGH_RISK=true`, PR confirmation is blocked.
+- Failed review moves the task to `VERIFY_FAILED` and stores the review summary as command evidence context for UI and retry flows.
+- The task detail page displays the latest AI Patch Review result, score, risk level, findings, and recommendations.
 
 ### GitHub Account Authorization
 

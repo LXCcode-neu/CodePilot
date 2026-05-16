@@ -9,6 +9,7 @@ const statusStyles: Record<string, string> = {
   GENERATING_PATCH: "border-orange-200 bg-orange-50 text-orange-700",
   VERIFYING: "border-sky-200 bg-sky-50 text-sky-700",
   REPAIRING_PATCH: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700",
+  REVIEWING_PATCH: "border-indigo-200 bg-indigo-50 text-indigo-700",
   CANCEL_REQUESTED: "border-rose-200 bg-rose-50 text-rose-700",
   CANCELLED: "border-slate-300 bg-slate-100 text-slate-700",
   VERIFY_FAILED: "border-red-200 bg-red-50 text-red-700",

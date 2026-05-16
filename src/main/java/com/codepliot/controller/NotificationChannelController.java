@@ -4,7 +4,7 @@ import com.codepliot.model.NotificationChannelCreateRequest;
 import com.codepliot.model.NotificationChannelVO;
 import com.codepliot.model.NotificationSendResult;
 import com.codepliot.model.Result;
-import com.codepliot.service.NotificationService;
+import com.codepliot.service.notification.NotificationService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;

@@ -1,4 +1,4 @@
-package com.codepliot.service;
+package com.codepliot.service.bot;
 
 import com.codepliot.config.BotProperties;
 import com.codepliot.exception.BusinessException;
