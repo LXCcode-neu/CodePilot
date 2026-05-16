@@ -3,6 +3,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ProjectSentryConfigDialog } from "@/components/ProjectSentryConfigDialog";
 import type { ProjectRepo } from "@/types/project";
 
 export function ProjectCard({
@@ -51,10 +52,13 @@ export function ProjectCard({
             <p className="mt-1 text-slate-700">{project.defaultBranch || "--"}</p>
           </div>
         </div>
+        <div className="flex flex-wrap gap-2">
+          <ProjectSentryConfigDialog project={project} />
         <Button variant="destructive" size="sm" onClick={() => onDelete(project.id)} disabled={deleting}>
           <Trash2 className="h-4 w-4" />
           删除仓库
         </Button>
+        </div>
       </CardContent>
     </Card>
   );

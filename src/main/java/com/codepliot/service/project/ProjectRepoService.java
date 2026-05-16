@@ -12,6 +12,7 @@ import com.codepliot.model.ProjectRepoVO;
 import com.codepliot.repository.ProjectRepoMapper;
 import com.codepliot.service.GitHubAuthService;
 import com.codepliot.service.ProjectLlmConfigService;
+import com.codepliot.service.SentryProjectMappingService;
 import com.codepliot.service.task.AgentTaskService;
 import com.codepliot.utils.SecurityUtils;
 import java.util.List;
@@ -24,15 +25,18 @@ public class ProjectRepoService {
     private final ProjectRepoMapper projectRepoMapper;
     private final AgentTaskService agentTaskService;
     private final ProjectLlmConfigService projectLlmConfigService;
+    private final SentryProjectMappingService sentryProjectMappingService;
     private final GitHubAuthService gitHubAuthService;
 
     public ProjectRepoService(ProjectRepoMapper projectRepoMapper,
                               AgentTaskService agentTaskService,
                               ProjectLlmConfigService projectLlmConfigService,
+                              SentryProjectMappingService sentryProjectMappingService,
                               GitHubAuthService gitHubAuthService) {
         this.projectRepoMapper = projectRepoMapper;
         this.agentTaskService = agentTaskService;
         this.projectLlmConfigService = projectLlmConfigService;
+        this.sentryProjectMappingService = sentryProjectMappingService;
         this.gitHubAuthService = gitHubAuthService;
     }
 
@@ -104,6 +108,7 @@ public class ProjectRepoService {
         ProjectRepo projectRepo = requireOwnedRepo(id);
         agentTaskService.deleteByProjectId(projectRepo.getId());
         projectLlmConfigService.deleteByProjectId(projectRepo.getId());
+        sentryProjectMappingService.deleteByProjectId(projectRepo.getId());
         projectRepoMapper.deleteById(projectRepo.getId());
     }
 

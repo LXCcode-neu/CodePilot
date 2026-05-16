@@ -165,6 +165,7 @@ This repository contains:
 - patch record persistence, safety review, and manual confirmation
 - group robot notification approval links for GitHub Issue auto-fix or ignore decisions
 - repair-result group notifications with diff summary and PR draft preview
+- Sentry alert webhook intake that can create and auto-run repair tasks
 - Feishu app bot message commands for mobile approval: `修复 CP-xxxxx`, `忽略 CP-xxxxx`, `状态 CP-xxxxx`, `确认PR CP-xxxxx`
 - task deletion and cascading cleanup when deleting a project repository
 - Redis-backed task run lock
@@ -210,6 +211,13 @@ Prepare before startup:
 - `CODEPILOT_PUBLIC_BASE_URL` for externally reachable group robot action links, for example `https://codepilot.example.com`
 - `CODEPILOT_VERIFICATION_COMMAND_TIMEOUT_SECONDS` for each patch verification command timeout, default `300`
 - `CODEPILOT_VERIFICATION_MAX_REPAIR_ATTEMPTS` for automatic repair attempts after verification failure, default `3`
+- optional Sentry alert auto-fix configuration:
+  - `CODEPILOT_SENTRY_ENABLED=true`
+  - `CODEPILOT_SENTRY_WEBHOOK_TOKEN` for authenticating Sentry webhook calls
+  - `SENTRY_AUTH_TOKEN` for server-side Sentry event detail lookup
+  - `SENTRY_ORG` for the default Sentry organization slug
+  - `SENTRY_API_BASE_URL`, default `https://sentry.io/api/0`
+  - `CODEPILOT_SENTRY_AUTO_RUN_ENABLED`, default `true`
 - optional Feishu app bot configuration for mobile chat commands:
   - `FEISHU_BOT_ENABLED=true`
   - `FEISHU_APP_ID`
@@ -282,6 +290,58 @@ The dashboard can load GitHub issues for repositories added to CodePilot.
 $env:GITHUB_TOKEN="your_github_token_here"
 java -jar target/codepilot-0.0.1-SNAPSHOT.jar
 ```
+
+### Sentry Alert Auto-Fix
+
+CodePilot can receive Sentry alert webhooks and turn them into agent repair tasks.
+
+- Webhook endpoint:
+  - `POST /api/sentry/alerts`
+- Required webhook token, either as a header:
+  - `X-CodePilot-Sentry-Token: <CODEPILOT_SENTRY_WEBHOOK_TOKEN>`
+  - or as a query parameter when the Sentry UI cannot add custom headers: `/api/sentry/alerts?token=<CODEPILOT_SENTRY_WEBHOOK_TOKEN>`
+- Incoming alerts are stored in `sentry_alert_event`.
+- Project-level Sentry mappings are configured from the CodePilot project card with the `Sentry` button and stored in `sentry_project_mapping`.
+- CodePilot deduplicates active tasks by Sentry organization, project, and issue/event identity.
+- When `CODEPILOT_SENTRY_AUTO_RUN_ENABLED=true`, the created task is submitted to the existing agent runner.
+- Generated patches still must pass automatic verification before entering `WAITING_CONFIRM`.
+- Sentry auth tokens stay server-side and are never returned to the frontend.
+
+CodePilot setup:
+
+- Start the backend with the Sentry server-side environment variables below.
+- Open the project list in the CodePilot frontend.
+- Click `Sentry` on the target project card.
+- Fill the Sentry organization slug and project slug.
+- Choose whether alerts should auto-run repair tasks for that project.
+
+The old `codepilot.sentry.project-mappings` YAML map remains available only as an operations fallback. Normal users should configure mappings in the frontend.
+
+```yaml
+codepilot:
+  sentry:
+    enabled: true
+    webhook-token: ${CODEPILOT_SENTRY_WEBHOOK_TOKEN}
+    organization-slug: your-sentry-org
+```
+
+Local startup example:
+
+```powershell
+$env:CODEPILOT_SENTRY_ENABLED="true"
+$env:CODEPILOT_SENTRY_WEBHOOK_TOKEN="change-this-random-token"
+$env:SENTRY_AUTH_TOKEN="sntrys_your_token_here"
+$env:SENTRY_ORG="your-sentry-org"
+mvn spring-boot:run
+```
+
+Sentry setup:
+
+- Create an Internal Integration in Sentry.
+- Set the webhook URL to `https://your-codepilot-domain/api/sentry/alerts?token=<CODEPILOT_SENTRY_WEBHOOK_TOKEN>`, or use `/api/sentry/alerts` plus the `X-CodePilot-Sentry-Token` header if your Sentry setup supports custom headers.
+- Enable Alert Rule Action for the integration.
+- In an Issue Alert rule, add the action `Send a notification via <your integration>`.
+- Use alert filters such as environment and level to avoid creating repair tasks for noisy non-production alerts.
 
 ### Issue Auto-Fix Group Approval
 

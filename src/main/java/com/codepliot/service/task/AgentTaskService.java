@@ -108,6 +108,32 @@ public class AgentTaskService {
         return AgentTaskVO.from(agentTask);
     }
 
+    @Transactional
+    public AgentTaskVO createFromSentryAlert(Long userId,
+                                             Long projectId,
+                                             Long sentryAlertEventId,
+                                             String issueTitle,
+                                             String issueDescription) {
+        requireOwnedProject(userId, projectId);
+        ProjectLlmConfig llmConfig = projectLlmConfigService.requireProjectConfig(projectId, userId);
+
+        AgentTask agentTask = new AgentTask();
+        agentTask.setUserId(userId);
+        agentTask.setProjectId(projectId);
+        agentTask.setIssueTitle(issueTitle == null ? "" : issueTitle.trim());
+        agentTask.setIssueDescription(issueDescription == null ? "" : issueDescription.trim());
+        agentTask.setStatus(AgentTaskStatus.PENDING.name());
+        agentTask.setResultSummary(null);
+        agentTask.setErrorMessage(null);
+        agentTask.setLlmProvider(llmConfig.getProvider());
+        agentTask.setLlmModelName(llmConfig.getModelName());
+        agentTask.setLlmDisplayName(llmConfig.getDisplayName());
+        agentTask.setSourceType("SENTRY_ALERT");
+        agentTask.setSourceId(sentryAlertEventId);
+        agentTaskMapper.insert(agentTask);
+        return AgentTaskVO.from(agentTask);
+    }
+
     public List<AgentTaskVO> listCurrentUserTasks() {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         return agentTaskMapper.selectList(new LambdaQueryWrapper<AgentTask>()

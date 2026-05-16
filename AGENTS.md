@@ -163,6 +163,9 @@ Those rules should live in a separate document, for example:
 19. Generated patches must pass automatic verification before entering `WAITING_CONFIRM`. Verification failures must block PR confirmation and be surfaced as `VERIFY_FAILED` with command output context.
 20. Patch verification command results must be persisted through the repository/service layer so later UI, bot, and retry flows can inspect actual command evidence.
 21. Verification repair attempts must generate full replacement patches, rerun verification, and stay bounded by configuration instead of looping indefinitely.
+22. Sentry alert webhook integration must keep Sentry auth tokens and webhook tokens server-side only. Webhook requests must be authenticated before creating repair tasks.
+23. Sentry alert auto-fix tasks must reuse the existing AgentTask execution and verification flow instead of bypassing `WAITING_CONFIRM` or automatic verification.
+24. Project-level Sentry mappings should be user-configurable through CodePilot frontend/backend APIs and persisted in the repository/service layer; do not require ordinary users to edit source code or application YAML for each project mapping.
 
 ### Default Interpretation
 

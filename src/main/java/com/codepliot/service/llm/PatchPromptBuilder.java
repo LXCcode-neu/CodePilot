@@ -37,6 +37,12 @@ public String buildUserPrompt(String issueTitle,
                 .append(nullToEmpty(issueDescription)).append('\n').append('\n')
                 .append("已有分析：\n")
                 .append(nullToEmpty(analysis)).append('\n').append('\n')
+                .append("Patch generation constraints:\n")
+                .append("1. Only modify the minimum code needed to fix this Issue. Do not refactor unrelated code.\n")
+                .append("2. Preserve the existing code style, naming conventions, package layout, and layering boundaries.\n")
+                .append("3. Do not introduce new dependencies, frameworks, middleware, or frontend stacks.\n")
+                .append("4. Do not edit files that are not directly supported by the provided code snippets.\n")
+                .append("5. If required context is missing, return an empty patch and explain the missing context in risk.\n\n")
                 .append("棢索到的代码片段：\n");
 
         appendChunks(builder, retrievedChunks);
