@@ -270,6 +270,28 @@ Note:
 
 - If `mvn clean` fails, a local process is usually holding files under `target/`.
 
+### Run CLI
+
+The first CLI version is a thin Java client over the running CodePilot backend. Human-facing terminal output is in Simplified Chinese.
+
+```powershell
+mvn -q -DskipTests compile exec:java "-Dexec.args=help"
+```
+
+Common commands:
+
+```powershell
+mvn -q -DskipTests compile exec:java "-Dexec.args=config set-server http://localhost:8080"
+mvn -q -DskipTests compile exec:java "-Dexec.args=auth login --username your_name --password your_password"
+mvn -q -DskipTests compile exec:java "-Dexec.args=project list"
+mvn -q -DskipTests compile exec:java "-Dexec.args=task create --project 1 --title test --desc test"
+mvn -q -DskipTests compile exec:java "-Dexec.args=task watch 1"
+mvn -q -DskipTests compile exec:java "-Dexec.args=patch confirm 1"
+mvn -q -DskipTests compile exec:java "-Dexec.args=pr submit 1"
+```
+
+Use `--json` for machine-readable output in CI.
+
 ### Run Frontend Dev Server
 
 ```powershell
