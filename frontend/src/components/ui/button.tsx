@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+/** 按钮变体样式配置，定义了变体和尺寸两种分类维度 */
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
   {
@@ -28,12 +29,22 @@ const buttonVariants = cva(
   }
 );
 
+/** 按钮组件的属性接口 */
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
+  /** 当设为 true 时，按钮将渲染为子元素（通过 Radix Slot），用于自定义底层元素 */
   asChild?: boolean;
 }
 
+/**
+ * 按钮（Button）组件
+ *
+ * 通用操作按钮，支持多种样式变体和尺寸。
+ * 变体：default（主色）、secondary（次要）、outline（描边）、ghost（透明）、destructive（危险/红色）。
+ * 尺寸：default、sm（小）、lg（大）、icon（方形图标按钮）。
+ * 通过 asChild 可将按钮样式应用到子元素上。
+ */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";

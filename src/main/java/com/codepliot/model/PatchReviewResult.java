@@ -5,14 +5,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 补丁审核结果。
+ * <p>封装AI对补丁进行代码审核后的结构化结果，包含评分、风险等级、
+ * 发现的问题和改进建议。支持从AI模型原始输出中解析。</p>
+ */
 public record PatchReviewResult(
+        /** 是否跳过审核（小改动或无代码变更时可跳过） */
         boolean skipped,
+        /** 审核是否通过 */
         boolean passed,
+        /** 审核评分（0-100，分数越高越安全） */
         int score,
+        /** 风险等级：HIGH、MEDIUM、LOW */
         String riskLevel,
+        /** 审核摘要说明 */
         String summary,
+        /** 审核发现的问题列表 */
         List<PatchReviewFinding> findings,
+        /** 改进建议列表 */
         List<String> recommendations,
+        /** AI模型返回的原始响应文本 */
         String rawResponse
 ) {
     public PatchReviewResult {

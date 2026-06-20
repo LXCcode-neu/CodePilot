@@ -16,6 +16,18 @@ import java.util.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 通知操作令牌服务。
+ * <p>
+ * 管理通知中可执行操作的安全令牌，支持：
+ * <ul>
+ *   <li>生成一次性操作令牌（如通知中的"忽略"或"执行修复"按钮）</li>
+ *   <li>验证并领取（claim）令牌，确保每个令牌只能使用一次</li>
+ *   <li>令牌使用 SHA-256 哈希存储，原始令牌仅返回给调用方</li>
+ * </ul>
+ * <p>
+ * 令牌默认有效期为 24 小时，过期后不可使用。
+ */
 @Service
 public class NotificationActionTokenService {
 
@@ -30,6 +42,16 @@ public class NotificationActionTokenService {
         this.notificationActionTokenMapper = notificationActionTokenMapper;
     }
 
+    /**
+     * 创建 Issue 操作令牌。
+     * <p>
+     * 生成安全随机令牌并存储其哈希值，原始令牌仅通过返回值传递给调用方。
+     *
+     * @param userId       用户 ID
+     * @param issueEventId Issue 事件 ID
+     * @param actionType   操作类型（如 IGNORE、RUN_REPAIR）
+     * @return 原始令牌字符串
+     */
     @Transactional
     public String createIssueActionToken(Long userId, Long issueEventId, NotificationActionType actionType) {
         NotificationActionToken token = new NotificationActionToken();
@@ -45,6 +67,16 @@ public class NotificationActionTokenService {
         return rawToken;
     }
 
+    /**
+     * 验证并领取操作令牌。
+     * <p>
+     * 使用乐观锁确保令牌只能被领取一次，已使用或已过期的令牌将被拒绝。
+     *
+     * @param rawToken   原始令牌字符串
+     * @param actionType 期望的操作类型
+     * @return 已领取的令牌实体
+     * @throws BusinessException 令牌不存在、已使用或已过期时抛出异常
+     */
     @Transactional
     public NotificationActionToken claim(String rawToken, NotificationActionType actionType) {
         String tokenHash = hash(requireToken(rawToken));

@@ -13,6 +13,13 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.stereotype.Component;
 
+/**
+ * API密钥加密解密工具类。
+ * <p>
+ * 基于 AES-GCM 算法对第三方 API 密钥进行加密存储和解密读取，
+ * 同时提供密钥脱敏功能，用于在日志或前端安全地展示密钥片段。
+ * </p>
+ */
 @Component
 public class ApiKeyCryptoUtils {
 
@@ -23,10 +30,25 @@ public class ApiKeyCryptoUtils {
     private final SecretProperties secretProperties;
     private final SecureRandom secureRandom = new SecureRandom();
 
+    /**
+     * 构造方法，注入加密密钥配置属性。
+     *
+     * @param secretProperties 加密密钥配置属性，其中包含 API 密钥加密所用的密钥
+     */
     public ApiKeyCryptoUtils(SecretProperties secretProperties) {
         this.secretProperties = secretProperties;
     }
 
+    /**
+     * 加密明文 API 密钥。
+     * <p>
+     * 使用 AES-GCM 算法加密，随机生成 12 字节 IV，并将 IV 与密文拼接后进行 Base64 编码返回。
+     * </p>
+     *
+     * @param plainText 明文 API 密钥，不能为空或空白
+     * @return Base64 编码的加密字符串（格式：IV + 密文）
+     * @throws BusinessException 当明文为空或加密失败时抛出
+     */
     public String encrypt(String plainText) {
         if (plainText == null || plainText.isBlank()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "API key cannot be blank");
@@ -49,6 +71,16 @@ public class ApiKeyCryptoUtils {
         }
     }
 
+    /**
+     * 解密加密后的 API 密钥。
+     * <p>
+     * 对 Base64 编码的加密字符串进行解码，提取 IV 和密文，然后使用 AES-GCM 算法解密还原明文。
+     * </p>
+     *
+     * @param encryptedText Base64 编码的加密字符串，不能为空或空白
+     * @return 解密后的明文 API 密钥
+     * @throws BusinessException 当密文为空或解密失败时抛出
+     */
     public String decrypt(String encryptedText) {
         if (encryptedText == null || encryptedText.isBlank()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "API key is not configured");
@@ -71,6 +103,16 @@ public class ApiKeyCryptoUtils {
         }
     }
 
+    /**
+     * 对加密的 API 密钥进行脱敏处理。
+     * <p>
+     * 先解密获取明文，然后保留前 3 位和后 4 位字符，中间用 **** 替代。
+     * 若密钥长度不超过 8 位，则直接返回 ****。
+     * </p>
+     *
+     * @param encryptedText Base64 编码的加密字符串
+     * @return 脱敏后的密钥字符串，例如 "sk-****abcd"
+     */
     public String mask(String encryptedText) {
         String apiKey = decrypt(encryptedText);
         if (apiKey.length() <= 8) {
@@ -79,6 +121,15 @@ public class ApiKeyCryptoUtils {
         return apiKey.substring(0, Math.min(3, apiKey.length())) + "****" + apiKey.substring(apiKey.length() - 4);
     }
 
+    /**
+     * 根据配置的加密密钥生成 AES 密钥规格。
+     * <p>
+     * 将配置密钥经 SHA-256 哈希后截取为 256 位 AES 密钥。
+     * </p>
+     *
+     * @return AES 密钥规格对象
+     * @throws Exception 当密钥配置缺失或哈希计算失败时抛出
+     */
     private SecretKeySpec keySpec() throws Exception {
         String secret = secretProperties.getApiKeyEncryptionKey();
         if (secret == null || secret.isBlank()) {

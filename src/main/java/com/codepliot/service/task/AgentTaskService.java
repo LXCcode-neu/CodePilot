@@ -25,6 +25,20 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 智能体（Agent）任务服务。
+ * <p>
+ * 管理 AI Agent 任务的完整生命周期，包括：
+ * <ul>
+ *   <li>创建任务：支持手动创建、从 GitHub Issue 导入、从 Sentry 告警创建</li>
+ *   <li>查询任务：查询当前用户的任务列表和任务详情</li>
+ *   <li>更新任务状态：跟踪任务从待处理到完成的各阶段状态</li>
+ *   <li>删除任务：支持单个和按项目批量删除，运行中的任务不可删除</li>
+ * </ul>
+ * <p>
+ * 删除任务时会使用分布式锁确保并发安全，并级联删除关联的步骤记录、
+ * 补丁记录、验证记录和审查记录。
+ */
 @Service
 public class AgentTaskService {
 
@@ -58,6 +72,12 @@ public class AgentTaskService {
         this.patchReviewRecordService = patchReviewRecordService;
     }
 
+    /**
+     * 手动创建 Agent 任务。
+     *
+     * @param request 创建请求，包含项目 ID、Issue 标题和描述
+     * @return 创建的任务视图对象
+     */
     @Transactional
     public AgentTaskVO create(AgentTaskCreateRequest request) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
@@ -81,6 +101,15 @@ public class AgentTaskService {
         return AgentTaskVO.from(agentTask);
     }
 
+    /**
+     * 从 GitHub Issue 创建 Agent 任务（使用当前用户 ID）。
+     *
+     * @param projectId       项目仓库 ID
+     * @param issueEventId    GitHub Issue 事件 ID
+     * @param issueTitle      Issue 标题
+     * @param issueDescription Issue 描述
+     * @return 创建的任务视图对象
+     */
     @Transactional
     public AgentTaskVO createFromGitHubIssue(Long projectId, Long issueEventId, String issueTitle, String issueDescription) {
         return createFromGitHubIssue(SecurityUtils.getCurrentUserId(), projectId, issueEventId, issueTitle, issueDescription);
@@ -112,6 +141,16 @@ public class AgentTaskService {
         return AgentTaskVO.from(agentTask);
     }
 
+    /**
+     * 从 Sentry 告警创建 Agent 任务。
+     *
+     * @param userId             用户 ID
+     * @param projectId          项目仓库 ID
+     * @param sentryAlertEventId Sentry 告警事件 ID
+     * @param issueTitle         任务标题
+     * @param issueDescription   任务描述
+     * @return 创建的任务视图对象
+     */
     @Transactional
     public AgentTaskVO createFromSentryAlert(Long userId,
                                              Long projectId,
@@ -138,6 +177,11 @@ public class AgentTaskService {
         return AgentTaskVO.from(agentTask);
     }
 
+    /**
+     * 查询当前用户的所有 Agent 任务列表，按创建时间倒序排列。
+     *
+     * @return 任务列表
+     */
     public List<AgentTaskVO> listCurrentUserTasks() {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         return agentTaskMapper.selectList(new LambdaQueryWrapper<AgentTask>()
@@ -148,6 +192,12 @@ public class AgentTaskService {
                 .toList();
     }
 
+    /**
+     * 获取指定任务的详情。
+     *
+     * @param id 任务 ID
+     * @return 任务视图对象
+     */
     public AgentTaskVO getDetail(Long id) {
         return AgentTaskVO.from(requireOwnedTask(id));
     }
@@ -156,6 +206,13 @@ public class AgentTaskService {
         return requireOwnedTask(id);
     }
 
+    /**
+     * 删除指定的 Agent 任务及其所有关联数据。
+     * <p>
+     * 使用分布式锁确保并发安全，运行中的任务不可删除。
+     *
+     * @param id 任务 ID
+     */
     @Transactional
     public void delete(Long id) {
         AgentTask agentTask = requireOwnedTask(id);
@@ -167,6 +224,11 @@ public class AgentTaskService {
         }
     }
 
+    /**
+     * 按项目 ID 批量删除所有关联的 Agent 任务。
+     *
+     * @param projectId 项目仓库 ID
+     */
     @Transactional
     public void deleteByProjectId(Long projectId) {
         List<AgentTask> tasks = agentTaskMapper.selectList(new LambdaQueryWrapper<AgentTask>()
@@ -184,11 +246,25 @@ public class AgentTaskService {
         }
     }
 
+    /**
+     * 更新指定任务的状态。
+     *
+     * @param taskId 任务 ID
+     * @param status 新状态
+     */
     @Transactional
     public void updateStatus(Long taskId, AgentTaskStatus status) {
         updateStatus(taskId, status, null, null);
     }
 
+    /**
+     * 更新指定任务的状态及结果信息。
+     *
+     * @param taskId        任务 ID
+     * @param status        新状态
+     * @param resultSummary 结果摘要
+     * @param errorMessage  错误信息
+     */
     @Transactional
     public void updateStatus(Long taskId, AgentTaskStatus status, String resultSummary, String errorMessage) {
         AgentTask agentTask = requireTask(taskId);

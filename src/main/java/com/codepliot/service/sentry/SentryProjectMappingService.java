@@ -13,6 +13,19 @@ import com.codepliot.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Sentry 项目映射服务。
+ * <p>
+ * 管理 Sentry 项目与 CodePilot 项目仓库之间的映射关系，支持：
+ * <ul>
+ *   <li>查询指定项目的 Sentry 映射配置</li>
+ *   <li>创建或更新 Sentry 项目映射（组织 slug、项目 slug、启用状态等）</li>
+ *   <li>删除项目映射</li>
+ *   <li>根据 Sentry 组织和项目 slug 查找已启用的映射</li>
+ * </ul>
+ * <p>
+ * 映射关系用于将 Sentry 告警路由到正确的 CodePilot 项目进行自动修复。
+ */
 @Service
 public class SentryProjectMappingService {
 
@@ -25,12 +38,25 @@ public class SentryProjectMappingService {
         this.projectRepoMapper = projectRepoMapper;
     }
 
+    /**
+     * 获取指定项目的 Sentry 映射配置。
+     *
+     * @param projectId CodePilot 项目仓库 ID
+     * @return 映射配置视图对象，若未配置则返回 null
+     */
     public SentryProjectMappingVO getProjectMapping(Long projectId) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         requireOwnedProject(projectId, currentUserId);
         return SentryProjectMappingVO.from(findByProjectId(projectId));
     }
 
+    /**
+     * 保存项目的 Sentry 映射配置（新增或更新）。
+     *
+     * @param projectId CodePilot 项目仓库 ID
+     * @param request   映射配置保存请求
+     * @return 保存后的映射配置视图对象
+     */
     @Transactional
     public SentryProjectMappingVO saveProjectMapping(Long projectId, SentryProjectMappingSaveRequest request) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
@@ -66,6 +92,13 @@ public class SentryProjectMappingService {
                 .eq(SentryProjectMapping::getProjectId, projectId));
     }
 
+    /**
+     * 根据 Sentry 组织和项目 slug 查找已启用的映射配置。
+     *
+     * @param organizationSlug Sentry 组织标识
+     * @param projectSlug      Sentry 项目标识
+     * @return 匹配的映射实体，未找到则返回 null
+     */
     public SentryProjectMapping findEnabledMapping(String organizationSlug, String projectSlug) {
         if (isBlank(projectSlug)) {
             return null;

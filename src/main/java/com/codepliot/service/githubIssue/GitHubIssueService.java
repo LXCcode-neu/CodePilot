@@ -15,6 +15,17 @@ import com.codepliot.service.task.AgentTaskService;
 import com.codepliot.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 
+/**
+ * GitHub Issue 服务。
+ * <p>
+ * 提供与 GitHub Issue 相关的业务操作，包括：
+ * <ul>
+ *   <li>查询指定项目的 GitHub Issue 列表</li>
+ *   <li>将 GitHub Issue 导入为系统 Agent 任务</li>
+ * </ul>
+ * <p>
+ * 通过 GitHub API 获取 Issue 数据，并支持从 Issue URL 中解析仓库所有者和名称。
+ */
 @Service
 public class GitHubIssueService {
 
@@ -33,6 +44,15 @@ public class GitHubIssueService {
         this.gitHubAuthService = gitHubAuthService;
     }
 
+    /**
+     * 分页查询指定项目的 GitHub Issue 列表。
+     *
+     * @param projectId 项目仓库 ID
+     * @param state     Issue 状态过滤（如 open、closed）
+     * @param page      页码
+     * @param pageSize  每页大小
+     * @return Issue 分页结果
+     */
     public GitHubIssuePageVO listIssues(Long projectId, String state, Integer page, Integer pageSize) {
         ProjectRepo projectRepo = requireOwnedRepo(projectId);
         GitHubRepoRef repoRef = parseRepoRef(projectRepo.getRepoUrl());
@@ -46,6 +66,15 @@ public class GitHubIssueService {
         );
     }
 
+    /**
+     * 将指定的 GitHub Issue 导入为系统 Agent 任务。
+     * <p>
+     * 从 GitHub API 获取 Issue 详情，以 Issue 标题和描述创建 Agent 任务。
+     *
+     * @param projectId   项目仓库 ID
+     * @param issueNumber GitHub Issue 编号
+     * @return 创建的 Agent 任务视图对象
+     */
     public AgentTaskVO importIssueAsTask(Long projectId, Integer issueNumber) {
         if (issueNumber == null || issueNumber <= 0) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "issueNumber must be positive");

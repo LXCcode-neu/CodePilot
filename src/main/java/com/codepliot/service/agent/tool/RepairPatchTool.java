@@ -11,6 +11,14 @@ import java.util.Map;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+/**
+ * 修复补丁工具。
+ * <p>
+ * Agent 工具链中的补丁修复步骤（优先级 60）。当补丁验证失败时，
+ * 委托 {@link PatchRepairService} 进行多轮 LLM 驱动的自动修复，
+ * 直到验证通过或达到最大尝试次数。如果验证已通过则跳过修复。
+ * </p>
+ */
 @Component
 @Order(60)
 public class RepairPatchTool implements AgentTool {
@@ -36,6 +44,16 @@ public class RepairPatchTool implements AgentTool {
         return "Repair Patch";
     }
 
+    /**
+     * 执行补丁修复。
+     * <p>
+     * 如果补丁验证结果为空或已通过，则跳过修复直接返回成功；
+     * 否则调用修复服务进行多轮自动修复。
+     * </p>
+     *
+     * @param context Agent 执行上下文
+     * @return 工具执行结果
+     */
     @Override
     public ToolResult execute(AgentContext context) {
         PatchVerificationResult verification = context.patchVerificationResult();

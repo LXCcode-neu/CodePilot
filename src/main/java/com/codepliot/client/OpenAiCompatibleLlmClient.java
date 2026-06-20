@@ -20,29 +20,63 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
+/**
+ * OpenAI 兼容 LLM 客户端实现。
+ * <p>
+ * 支持所有兼容 OpenAI Chat Completions 接口格式的 LLM 提供商，
+ * 包括 OpenAI、Kimi、MiniMax、GLM、MiMo 等。
+ * </p>
+ */
 @Component
 public class OpenAiCompatibleLlmClient implements LlmClient {
 
+    /** 支持的提供商列表 */
     private static final List<String> PROVIDERS = List.of("openai", "kimi", "minimax", "glm", "mimo");
 
+    /** JSON 序列化/反序列化工具 */
     private final ObjectMapper objectMapper;
+
+    /** HTTP 客户端，用于发送 API 请求 */
     private final HttpClient httpClient;
 
+    /**
+     * 构造方法，注入对象映射器并创建 HTTP 客户端。
+     *
+     * @param objectMapper JSON 对象映射器
+     */
     public OpenAiCompatibleLlmClient(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newHttpClient();
     }
 
+    /**
+     * 返回默认的提供商名称。
+     *
+     * @return 提供商标识 "openai"
+     */
     @Override
     public String provider() {
         return "openai";
     }
 
+    /**
+     * 返回当前客户端支持的所有提供商名称列表。
+     *
+     * @return 支持的提供商列表：openai、kimi、minimax、glm、mimo
+     */
     @Override
     public List<String> supportedProviders() {
         return PROVIDERS;
     }
 
+    /**
+     * 调用 OpenAI 兼容 API 生成文本响应。
+     *
+     * @param config       运行时配置（模型名称、API密钥、基础URL等）
+     * @param systemPrompt 系统提示词
+     * @param userPrompt   用户提示词
+     * @return 生成的文本内容
+     */
     @Override
     public String generate(LlmRuntimeConfig config, String systemPrompt, String userPrompt) {
         validateConfiguration(config);
@@ -60,6 +94,14 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
         }
     }
 
+    /**
+     * 调用 OpenAI 兼容 API 进行带工具调用的对话。
+     *
+     * @param config   运行时配置
+     * @param messages 对话消息列表
+     * @param tools    可用工具定义列表
+     * @return 包含响应内容、完成原因和工具调用的响应对象
+     */
     @Override
     public LlmToolChatResponse chatWithTools(LlmRuntimeConfig config,
                                              List<LlmMessage> messages,

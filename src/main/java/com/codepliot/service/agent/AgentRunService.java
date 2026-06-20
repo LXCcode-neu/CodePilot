@@ -17,6 +17,14 @@ import com.codepliot.utils.SecurityUtils;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 
+/**
+ * Agent 任务运行服务。
+ * <p>
+ * 负责启动 Agent 任务的完整流程：验证任务所有权和可运行状态、获取分布式锁、
+ * 清理历史运行数据、将任务状态设置为"克隆中"，然后异步调用 {@link AgentExecutor} 执行任务。
+ * 支持任务失败后重新运行。
+ * </p>
+ */
 @Service
 public class AgentRunService {
 
@@ -41,10 +49,28 @@ public class AgentRunService {
         this.sseService = sseService;
     }
 
+    /**
+     * 使用当前登录用户身份运行 Agent 任务。
+     *
+     * @param taskId 任务 ID
+     * @return 任务视图对象
+     */
     public AgentTaskVO run(Long taskId) {
         return run(taskId, SecurityUtils.getCurrentUserId());
     }
 
+    /**
+     * 运行指定用户的 Agent 任务。
+     * <p>
+     * 执行流程：获取分布式锁 -> 验证任务状态 -> 清理历史数据 ->
+     * 抢占任务（状态更新为 CLONING）-> 推送启动事件 -> 异步执行。
+     * 如果执行过程中发生异常，会自动释放分布式锁。
+     * </p>
+     *
+     * @param taskId 任务 ID
+     * @param userId 用户 ID
+     * @return 任务视图对象
+     */
     public AgentTaskVO run(Long taskId, Long userId) {
         AgentTask task = requireOwnedTask(taskId, userId);
         String lockValue = taskRunLockService.lock(taskId);

@@ -18,6 +18,14 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
+/**
+ * 补丁修复服务。
+ * <p>
+ * 当补丁验证失败时，通过 LLM 对补丁进行自动修复。
+ * 支持多轮修复尝试（最多 {@code maxRepairAttempts} 次），每轮修复后重新验证补丁，
+ * 直到验证通过或达到最大尝试次数。修复过程中会对补丁文本进行规范化和安全检查。
+ * </p>
+ */
 @Service
 public class PatchRepairService {
 
@@ -48,6 +56,17 @@ public class PatchRepairService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * 反复修复补丁直到验证通过或达到最大尝试次数。
+     * <p>
+     * 如果原始验证已通过或未配置修复尝试次数，则跳过修复。
+     * 每次修复尝试包括：调用 LLM 生成修复补丁 -> 规范化补丁文本 ->
+     * 安全检查 -> 保存补丁记录 -> 验证补丁。
+     * </p>
+     *
+     * @param context Agent 执行上下文
+     * @return 包含修复尝试详情的结果 Map，包括是否尝试过、尝试次数、各次尝试详情和最终验证结果
+     */
     public Map<String, Object> repairUntilVerified(AgentContext context) {
         PatchVerificationResult verification = context.patchVerificationResult();
         int maxAttempts = Math.max(properties.getMaxRepairAttempts(), 0);

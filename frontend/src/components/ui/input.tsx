@@ -1,6 +1,12 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * 输入框（Input）组件
+ *
+ * 标准文本输入框，支持圆角边框、聚焦高亮和禁用状态。
+ * 接受所有原生 input 元素的属性。
+ */
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
     return (

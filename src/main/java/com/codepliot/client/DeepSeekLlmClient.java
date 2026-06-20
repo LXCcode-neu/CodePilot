@@ -21,24 +21,55 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
+/**
+ * DeepSeek 大语言模型客户端实现。
+ * <p>
+ * 通过 HTTP 调用 DeepSeek API 实现文本生成和工具调用功能，
+ * 支持标准的 Chat Completions 接口格式。
+ * </p>
+ */
 @Component
 public class DeepSeekLlmClient implements LlmClient {
 
+    /** LLM 配置属性，包含模型名称、API密钥、基础URL等 */
     private final LlmProperties llmProperties;
+
+    /** JSON 序列化/反序列化工具 */
     private final ObjectMapper objectMapper;
+
+    /** HTTP 客户端，用于发送 API 请求 */
     private final HttpClient httpClient;
 
+    /**
+     * 构造方法，注入配置属性和对象映射器。
+     *
+     * @param llmProperties  LLM 配置属性
+     * @param objectMapper   JSON 对象映射器
+     */
     public DeepSeekLlmClient(LlmProperties llmProperties, ObjectMapper objectMapper) {
         this.llmProperties = llmProperties;
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newHttpClient();
     }
 
+    /**
+     * 返回当前客户端对应的 LLM 提供商名称。
+     *
+     * @return 提供商标识 "deepseek"
+     */
     @Override
     public String provider() {
         return "deepseek";
     }
 
+    /**
+     * 调用 DeepSeek API 生成文本响应。
+     *
+     * @param config        运行时配置（模型名称、API密钥、基础URL等）
+     * @param systemPrompt  系统提示词
+     * @param userPrompt    用户提示词
+     * @return 生成的文本内容
+     */
     @Override
     public String generate(LlmRuntimeConfig config, String systemPrompt, String userPrompt) {
         LlmRuntimeConfig resolvedConfig = resolveConfig(config);
@@ -60,6 +91,14 @@ public class DeepSeekLlmClient implements LlmClient {
         }
     }
 
+    /**
+     * 调用 DeepSeek API 进行带工具调用的对话。
+     *
+     * @param config   运行时配置
+     * @param messages 对话消息列表
+     * @param tools    可用工具定义列表
+     * @return 包含响应内容、完成原因和工具调用的响应对象
+     */
     @Override
     public LlmToolChatResponse chatWithTools(LlmRuntimeConfig config,
                                              List<LlmMessage> messages,

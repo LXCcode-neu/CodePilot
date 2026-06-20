@@ -13,6 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * GitHub Issue 轮询定时任务。
+ * <p>
+ * 按照配置的时间间隔定期轮询所有已启用的用户仓库监听，拉取最新的 Open 状态 Issue，
+ * 并将新发现的 Issue 交给 {@link GitHubIssueEventService} 处理。
+ * <p>
+ * 轮询间隔可通过配置项 {@code codepilot.issue-polling.fixed-delay-ms} 调整，默认为 5 分钟。
+ */
 @Component
 public class GitHubIssuePollingJob {
 
@@ -33,6 +41,9 @@ public class GitHubIssuePollingJob {
         this.gitHubIssueEventService = gitHubIssueEventService;
     }
 
+    /**
+     * 定时轮询所有已启用的仓库监听，拉取最新的 Open Issue 并处理新发现的 Issue。
+     */
     @Scheduled(fixedDelayString = "${codepilot.issue-polling.fixed-delay-ms:300000}")
     public void pollOpenIssues() {
         List<UserRepoWatch> watches = userRepoWatchMapper.selectList(new LambdaQueryWrapper<UserRepoWatch>()

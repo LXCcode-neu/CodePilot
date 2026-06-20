@@ -14,6 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Sentry 告警控制器
+ * <p>
+ * 接收 Sentry 平台推送的 Webhook 告警通知，通过 Token 校验确保请求来源的合法性，
+ * 并将告警信息转换为 Agent 任务进行自动处理。
+ * </p>
+ */
 @RestController
 @RequestMapping("/api/sentry")
 public class SentryAlertController {
@@ -28,6 +35,17 @@ public class SentryAlertController {
         this.sentryAlertService = sentryAlertService;
     }
 
+    /**
+     * 接收 Sentry 告警 Webhook 通知
+     * <p>
+     * 支持通过请求头（X-CodePilot-Sentry-Token）或查询参数（token）两种方式传递认证 Token。
+     * </p>
+     *
+     * @param webhookToken 请求头中的 Webhook Token
+     * @param queryToken   查询参数中的 Token
+     * @param payload      Sentry 告警 JSON 数据
+     * @return 告警任务创建结果
+     */
     @PostMapping("/alerts")
     public Result<SentryAlertTaskCreateResult> receiveAlert(
             @RequestHeader(value = WEBHOOK_TOKEN_HEADER, required = false) String webhookToken,
@@ -37,6 +55,13 @@ public class SentryAlertController {
         return Result.success("Sentry alert received", sentryAlertService.receive(payload));
     }
 
+    /**
+     * 校验 Webhook Token 的有效性
+     *
+     * @param webhookToken 请求头中的 Token
+     * @param queryToken   查询参数中的 Token
+     * @throws BusinessException Token 无效或未配置时抛出异常
+     */
     private void requireValidToken(String webhookToken, String queryToken) {
         String expectedToken = sentryProperties.getWebhookToken();
         if (expectedToken == null || expectedToken.isBlank()) {

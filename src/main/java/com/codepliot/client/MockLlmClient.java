@@ -9,20 +9,51 @@ import com.codepliot.model.LlmToolDefinition;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
+/**
+ * 模拟 LLM 客户端实现。
+ * <p>
+ * 用于开发和测试环境，不实际调用外部 LLM API，
+ * 返回预设的模拟响应内容。
+ * </p>
+ */
 @Component
 public class MockLlmClient implements LlmClient {
 
+    /** LLM 配置属性，用于获取当前配置的提供商名称 */
     private final LlmProperties llmProperties;
 
+    /**
+     * 构造方法，注入 LLM 配置属性。
+     *
+     * @param llmProperties LLM 配置属性
+     */
     public MockLlmClient(LlmProperties llmProperties) {
         this.llmProperties = llmProperties;
     }
 
+    /**
+     * 返回当前客户端对应的 LLM 提供商名称。
+     *
+     * @return 提供商标识 "mock"
+     */
     @Override
     public String provider() {
         return "mock";
     }
 
+    /**
+     * 生成模拟的文本响应。
+     * <p>
+     * 根据用户提示词内容返回不同的模拟响应：
+     * 包含 "patch" 和 "risk" 关键词时返回 JSON 格式的分析结果，
+     * 否则返回通用的模拟分析文本。
+     * </p>
+     *
+     * @param config       运行时配置
+     * @param systemPrompt 系统提示词
+     * @param userPrompt   用户提示词
+     * @return 模拟的文本响应
+     */
     @Override
     public String generate(LlmRuntimeConfig config, String systemPrompt, String userPrompt) {
         String normalizedPrompt = userPrompt == null ? "" : userPrompt.toLowerCase();
@@ -46,6 +77,18 @@ public class MockLlmClient implements LlmClient {
                 """;
     }
 
+    /**
+     * 模拟带工具调用的对话。
+     * <p>
+     * 如果消息中已包含工具执行结果，则返回空响应表示对话结束；
+     * 否则返回一个模拟的工具调用请求（优先调用 grep 工具）。
+     * </p>
+     *
+     * @param config   运行时配置
+     * @param messages 对话消息列表
+     * @param tools    可用工具定义列表
+     * @return 模拟的工具调用响应
+     */
     @Override
     public LlmToolChatResponse chatWithTools(LlmRuntimeConfig config,
                                              List<LlmMessage> messages,

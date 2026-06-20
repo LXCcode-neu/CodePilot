@@ -19,26 +19,69 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+/**
+ * GitHub Issue 客户端。
+ * <p>
+ * 封装 GitHub REST API，支持查询仓库 Issue 列表和获取单个 Issue 详情。
+ * 支持分页查询和多种 Issue 状态筛选。
+ * </p>
+ */
 @Component
 public class GitHubIssueClient {
 
+    /** GitHub API 版本号 */
     private static final String GITHUB_API_VERSION = "2022-11-28";
+
+    /** 用于解析 Link 头部中最后一页页码的正则表达式 */
     private static final Pattern LAST_PAGE_PATTERN = Pattern.compile("[?&]page=(\\d+)[^>]*>;\\s*rel=\"last\"");
 
+    /** GitHub 配置属性，包含 API 基础 URL 和访问令牌 */
     private final GitHubProperties properties;
+
+    /** JSON 序列化/反序列化工具 */
     private final ObjectMapper objectMapper;
+
+    /** REST 客户端，用于发送 HTTP 请求 */
     private final RestClient restClient;
 
+    /**
+     * 构造方法，注入配置属性和 REST 客户端构建器。
+     *
+     * @param properties        GitHub 配置属性
+     * @param objectMapper      JSON 对象映射器
+     * @param restClientBuilder REST 客户端构建器
+     */
     public GitHubIssueClient(GitHubProperties properties, ObjectMapper objectMapper, RestClient.Builder restClientBuilder) {
         this.properties = properties;
         this.objectMapper = objectMapper;
         this.restClient = restClientBuilder.baseUrl(properties.getApiBaseUrl()).build();
     }
 
+    /**
+     * 查询指定仓库的 Issue 列表（使用默认令牌）。
+     *
+     * @param owner    仓库所有者
+     * @param repo     仓库名称
+     * @param state    Issue 状态（open/closed/all）
+     * @param page     页码（从1开始）
+     * @param pageSize 每页数量（最大100）
+     * @return Issue 分页结果
+     */
     public GitHubIssuePageVO listIssues(String owner, String repo, String state, int page, int pageSize) {
         return listIssues(null, owner, repo, state, page, pageSize);
     }
 
+    /**
+     * 查询指定仓库的 Issue 列表（使用自定义令牌）。
+     *
+     * @param accessToken 访问令牌（为空时使用默认令牌）
+     * @param owner       仓库所有者
+     * @param repo        仓库名称
+     * @param state       Issue 状态（open/closed/all）
+     * @param page        页码（从1开始）
+     * @param pageSize    每页数量（最大100）
+     * @return Issue 分页结果
+     */
     public GitHubIssuePageVO listIssues(String accessToken, String owner, String repo, String state, int page, int pageSize) {
         int safePage = Math.max(page, 1);
         int safePageSize = Math.min(Math.max(pageSize, 1), 100);
@@ -76,10 +119,27 @@ public class GitHubIssueClient {
                 .toEntity(String.class);
     }
 
+    /**
+     * 获取单个 Issue 详情（使用默认令牌）。
+     *
+     * @param owner       仓库所有者
+     * @param repo        仓库名称
+     * @param issueNumber Issue 编号
+     * @return Issue 详情
+     */
     public GitHubIssueVO getIssue(String owner, String repo, int issueNumber) {
         return getIssue(null, owner, repo, issueNumber);
     }
 
+    /**
+     * 获取单个 Issue 详情（使用自定义令牌）。
+     *
+     * @param accessToken 访问令牌（为空时使用默认令牌）
+     * @param owner       仓库所有者
+     * @param repo        仓库名称
+     * @param issueNumber Issue 编号
+     * @return Issue 详情
+     */
     public GitHubIssueVO getIssue(String accessToken, String owner, String repo, int issueNumber) {
         ResponseEntity<String> response = restClient.get()
                 .uri(uriBuilder -> uriBuilder

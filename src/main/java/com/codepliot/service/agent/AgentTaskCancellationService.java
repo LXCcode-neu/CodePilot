@@ -17,6 +17,14 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Agent 任务取消服务。
+ * <p>
+ * 处理 Agent 任务的取消请求，包括：验证任务是否处于可取消状态、
+ * 将任务状态更新为"取消已请求"、中断正在执行的线程、
+ * 提供取消检查点供执行流程调用、以及最终标记任务为已取消。
+ * </p>
+ */
 @Service
 public class AgentTaskCancellationService {
 
@@ -41,6 +49,17 @@ public class AgentTaskCancellationService {
         this.cancellationRegistry = cancellationRegistry;
     }
 
+    /**
+     * 请求取消指定的 Agent 任务。
+     * <p>
+     * 如果任务已经是"取消已请求"状态，则直接中断执行线程；
+     * 否则将任务状态更新为"取消已请求"并中断线程。
+     * 仅允许处于可取消状态的任务被取消。
+     * </p>
+     *
+     * @param taskId 任务 ID
+     * @return 更新后的任务视图对象
+     */
     @Transactional
     public AgentTaskVO requestCancel(Long taskId) {
         Long userId = SecurityUtils.getCurrentUserId();
@@ -64,6 +83,15 @@ public class AgentTaskCancellationService {
         return AgentTaskVO.from(agentTaskMapper.selectById(taskId));
     }
 
+    /**
+     * 检查任务是否已被请求取消，如果是则抛出 {@link AgentTaskCancelledException}。
+     * <p>
+     * 此方法通常在 Agent 执行流程的关键节点调用，作为取消检查点。
+     * </p>
+     *
+     * @param taskId 任务 ID
+     * @throws AgentTaskCancelledException 如果任务已被请求取消
+     */
     public void throwIfCancelRequested(Long taskId) {
         AgentTask task = agentTaskMapper.selectById(taskId);
         if (task != null && AgentTaskStatus.CANCEL_REQUESTED.name().equals(task.getStatus())) {
@@ -71,6 +99,15 @@ public class AgentTaskCancellationService {
         }
     }
 
+    /**
+     * 将任务标记为已取消状态。
+     * <p>
+     * 更新任务状态为 CANCELLED，设置结果摘要，并通过 SSE 推送取消完成事件。
+     * </p>
+     *
+     * @param taskId  任务 ID
+     * @param message 取消原因消息
+     */
     @Transactional
     public void markCancelled(Long taskId, String message) {
         AgentTask task = agentTaskMapper.selectById(taskId);

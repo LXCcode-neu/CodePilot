@@ -8,6 +8,18 @@ import java.util.List;
 import java.util.Locale;
 import org.springframework.stereotype.Service;
 
+/**
+ * LLM 提供商服务。
+ * <p>
+ * 管理系统支持的所有 LLM 提供商及其模型配置，包括：
+ * <ul>
+ *   <li>维护支持的 LLM 提供商列表（DeepSeek、OpenAI、Kimi、MiniMax、GLM、MiMo 等）</li>
+ *   <li>提供各提供商的可用模型查询</li>
+ *   <li>根据提供商和模型名称解析具体的模型配置</li>
+ * </ul>
+ * <p>
+ * 所有提供商和模型信息以静态配置方式存储在内存中。
+ */
 @Service
 public class LlmProviderService {
 
@@ -42,16 +54,32 @@ public class LlmProviderService {
             ))
     );
 
+    /**
+     * 获取所有支持的 LLM 提供商列表。
+     *
+     * @return 提供商列表
+     */
     public List<LlmProviderVO> listProviders() {
         return PROVIDERS;
     }
 
+    /**
+     * 获取所有提供商下的所有可用模型列表。
+     *
+     * @return 可用模型列表
+     */
     public List<LlmAvailableModelVO> listAvailableModels() {
         return PROVIDERS.stream()
                 .flatMap(provider -> provider.defaultModels().stream())
                 .toList();
     }
 
+    /**
+     * 根据提供商标识获取提供商配置，若不存在则抛出异常。
+     *
+     * @param provider 提供商标识（如 deepseek、openai）
+     * @return 提供商配置
+     */
     public LlmProviderVO requireProvider(String provider) {
         String normalized = normalize(provider);
         return PROVIDERS.stream()
@@ -60,6 +88,17 @@ public class LlmProviderService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.BAD_REQUEST, "Unsupported LLM provider"));
     }
 
+    /**
+     * 解析并返回指定提供商下的模型配置。
+     * <p>
+     * 若模型名称在默认模型列表中不存在，则使用传入的参数动态构建模型配置。
+     *
+     * @param provider    提供商标识
+     * @param modelName   模型名称
+     * @param displayName 显示名称
+     * @param baseUrl     API 基础 URL
+     * @return 解析后的模型配置
+     */
     public LlmAvailableModelVO resolveModel(String provider, String modelName, String displayName, String baseUrl) {
         LlmProviderVO providerMetadata = requireProvider(provider);
         String normalizedModelName = modelName == null ? "" : modelName.trim();

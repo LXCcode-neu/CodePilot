@@ -16,6 +16,18 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 用户仓库监听服务。
+ * <p>
+ * 管理用户对 GitHub 仓库的 Issue 监听配置，包括：
+ * <ul>
+ *   <li>创建新的仓库监听（自动关联或创建项目仓库记录）</li>
+ *   <li>查询当前用户的所有监听列表</li>
+ *   <li>启用或禁用指定监听</li>
+ * </ul>
+ * <p>
+ * 监听配置用于支持 GitHub Issue 的定时轮询和事件处理。
+ */
 @Service
 public class UserRepoWatchService {
 
@@ -28,6 +40,14 @@ public class UserRepoWatchService {
         this.projectRepoMapper = projectRepoMapper;
     }
 
+    /**
+     * 创建新的仓库监听配置。
+     * <p>
+     * 若项目仓库记录不存在则自动创建，同时检查是否已存在相同仓库的监听以避免重复。
+     *
+     * @param request 创建请求，包含仓库所有者、名称、URL 和默认分支等信息
+     * @return 创建的监听视图对象
+     */
     @Transactional
     public UserRepoWatchVO create(UserRepoWatchCreateRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
@@ -60,6 +80,11 @@ public class UserRepoWatchService {
         return UserRepoWatchVO.from(watch);
     }
 
+    /**
+     * 查询当前用户的所有仓库监听列表，按创建时间倒序排列。
+     *
+     * @return 监听列表
+     */
     public List<UserRepoWatchVO> listCurrentUserWatches() {
         Long userId = SecurityUtils.getCurrentUserId();
         return userRepoWatchMapper.selectList(new LambdaQueryWrapper<UserRepoWatch>()
@@ -70,6 +95,13 @@ public class UserRepoWatchService {
                 .toList();
     }
 
+    /**
+     * 更新指定监听的启用/禁用状态。
+     *
+     * @param id      监听记录 ID
+     * @param request 启用状态更新请求
+     * @return 更新后的监听视图对象
+     */
     @Transactional
     public UserRepoWatchVO updateEnabled(Long id, EnabledUpdateRequest request) {
         UserRepoWatch watch = requireOwnedWatch(id);

@@ -11,15 +11,38 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+/**
+ * 飞书机器人客户端。
+ * <p>
+ * 封装飞书开放平台 API，支持向群聊发送文本消息。
+ * 自动管理 tenant_access_token 的获取和缓存。
+ * </p>
+ */
 @Component
 public class FeishuBotClient {
 
+    /** 机器人配置属性，包含飞书应用的 AppID、AppSecret 等 */
     private final BotProperties botProperties;
+
+    /** JSON 序列化/反序列化工具 */
     private final ObjectMapper objectMapper;
+
+    /** REST 客户端，用于发送 HTTP 请求 */
     private final RestClient restClient;
+
+    /** 缓存的租户访问令牌 */
     private String cachedTenantAccessToken;
+
+    /** 令牌过期时间 */
     private Instant tokenExpiresAt = Instant.EPOCH;
 
+    /**
+     * 构造方法，注入配置属性和 REST 客户端构建器。
+     *
+     * @param botProperties    机器人配置属性
+     * @param objectMapper     JSON 对象映射器
+     * @param restClientBuilder REST 客户端构建器
+     */
     public FeishuBotClient(BotProperties botProperties,
                            ObjectMapper objectMapper,
                            RestClient.Builder restClientBuilder) {
@@ -28,6 +51,11 @@ public class FeishuBotClient {
         this.restClient = restClientBuilder.build();
     }
 
+    /**
+     * 检查飞书机器人是否已启用且配置完整。
+     *
+     * @return 如果已启用且 AppID 和 AppSecret 均已配置则返回 true
+     */
     public boolean isEnabled() {
         BotProperties.Feishu feishu = botProperties.getFeishu();
         return feishu.isEnabled()
@@ -35,6 +63,12 @@ public class FeishuBotClient {
                 && hasText(feishu.getAppSecret());
     }
 
+    /**
+     * 向指定飞书群聊发送文本消息。
+     *
+     * @param chatId 群聊 ID
+     * @param text   消息文本内容
+     */
     public void sendTextToChat(String chatId, String text) {
         if (!isEnabled() || !hasText(chatId)) {
             return;
@@ -55,6 +89,14 @@ public class FeishuBotClient {
         }
     }
 
+    /**
+     * 获取租户访问令牌，支持自动缓存和刷新。
+     * <p>
+     * 令牌在过期前60秒会自动刷新，使用 synchronized 保证线程安全。
+     * </p>
+     *
+     * @return 租户访问令牌
+     */
     private synchronized String tenantAccessToken() {
         if (hasText(cachedTenantAccessToken) && Instant.now().isBefore(tokenExpiresAt.minusSeconds(60))) {
             return cachedTenantAccessToken;

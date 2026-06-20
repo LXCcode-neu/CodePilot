@@ -14,6 +14,15 @@ import java.util.Map;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+/**
+ * 搜索相关代码工具。
+ * <p>
+ * Agent 工具链中的代码检索步骤（优先级 20）。根据 Issue 的标题和描述，
+ * 使用代码搜索引擎在项目仓库中查找相关代码片段。支持 grep 等多种搜索模式，
+ * 检索结果会被转换为 {@link RetrievedCodeChunk} 并更新到 Agent 上下文中，
+ * 供后续的补丁生成步骤使用。
+ * </p>
+ */
 @Component
 @Order(20)
 public class SearchRelevantCodeTool implements AgentTool {
@@ -44,6 +53,17 @@ public class SearchRelevantCodeTool implements AgentTool {
         return "Search Relevant Code";
     }
 
+    /**
+     * 执行代码搜索。
+     * <p>
+     * 根据 Issue 文本在项目仓库中搜索相关代码，将搜索结果转换为
+     * RetrievedCodeChunk 列表并更新到上下文中。如果搜索失败或未找到结果，
+     * 返回包含警告信息的失败结果。
+     * </p>
+     *
+     * @param context Agent 执行上下文
+     * @return 包含搜索结果摘要（命中数、代码片段列表、警告等）的工具执行结果
+     */
     @Override
     public ToolResult execute(AgentContext context) {
         String issueText = buildIssueText(context);

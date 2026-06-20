@@ -24,6 +24,19 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.springframework.stereotype.Service;
 
+/**
+ * 补丁验证服务。
+ * <p>
+ * 对生成的补丁进行自动化验证，包括以下步骤：
+ * <ol>
+ *   <li>在临时目录中复制仓库副本</li>
+ *   <li>执行 {@code git apply --check} 检查补丁是否可应用</li>
+ *   <li>执行 {@code git apply} 应用补丁</li>
+ *   <li>根据项目类型自动检测并运行验证命令（如 Maven test、Go test、npm build 等）</li>
+ * </ol>
+ * 支持配置自定义验证命令，支持任务取消中断验证过程。
+ * </p>
+ */
 @Service
 public class PatchVerificationService {
 
@@ -51,10 +64,31 @@ public class PatchVerificationService {
         this.agentTaskCancellationService = agentTaskCancellationService;
     }
 
+    /**
+     * 验证补丁（不关联补丁记录）。
+     *
+     * @param repoPath  仓库本地路径
+     * @param taskId    任务 ID
+     * @param patchText 补丁文本
+     * @return 验证结果
+     */
     public PatchVerificationResult verify(String repoPath, Long taskId, String patchText) {
         return verify(repoPath, taskId, null, patchText);
     }
 
+    /**
+     * 验证补丁并保存验证记录。
+     * <p>
+     * 完整验证流程：复制仓库到临时目录 -> 检查补丁可应用性 -> 应用补丁 ->
+     * 检测并运行验证命令 -> 保存验证结果。验证过程中会检查任务取消状态。
+     * </p>
+     *
+     * @param repoPath      仓库本地路径
+     * @param taskId        任务 ID
+     * @param patchRecordId 补丁记录 ID（可为 null）
+     * @param patchText     补丁文本
+     * @return 验证结果
+     */
     public PatchVerificationResult verify(String repoPath, Long taskId, Long patchRecordId, String patchText) {
         if (patchText == null || patchText.isBlank()) {
             return saveAndReturn(taskId, patchRecordId, new PatchVerificationResult(
@@ -132,6 +166,23 @@ public class PatchVerificationService {
         }
     }
 
+    /**
+     * 检测仓库中需要运行的验证命令。
+     * <p>
+     * 根据项目类型自动检测验证命令：
+     * <ul>
+     *   <li>Maven 项目（pom.xml）-> mvn test</li>
+     *   <li>Go 项目（go.mod）-> go test ./...</li>
+     *   <li>Python 项目（pyproject.toml/requirements.txt/setup.py）-> python -m compileall</li>
+     *   <li>Node.js 项目（package.json 含 build 脚本）-> npm ci/install + npm run build</li>
+     * </ul>
+     * 同时包含配置文件中定义的自定义验证命令。
+     * </p>
+     *
+     * @param root 仓库根目录
+     * @return 验证命令列表
+     * @throws IOException 如果读取文件时发生 I/O 错误
+     */
     List<VerificationCommand> detectVerificationCommands(Path root) throws IOException {
         List<VerificationCommand> commands = new ArrayList<>();
         commands.addAll(configuredVerificationCommands(root));

@@ -6,9 +6,17 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+/**
+ * GitHub 认证数据库表结构初始化器。
+ * <p>
+ * 应用启动时自动执行，负责创建用户 GitHub 账号关联表
+ * 并为 {@code project_repo} 表补充 GitHub 仓库相关字段。
+ * </p>
+ */
 @Component
 public class GitHubAuthSchemaInitializer implements ApplicationRunner {
 
+    /** 需要为 project_repo 表追加的 GitHub 相关列定义 */
     private static final Map<String, String> PROJECT_REPO_COLUMNS = Map.of(
             "github_owner", "ALTER TABLE project_repo ADD COLUMN github_owner VARCHAR(128) DEFAULT NULL",
             "github_repo_name", "ALTER TABLE project_repo ADD COLUMN github_repo_name VARCHAR(128) DEFAULT NULL",
@@ -16,12 +24,26 @@ public class GitHubAuthSchemaInitializer implements ApplicationRunner {
             "github_private", "ALTER TABLE project_repo ADD COLUMN github_private TINYINT(1) NOT NULL DEFAULT 0"
     );
 
+    /** JDBC 模板，用于执行 DDL 语句 */
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * 构造方法，注入 JdbcTemplate。
+     *
+     * @param jdbcTemplate JDBC 模板
+     */
     public GitHubAuthSchemaInitializer(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * 应用启动时执行表结构初始化。
+     * <p>
+     * 创建 user_github_account 表，并为 project_repo 表按需追加 GitHub 相关列。
+     * </p>
+     *
+     * @param args 应用启动参数
+     */
     @Override
     public void run(ApplicationArguments args) {
         jdbcTemplate.execute("""
@@ -51,6 +73,12 @@ public class GitHubAuthSchemaInitializer implements ApplicationRunner {
         }
     }
 
+    /**
+     * 判断指定表是否存在于当前数据库中。
+     *
+     * @param tableName 表名
+     * @return 如果表存在返回 true，否则返回 false
+     */
     private boolean tableExists(String tableName) {
         Integer count = jdbcTemplate.queryForObject(
                 """
@@ -65,6 +93,13 @@ public class GitHubAuthSchemaInitializer implements ApplicationRunner {
         return count != null && count > 0;
     }
 
+    /**
+     * 判断指定表中是否存在指定列。
+     *
+     * @param tableName  表名
+     * @param columnName 列名
+     * @return 如果列存在返回 true，否则返回 false
+     */
     private boolean columnExists(String tableName, String columnName) {
         Integer count = jdbcTemplate.queryForObject(
                 """

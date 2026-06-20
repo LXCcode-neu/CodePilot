@@ -16,6 +16,19 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.stereotype.Service;
 
+/**
+ * 飞书机器人事件处理服务。
+ * <p>
+ * 处理飞书开放平台推送的事件回调，包括：
+ * <ul>
+ *   <li>验证事件签名（SHA-256 HMAC）防止伪造请求</li>
+ *   <li>处理 URL 验证挑战（url_verification）</li>
+ *   <li>解密加密事件（AES-CBC）</li>
+ *   <li>解析消息事件（im.message.receive_v1），提取消息内容并委托给 {@link BotCommandService} 处理</li>
+ *   <li>验证飞书 Verification Token 防止重放攻击</li>
+ * </ul>
+ * </p>
+ */
 @Service
 public class FeishuBotEventService {
 
@@ -31,6 +44,19 @@ public class FeishuBotEventService {
         this.botCommandService = botCommandService;
     }
 
+    /**
+     * 处理飞书事件回调。
+     * <p>
+     * 完整处理流程：验证签名 -> 解析请求体 -> 解密（如需要）->
+     * 处理 URL 验证挑战 -> 验证 Token -> 提取消息并分发处理。
+     * </p>
+     *
+     * @param rawBody   原始请求体（JSON 字符串）
+     * @param timestamp 请求时间戳（X-Lark-Request-Timestamp 头）
+     * @param nonce     随机数（X-Lark-Request-Nonce 头）
+     * @param signature 签名（X-Lark-Signature 头）
+     * @return 响应 JSON 节点
+     */
     public JsonNode handleEvent(String rawBody,
                                 String timestamp,
                                 String nonce,

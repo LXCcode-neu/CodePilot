@@ -2,6 +2,12 @@ import * as React from "react";
 import * as SeparatorPrimitive from "@radix-ui/react-separator";
 import { cn } from "@/lib/utils";
 
+/**
+ * 分隔线（Separator）组件
+ *
+ * 用于视觉上分隔内容区域的水平或垂直线条。
+ * 默认为水平方向，支持 decorative 模式（纯装饰性，不参与无障碍语义）。
+ */
 const Separator = React.forwardRef<
   React.ElementRef<typeof SeparatorPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>

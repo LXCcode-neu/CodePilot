@@ -24,6 +24,19 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Sentry 告警服务。
+ * <p>
+ * 处理来自 Sentry 的 Webhook 告警，实现告警到自动修复任务的全流程：
+ * <ul>
+ *   <li>接收并解析 Sentry Webhook 告警负载</li>
+ *   <li>通过项目映射解析告警对应的 CodePilot 项目</li>
+ *   <li>基于去重键（dedupe key）防止重复处理同一告警</li>
+ *   <li>从 Sentry API 获取富化事件详情</li>
+ *   <li>创建 Agent 任务并可选自动执行修复</li>
+ *   <li>管理告警事件的状态流转（接收 -> 忽略/已创建任务 -> 运行中）</li>
+ * </ul>
+ */
 @Service
 public class SentryAlertService {
 
@@ -58,6 +71,22 @@ public class SentryAlertService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * 接收并处理 Sentry Webhook 告警。
+     * <p>
+     * 处理流程：
+     * <ol>
+     *   <li>解析告警上下文信息</li>
+     *   <li>解析对应的 CodePilot 项目</li>
+     *   <li>检查是否存在重复的活跃告警</li>
+     *   <li>保存告警事件记录</li>
+     *   <li>获取 Sentry 富化事件详情</li>
+     *   <li>创建 Agent 任务（可选自动执行）</li>
+     * </ol>
+     *
+     * @param payload Sentry Webhook JSON 负载
+     * @return 任务创建结果，包含告警 ID、任务 ID、状态和消息
+     */
     @Transactional
     public SentryAlertTaskCreateResult receive(JsonNode payload) {
         if (!sentryProperties.isEnabled()) {

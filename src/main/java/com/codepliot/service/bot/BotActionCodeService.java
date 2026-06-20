@@ -12,6 +12,22 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 机器人操作码服务。
+ * <p>
+ * 管理飞书等 Bot 渠道的操作码（Action Code）生命周期。操作码是用户通过 Bot
+ * 发起操作时的唯一标识，用于关联 Issue 事件与 Agent 任务。
+ * </p>
+ * <p>
+ * 主要功能：
+ * <ul>
+ *   <li>为 Issue 事件生成唯一操作码（格式：CP-XXXXX，24 小时有效）</li>
+ *   <li>验证操作码的可用性（检查渠道类型、过期时间、聊天绑定）</li>
+ *   <li>管理操作码的状态流转（PENDING -> RUNNING -> PATCH_READY/FAILED/PR_CREATED/IGNORED/CANCELLED）</li>
+ *   <li>绑定聊天 ID 和消息 ID 用于后续消息更新</li>
+ * </ul>
+ * </p>
+ */
 @Service
 public class BotActionCodeService {
 
@@ -24,6 +40,17 @@ public class BotActionCodeService {
         this.botActionCodeMapper = botActionCodeMapper;
     }
 
+    /**
+     * 查找或创建指定 Issue 事件的操作码。
+     * <p>
+     * 如果该 Issue 事件已有操作码则直接返回，否则生成一个新的操作码。
+     * 新操作码默认状态为 PENDING，有效期 24 小时。
+     * </p>
+     *
+     * @param userId      用户 ID
+     * @param issueEventId Issue 事件 ID
+     * @return 操作码实体
+     */
     @Transactional
     public BotActionCode findOrCreateForIssue(Long userId, Long issueEventId) {
         BotActionCode existing = botActionCodeMapper.selectOne(new LambdaQueryWrapper<BotActionCode>()
@@ -44,6 +71,18 @@ public class BotActionCodeService {
         return code;
     }
 
+    /**
+     * 获取并验证操作码的可用性。
+     * <p>
+     * 检查操作码是否存在、渠道类型是否匹配、是否已过期、是否属于当前聊天。
+     * </p>
+     *
+     * @param actionCode  操作码字符串
+     * @param channelType 通知渠道类型（可为 null，表示不检查渠道）
+     * @param chatId      聊天 ID（可为 null，表示不检查聊天绑定）
+     * @return 验证通过的操作码实体
+     * @throws BusinessException 如果操作码不存在、渠道不匹配、已过期或不属于当前聊天
+     */
     public BotActionCode requireUsableCode(String actionCode, NotificationChannelType channelType, String chatId) {
         BotActionCode code = requireByCode(actionCode);
         if (channelType != null && !channelType.name().equals(code.getChannelType())) {
@@ -58,6 +97,18 @@ public class BotActionCodeService {
         return code;
     }
 
+    /**
+     * 绑定聊天 ID 和消息 ID 到操作码。
+     * <p>
+     * 用于后续通过 Bot 更新消息内容。聊天 ID 仅在首次绑定时设置，
+     * 消息 ID 每次都会更新为最新的消息 ID。
+     * </p>
+     *
+     * @param code      操作码实体
+     * @param chatId    聊天 ID
+     * @param messageId 消息 ID
+     * @return 更新后的操作码实体
+     */
     @Transactional
     public BotActionCode bindChatAndMessage(BotActionCode code, String chatId, String messageId) {
         if (chatId != null && !chatId.isBlank() && (code.getChatId() == null || code.getChatId().isBlank())) {
@@ -89,6 +140,12 @@ public class BotActionCodeService {
         botActionCodeMapper.updateById(code);
     }
 
+    /**
+     * 标记操作码对应的补丁已就绪。
+     *
+     * @param taskId  任务 ID
+     * @param patchId 补丁记录 ID
+     */
     @Transactional
     public void markPatchReady(Long taskId, Long patchId) {
         BotActionCode code = findByTaskId(taskId);
@@ -110,12 +167,23 @@ public class BotActionCodeService {
         botActionCodeMapper.updateById(code);
     }
 
+    /**
+     * 标记操作码对应的 Pull Request 已创建。
+     *
+     * @param code 操作码实体
+     */
     @Transactional
     public void markPrCreated(BotActionCode code) {
         code.setStatus(BotActionStatus.PR_CREATED.name());
         botActionCodeMapper.updateById(code);
     }
 
+    /**
+     * 根据任务 ID 查找对应的操作码。
+     *
+     * @param taskId 任务 ID
+     * @return 操作码实体，如果不存在则返回 null
+     */
     public BotActionCode findByTaskId(Long taskId) {
         if (taskId == null) {
             return null;

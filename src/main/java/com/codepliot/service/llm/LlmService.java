@@ -16,6 +16,18 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * LLM（大语言模型）调用服务。
+ * <p>
+ * 统一封装 LLM 模型的调用逻辑，支持：
+ * <ul>
+ *   <li>根据提供商自动路由到对应的 LLM 客户端实现</li>
+ *   <li>使用默认配置或自定义运行时配置调用模型</li>
+ *   <li>纯文本生成（generate）和工具调用对话（chatWithTools）两种模式</li>
+ * </ul>
+ * <p>
+ * 支持通过构造函数注入自定义 LLM 客户端或生成函数，便于测试和扩展。
+ */
 @Service
 public class LlmService {
 
@@ -49,15 +61,44 @@ public class LlmService {
         });
     }
 
+    /**
+     * 使用默认配置生成文本响应。
+     *
+     * @param systemPrompt 系统提示词
+     * @param userPrompt   用户提示词
+     * @return 模型生成的文本
+     */
     public String generate(String systemPrompt, String userPrompt) {
         return generate(defaultConfig(), systemPrompt, userPrompt);
     }
 
+    /**
+     * 使用指定的运行时配置生成文本响应。
+     *
+     * @param config       LLM 运行时配置（包含提供商、模型、API 密钥等）
+     * @param systemPrompt 系统提示词
+     * @param userPrompt   用户提示词
+     * @return 模型生成的文本
+     */
     public String generate(LlmRuntimeConfig config, String systemPrompt, String userPrompt) {
         LlmRuntimeConfig resolvedConfig = config == null ? defaultConfig() : config;
         return clientFor(resolvedConfig).generate(resolvedConfig, systemPrompt, userPrompt);
     }
 
+    /**
+     * 使用默认配置进行带工具调用的对话。
+     *
+     * @param messages 对话消息列表
+     * @param tools    可用工具定义列表
+     * @return 包含模型响应和工具调用结果的响应对象
+     */
+    /**
+     * 使用默认配置进行带工具调用的对话。
+     *
+     * @param messages 对话消息列表
+     * @param tools    可用工具定义列表
+     * @return 包含模型响应和工具调用结果的响应对象
+     */
     public LlmToolChatResponse chatWithTools(List<LlmMessage> messages, List<LlmToolDefinition> tools) {
         return chatWithTools(defaultConfig(), messages, tools);
     }

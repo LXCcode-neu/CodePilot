@@ -19,6 +19,17 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 项目仓库服务。
+ * <p>
+ * 管理用户关联的 GitHub 项目仓库，包括：
+ * <ul>
+ *   <li>通过手动输入 URL 创建项目仓库</li>
+ *   <li>通过 GitHub OAuth 授权导入仓库</li>
+ *   <li>查询当前用户的项目仓库列表和详情</li>
+ *   <li>删除项目仓库（级联删除关联的 Agent 任务、LLM 配置和 Sentry 映射）</li>
+ * </ul>
+ */
 @Service
 public class ProjectRepoService {
 
@@ -40,6 +51,12 @@ public class ProjectRepoService {
         this.gitHubAuthService = gitHubAuthService;
     }
 
+    /**
+     * 通过手动输入 GitHub 仓库 URL 创建项目仓库。
+     *
+     * @param request 创建请求，包含仓库 URL
+     * @return 创建的项目仓库视图对象
+     */
     @Transactional
     public ProjectRepoVO create(ProjectCreateRequest request) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
@@ -61,6 +78,14 @@ public class ProjectRepoService {
         return ProjectRepoVO.from(projectRepo);
     }
 
+    /**
+     * 通过 GitHub OAuth 授权导入仓库。
+     * <p>
+     * 验证用户对该仓库的访问权限，并检查是否已存在重复导入。
+     *
+     * @param request 导入请求，包含仓库所有者、名称和 GitHub 仓库 ID
+     * @return 创建的项目仓库视图对象
+     */
     @Transactional
     public ProjectRepoVO importFromGitHub(GitHubRepoImportRequest request) {
         GitHubAuthorizedRepoVO repository = gitHubAuthService.requireAuthorizedRepository(
@@ -89,6 +114,11 @@ public class ProjectRepoService {
         return ProjectRepoVO.from(projectRepo);
     }
 
+    /**
+     * 查询当前用户的所有项目仓库列表，按创建时间倒序排列。
+     *
+     * @return 项目仓库列表
+     */
     public List<ProjectRepoVO> listCurrentUserRepos() {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         return projectRepoMapper.selectList(new LambdaQueryWrapper<ProjectRepo>()
@@ -103,6 +133,13 @@ public class ProjectRepoService {
         return ProjectRepoVO.from(requireOwnedRepo(id));
     }
 
+    /**
+     * 删除指定的项目仓库及其所有关联数据。
+     * <p>
+     * 级联删除：Agent 任务、LLM 配置、Sentry 项目映射。
+     *
+     * @param id 项目仓库 ID
+     */
     @Transactional
     public void delete(Long id) {
         ProjectRepo projectRepo = requireOwnedRepo(id);

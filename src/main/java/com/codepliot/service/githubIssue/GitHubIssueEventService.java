@@ -24,6 +24,18 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * GitHub Issue 事件服务。
+ * <p>
+ * 负责管理 GitHub Issue 事件的完整生命周期，包括：
+ * <ul>
+ *   <li>监听并保存新发现的 Issue 事件</li>
+ *   <li>触发 AI Agent 任务对 Issue 进行自动修复</li>
+ *   <li>管理事件状态流转（新建 -> 已通知 -> 运行中 -> 补丁就绪/失败）</li>
+ *   <li>支持从通知中直接忽略或执行修复操作</li>
+ *   <li>在补丁生成完成或修复失败时更新状态并发送通知</li>
+ * </ul>
+ */
 @Service
 public class GitHubIssueEventService {
 
@@ -61,6 +73,15 @@ public class GitHubIssueEventService {
         this.agentRunService = agentRunService;
     }
 
+    /**
+     * 保存新发现的 GitHub Issue 事件（如果不存在则新增）。
+     * <p>
+     * 该方法会检查是否已存在相同仓库监听和 Issue 编号的事件，若不存在则创建新事件，
+     * 同时创建对应的 Agent 任务并向用户发送通知。
+     *
+     * @param watch   用户仓库监听配置
+     * @param issue   GitHub Issue 信息
+     */
     @Transactional
     public void saveNewIssueIfAbsent(UserRepoWatch watch, GitHubIssueVO issue) {
         if (watch == null || issue == null || issue.number() == null) {
@@ -113,6 +134,14 @@ public class GitHubIssueEventService {
         }
     }
 
+    /**
+     * 分页查询当前用户的 GitHub Issue 事件列表。
+     *
+     * @param status   事件状态过滤条件（可选，如 NEW、NOTIFIED、RUNNING 等）
+     * @param page     页码，从 1 开始
+     * @param pageSize 每页大小，最大 100
+     * @return 事件列表
+     */
     public List<GitHubIssueEventVO> listCurrentUserEvents(String status, Integer page, Integer pageSize) {
         int safePage = Math.max(page == null ? 1 : page, 1);
         int safePageSize = Math.min(Math.max(pageSize == null ? 20 : pageSize, 1), 100);
@@ -130,6 +159,12 @@ public class GitHubIssueEventService {
                 .toList();
     }
 
+    /**
+     * 忽略当前用户指定的 GitHub Issue 事件。
+     *
+     * @param id 事件 ID
+     * @return 更新后的事件视图对象
+     */
     @Transactional
     public GitHubIssueEventVO ignore(Long id) {
         GitHubIssueEvent event = requireOwnedEvent(id);
@@ -152,6 +187,12 @@ public class GitHubIssueEventService {
         gitHubIssueEventMapper.updateById(event);
     }
 
+    /**
+     * 触发当前用户的 GitHub Issue 事件执行 AI 修复任务。
+     *
+     * @param id 事件 ID
+     * @return 执行结果，包含任务 ID 和状态
+     */
     public GitHubIssueEventRunResult run(Long id) {
         GitHubIssueEvent event = requireOwnedEvent(id);
         return runEvent(event, SecurityUtils.getCurrentUserId());
@@ -193,6 +234,12 @@ public class GitHubIssueEventService {
         return new GitHubIssueEventRunResult(taskId, STATUS_RUNNING);
     }
 
+    /**
+     * 标记指定任务的补丁已就绪，并向用户发送通知。
+     *
+     * @param taskId  Agent 任务 ID
+     * @param patchId 补丁记录 ID
+     */
     @Transactional
     public void markPatchReady(Long taskId, Long patchId) {
         GitHubIssueEvent event = findByTaskId(taskId);
@@ -214,6 +261,12 @@ public class GitHubIssueEventService {
         }
     }
 
+    /**
+     * 标记指定任务修复失败，并向用户发送失败通知。
+     *
+     * @param taskId Agent 任务 ID
+     * @param reason 失败原因
+     */
     @Transactional
     public void markFailed(Long taskId, String reason) {
         GitHubIssueEvent event = findByTaskId(taskId);

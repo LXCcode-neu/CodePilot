@@ -3,11 +3,16 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** 对话框根组件，管理打开/关闭状态 */
 const Dialog = DialogPrimitive.Root;
+/** 对话框触发器，包裹触发元素（如按钮） */
 const DialogTrigger = DialogPrimitive.Trigger;
+/** 对话框传送门，将内容渲染到 DOM 树外部 */
 const DialogPortal = DialogPrimitive.Portal;
+/** 对话框关闭按钮触发器 */
 const DialogClose = DialogPrimitive.Close;
 
+/** 对话框遮罩层，覆盖全屏并带模糊效果 */
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -20,6 +25,7 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+/** 对话框内容容器，居中显示并包含关闭按钮 */
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
@@ -44,14 +50,17 @@ const DialogContent = React.forwardRef<
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
+/** 对话框头部区域 */
 function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("flex flex-col gap-2 text-left", className)} {...props} />;
 }
 
+/** 对话框底部区域，通常放置操作按钮 */
 function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)} {...props} />;
 }
 
+/** 对话框标题 */
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -60,6 +69,7 @@ const DialogTitle = React.forwardRef<
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
+/** 对话框描述文字 */
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>

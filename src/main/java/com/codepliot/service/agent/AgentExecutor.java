@@ -30,6 +30,14 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+/**
+ * Agent 任务执行器。
+ * <p>
+ * 负责异步执行 Agent 任务，按顺序运行各个工具步骤（代码检索、补丁生成、验证、修复、审查等），
+ * 并在每个步骤执行前后检查任务是否被取消。执行完成后根据策略判定最终状态，
+ * 通过 SSE 推送任务事件，并发布补丁生成结果事件。
+ * </p>
+ */
 @Component
 public class AgentExecutor {
 
@@ -71,6 +79,17 @@ public class AgentExecutor {
         this.cancellationRegistry = cancellationRegistry;
     }
 
+    /**
+     * 异步执行 Agent 任务。
+     * <p>
+     * 在独立线程中执行任务，注册取消支持，执行完成后释放分布式锁。
+     * 执行过程中发生任何异常都会被捕获并标记为失败状态。
+     * </p>
+     *
+     * @param task        Agent 任务实体
+     * @param projectRepo 项目仓库信息
+     * @param lockValue   分布式锁的值，用于解锁
+     */
     @Async("agentTaskExecutor")
     public void executeAsync(AgentTask task, ProjectRepo projectRepo, String lockValue) {
         cancellationRegistry.register(task.getId());
@@ -90,6 +109,17 @@ public class AgentExecutor {
         }
     }
 
+    /**
+     * 同步执行 Agent 任务。
+     * <p>
+     * 按顺序运行所有注册的 Agent 工具，每个工具执行前后检查取消请求。
+     * 所有工具执行完毕后，根据执行策略判定最终状态（等待确认/验证失败等），
+     * 并发布补丁结果事件。
+     * </p>
+     *
+     * @param task        Agent 任务实体
+     * @param projectRepo 项目仓库信息
+     */
     public void execute(AgentTask task, ProjectRepo projectRepo) {
         AgentContext context = buildContext(task, projectRepo);
         try {

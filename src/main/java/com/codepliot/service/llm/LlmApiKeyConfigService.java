@@ -19,6 +19,19 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * LLM API 密钥配置服务。
+ * <p>
+ * 管理用户级别的 LLM API 密钥配置，包括：
+ * <ul>
+ *   <li>创建、删除 API 密钥配置</li>
+ *   <li>切换当前活跃的 API 密钥</li>
+ *   <li>测试 API 密钥连接是否可用</li>
+ *   <li>获取当前活跃密钥作为项目级 LLM 配置</li>
+ * </ul>
+ * <p>
+ * API 密钥使用加密存储，展示时进行脱敏处理。
+ */
 @Service
 public class LlmApiKeyConfigService {
 
@@ -37,6 +50,11 @@ public class LlmApiKeyConfigService {
         this.llmProviderService = llmProviderService;
     }
 
+    /**
+     * 查询当前用户的所有 LLM API 密钥配置列表，按活跃状态和创建时间排序。
+     *
+     * @return API 密钥配置列表（密钥已脱敏）
+     */
     public List<LlmApiKeyVO> listCurrentUserKeys() {
         Long userId = SecurityUtils.getCurrentUserId();
         return llmApiKeyConfigMapper.selectList(new LambdaQueryWrapper<LlmApiKeyConfig>()
@@ -48,6 +66,14 @@ public class LlmApiKeyConfigService {
                 .toList();
     }
 
+    /**
+     * 创建新的 LLM API 密钥配置。
+     * <p>
+     * 若当前用户尚无活跃密钥，新创建的密钥将自动设为活跃状态。
+     *
+     * @param request 创建请求，包含提供商、模型名称、API 密钥等信息
+     * @return 创建的密钥配置视图对象（密钥已脱敏）
+     */
     @Transactional
     public LlmApiKeyVO create(LlmApiKeyCreateRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
@@ -73,6 +99,14 @@ public class LlmApiKeyConfigService {
         return LlmApiKeyVO.from(config, apiKeyCryptoUtils.mask(config.getApiKeyEncrypted()));
     }
 
+    /**
+     * 将指定的 API 密钥设为当前用户的活跃密钥。
+     * <p>
+     * 会先将该用户的所有密钥设为非活跃状态，再激活目标密钥。
+     *
+     * @param id API 密钥配置 ID
+     * @return 更新后的密钥配置视图对象
+     */
     @Transactional
     public LlmApiKeyVO apply(Long id) {
         Long userId = SecurityUtils.getCurrentUserId();
@@ -85,6 +119,14 @@ public class LlmApiKeyConfigService {
         return LlmApiKeyVO.from(config, apiKeyCryptoUtils.mask(config.getApiKeyEncrypted()));
     }
 
+    /**
+     * 测试指定 API 密钥的连接可用性。
+     * <p>
+     * 发送简单的测试请求到 LLM 提供商，验证 API 密钥是否有效。
+     *
+     * @param id API 密钥配置 ID
+     * @return 测试结果，包含成功标志和消息
+     */
     public LlmConfigTestResult test(Long id) {
         LlmApiKeyConfig config = requireOwnedKey(id, SecurityUtils.getCurrentUserId());
         try {
@@ -95,6 +137,13 @@ public class LlmApiKeyConfigService {
         }
     }
 
+    /**
+     * 删除指定的 API 密钥配置。
+     * <p>
+     * 若删除的是当前活跃密钥，系统会自动将最新创建的密钥设为活跃状态。
+     *
+     * @param id API 密钥配置 ID
+     */
     @Transactional
     public void delete(Long id) {
         Long userId = SecurityUtils.getCurrentUserId();
@@ -106,6 +155,12 @@ public class LlmApiKeyConfigService {
         }
     }
 
+    /**
+     * 获取当前用户活跃的 API 密钥，并转换为项目级 LLM 配置。
+     *
+     * @return 项目级 LLM 配置
+     * @throws BusinessException 若无活跃密钥则抛出异常
+     */
     public ProjectLlmConfig requireActiveAsProjectConfig() {
         return requireActiveAsProjectConfig(SecurityUtils.getCurrentUserId());
     }

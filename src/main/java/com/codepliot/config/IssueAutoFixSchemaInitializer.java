@@ -6,20 +6,44 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+/**
+ * Issue 自动修复数据库表结构初始化器。
+ * <p>
+ * 应用启动时自动执行，负责创建仓库监听、Issue 事件、通知渠道、通知记录、
+ * 通知操作令牌及机器人操作码等相关数据表，并为 agent_task 表补充来源字段。
+ * </p>
+ */
 @Component
 public class IssueAutoFixSchemaInitializer implements ApplicationRunner {
 
+    /** 需要为 agent_task 表追加的来源相关列定义 */
     private static final Map<String, String> AGENT_TASK_COLUMNS = Map.of(
             "source_type", "ALTER TABLE agent_task ADD COLUMN source_type VARCHAR(32) DEFAULT 'MANUAL'",
             "source_id", "ALTER TABLE agent_task ADD COLUMN source_id BIGINT DEFAULT NULL"
     );
 
+    /** JDBC 模板，用于执行 DDL 语句 */
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * 构造方法，注入 JdbcTemplate。
+     *
+     * @param jdbcTemplate JDBC 模板
+     */
     public IssueAutoFixSchemaInitializer(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * 应用启动时执行表结构初始化。
+     * <p>
+     * 创建 user_repo_watch、github_issue_event、notification_channel、
+     * notification_record、notification_action_token、bot_action_code 等表，
+     * 并为 agent_task 表按需追加来源字段和索引。
+     * </p>
+     *
+     * @param args 应用启动参数
+     */
     @Override
     public void run(ApplicationArguments args) {
         jdbcTemplate.execute("""
@@ -152,6 +176,12 @@ public class IssueAutoFixSchemaInitializer implements ApplicationRunner {
         }
     }
 
+    /**
+     * 判断指定表是否存在于当前数据库中。
+     *
+     * @param tableName 表名
+     * @return 如果表存在返回 true，否则返回 false
+     */
     private boolean tableExists(String tableName) {
         Integer count = jdbcTemplate.queryForObject(
                 """
@@ -166,6 +196,13 @@ public class IssueAutoFixSchemaInitializer implements ApplicationRunner {
         return count != null && count > 0;
     }
 
+    /**
+     * 判断指定表中是否存在指定列。
+     *
+     * @param tableName  表名
+     * @param columnName 列名
+     * @return 如果列存在返回 true，否则返回 false
+     */
     private boolean columnExists(String tableName, String columnName) {
         Integer count = jdbcTemplate.queryForObject(
                 """
@@ -182,6 +219,13 @@ public class IssueAutoFixSchemaInitializer implements ApplicationRunner {
         return count != null && count > 0;
     }
 
+    /**
+     * 判断指定表中是否存在指定索引。
+     *
+     * @param tableName 表名
+     * @param indexName 索引名
+     * @return 如果索引存在返回 true，否则返回 false
+     */
     private boolean indexExists(String tableName, String indexName) {
         Integer count = jdbcTemplate.queryForObject(
                 """

@@ -7,7 +7,12 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 /**
- * Normalizes unified diff text before it is persisted and verified.
+ * 补丁文本规范化器。
+ * <p>
+ * 在补丁持久化和验证之前，对 unified diff 格式的补丁文本进行规范化处理。
+ * 主要功能包括：统一换行符为 LF、重新计算 diff hunk 头部的行数统计信息，
+ * 确保补丁文本格式正确且可被 git apply 正确应用。
+ * </p>
  */
 @Component
 public class PatchTextNormalizer {
@@ -16,6 +21,16 @@ public class PatchTextNormalizer {
             "^@@ -(\\d+)(?:,(\\d+))? \\+(\\d+)(?:,(\\d+))? @@(.*)$"
     );
 
+    /**
+     * 规范化补丁文本。
+     * <p>
+     * 将换行符统一为 LF，并重新计算每个 hunk 头部的行数统计，
+     * 使 hunk 头部中的行数与实际内容行数保持一致。
+     * </p>
+     *
+     * @param patchText 原始补丁文本
+     * @return 规范化后的补丁文本
+     */
     public String normalize(String patchText) {
         if (patchText == null || patchText.isBlank()) {
             return patchText;

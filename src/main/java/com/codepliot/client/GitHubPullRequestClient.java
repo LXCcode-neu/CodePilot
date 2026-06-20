@@ -16,15 +16,35 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+/**
+ * GitHub Pull Request 客户端。
+ * <p>
+ * 封装 GitHub REST API，支持创建 Pull Request、Fork 仓库、
+ * 获取仓库信息以及查询已认证用户名等操作。
+ * </p>
+ */
 @Component
 public class GitHubPullRequestClient {
 
+    /** GitHub API 版本号 */
     private static final String GITHUB_API_VERSION = "2022-11-28";
 
+    /** GitHub 配置属性，包含 API 基础 URL 和访问令牌 */
     private final GitHubProperties properties;
+
+    /** JSON 序列化/反序列化工具 */
     private final ObjectMapper objectMapper;
+
+    /** REST 客户端，用于发送 HTTP 请求 */
     private final RestClient restClient;
 
+    /**
+     * 构造方法，注入配置属性和 REST 客户端构建器。
+     *
+     * @param properties        GitHub 配置属性
+     * @param objectMapper      JSON 对象映射器
+     * @param restClientBuilder REST 客户端构建器
+     */
     public GitHubPullRequestClient(GitHubProperties properties,
                                    ObjectMapper objectMapper,
                                    RestClient.Builder restClientBuilder) {
@@ -33,6 +53,17 @@ public class GitHubPullRequestClient {
         this.restClient = restClientBuilder.baseUrl(properties.getApiBaseUrl()).build();
     }
 
+    /**
+     * 创建 Pull Request（使用默认令牌）。
+     *
+     * @param owner 仓库所有者
+     * @param repo  仓库名称
+     * @param title PR 标题
+     * @param body  PR 描述内容
+     * @param head  源分支（格式：owner:branch）
+     * @param base  目标分支
+     * @return 创建结果，包含 PR 编号和链接
+     */
     public GitHubPullRequestCreateResult createPullRequest(String owner,
                                                            String repo,
                                                            String title,
@@ -42,6 +73,18 @@ public class GitHubPullRequestClient {
         return createPullRequest(null, owner, repo, title, body, head, base);
     }
 
+    /**
+     * 创建 Pull Request（使用自定义令牌）。
+     *
+     * @param accessToken 访问令牌（为空时使用默认令牌）
+     * @param owner       仓库所有者
+     * @param repo        仓库名称
+     * @param title       PR 标题
+     * @param body        PR 描述内容
+     * @param head        源分支（格式：owner:branch）
+     * @param base        目标分支
+     * @return 创建结果，包含 PR 编号和链接
+     */
     public GitHubPullRequestCreateResult createPullRequest(String accessToken,
                                                            String owner,
                                                            String repo,
@@ -73,10 +116,21 @@ public class GitHubPullRequestClient {
         );
     }
 
+    /**
+     * 获取已认证用户的 GitHub 用户名（使用默认令牌）。
+     *
+     * @return GitHub 用户名
+     */
     public String getAuthenticatedUsername() {
         return getAuthenticatedUsername(null);
     }
 
+    /**
+     * 获取已认证用户的 GitHub 用户名（使用自定义令牌）。
+     *
+     * @param accessToken 访问令牌（为空时使用默认令牌）
+     * @return GitHub 用户名
+     */
     public String getAuthenticatedUsername(String accessToken) {
         ResponseEntity<String> response = restClient.get()
                 .uri("/user")
@@ -94,10 +148,30 @@ public class GitHubPullRequestClient {
         return login;
     }
 
+    /**
+     * 确保指定用户拥有目标仓库的 Fork（使用默认令牌）。
+     * <p>
+     * 如果 Fork 已存在则直接返回，否则创建新的 Fork 并等待其就绪。
+     * </p>
+     *
+     * @param owner     原仓库所有者
+     * @param repo      仓库名称
+     * @param forkOwner Fork 目标用户
+     * @return Fork 仓库引用
+     */
     public GitHubRepositoryRef ensureFork(String owner, String repo, String forkOwner) {
         return ensureFork(null, owner, repo, forkOwner);
     }
 
+    /**
+     * 确保指定用户拥有目标仓库的 Fork（使用自定义令牌）。
+     *
+     * @param accessToken 访问令牌（为空时使用默认令牌）
+     * @param owner       原仓库所有者
+     * @param repo        仓库名称
+     * @param forkOwner   Fork 目标用户
+     * @return Fork 仓库引用
+     */
     public GitHubRepositoryRef ensureFork(String accessToken, String owner, String repo, String forkOwner) {
         GitHubRepositoryRef existingFork = findRepository(accessToken, forkOwner, repo);
         if (existingFork != null) {
@@ -118,10 +192,25 @@ public class GitHubPullRequestClient {
         return waitForFork(accessToken, forkOwner, repo);
     }
 
+    /**
+     * 获取仓库信息（使用默认令牌）。
+     *
+     * @param owner 仓库所有者
+     * @param repo  仓库名称
+     * @return 仓库引用信息
+     */
     public GitHubRepositoryRef getRepository(String owner, String repo) {
         return getRepository(null, owner, repo);
     }
 
+    /**
+     * 获取仓库信息（使用自定义令牌）。
+     *
+     * @param accessToken 访问令牌（为空时使用默认令牌）
+     * @param owner       仓库所有者
+     * @param repo        仓库名称
+     * @return 仓库引用信息
+     */
     public GitHubRepositoryRef getRepository(String accessToken, String owner, String repo) {
         GitHubRepositoryRef repository = findRepository(accessToken, owner, repo);
         if (repository == null) {
